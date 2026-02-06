@@ -129,15 +129,27 @@ def generate_dashboard():
     arbitrage_opps.sort(key=lambda x: x['edge_val'], reverse=True)
     
     # 2. 篩選討論度最高 (成交量最高) 的熱門項目
-    # 先過濾掉明顯的極端異常數據，確保討論區呈現的是有意義的市場
-    filtered_hot = [m for m in raw_poly if m['edge_val'] > -50]
-    hot_markets = sorted(filtered_hot, key=lambda x: float(x['vol'].replace('K','')), reverse=True)
-    hot_markets = hot_markets[:10] # 取前 10 名
+    # 注意：成交量排序需要將 'K' 轉換回數值
+    def get_vol_val(v_str):
+        try:
+            return float(v_str.replace('K',''))
+        except:
+            return 0.0
 
-    poly_markets = raw_poly # 兼容舊代碼引用
+    filtered_hot = [m for m in raw_poly if m['edge_val'] > -50]
+    hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
+    hot_markets = hot_markets[:10]
+
+    poly_markets = raw_poly
     poly_html = ''
+    
+    # 打印調試資訊
+    print(f"Total Raw Markets: {len(raw_poly)}")
+    print(f"Arbitrage Opps: {len(arbitrage_opps)}")
+    print(f"Hot Markets: {len(hot_markets)}")
+
     if not arbitrage_opps:
-        poly_html = '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
+        poly_html += '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
         poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid var(--border);">🔥 熱門市場 (成交量 Top 10)</td></tr>'
         for m in hot_markets:
             poly_html += f'''
@@ -161,7 +173,7 @@ def generate_dashboard():
             </tr>'''
         # 即使有套利，下方也附上熱門市場參考
         poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">🔥 熱門市場 (成交量參考)</td></tr>'
-        for m in hot_markets[:5]: # 縮減為 5 筆避免過長
+        for m in hot_markets[:5]:
             poly_html += f'''
             <tr>
                 <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>

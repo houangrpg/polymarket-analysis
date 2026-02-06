@@ -47,5 +47,12 @@
     "accuracy": 60.0,
     "correct": 3,
     "total": 5
+  },
+  {
+    "date": "2026-02-06",
+    "time": "2026-02-06 18:48:24",
+    "accuracy": 60.0,
+    "correct": 3,
+    "total": 5
   }
 ]
