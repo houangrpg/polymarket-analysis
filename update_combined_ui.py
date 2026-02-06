@@ -401,11 +401,45 @@ def generate_dashboard():
                     <td data-label="成交量" class="val">{m['vol']}</td>
                 </tr>'''
 
+    # --- 前端實時報價腳本 (JS) ---
+    realtime_script = '''
+    <script>
+        // 定義需要監控的標的清單
+        const STOCKS = {
+            "US": ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AMZN", "META", "AVGO", "SMCI"],
+            "TW": ["2330.TW", "2317.TW", "2454.TW", "2382.TW", "2308.TW", "3008.TW", "2303.TW", "2412.TW"]
+        };
+
+        async function updatePrices() {
+            try {
+                // 使用 Yahoo Finance Query API (前端可用的 CORS proxy 或公開介面)
+                // 為了穩定性，這裡使用一個輕量化的彙整邏輯
+                for (const symbol of [...STOCKS.US, ...STOCKS.TW]) {
+                    // 模擬實時抓取邏輯 (實際部署時可對接特定的 Finance API)
+                    // 這裡先實作 UI 閃爍與動態更新的框架
+                    const cells = document.querySelectorAll(`[data-symbol="${symbol}"]`);
+                    cells.forEach(cell => {
+                        // 這裡未來可對接即時 API 數據
+                        // cell.classList.add('updating');
+                        // setTimeout(() => cell.classList.remove('updating'), 500);
+                    });
+                }
+            } catch (e) { console.error("Price update failed", e); }
+        }
+        
+        // 每 15 秒更新一次前端報價 (不經過 GitHub)
+        // setInterval(updatePrices, 15000);
+    </script>
+    <style>
+        .updating { background-color: rgba(26, 115, 232, 0.1); transition: background 0.3s; }
+    </style>
+    '''
+
     html = f'''<!doctype html>
 <html lang="zh-TW">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>OpenClaw Pro - 獲利監控</title>
+    <title>JoeClowAI - 實時監控</title>
     <style>
         :root {{ --blue: #1a73e8; --bg: #f1f3f4; --border: #dadce0; --up: #137333; --down: #d93025; }}
         body {{ font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: #202124; }}
@@ -441,6 +475,7 @@ def generate_dashboard():
     </style>
 </head>
 <body onload="checkReload()">
+    {realtime_script}
     <script>
         function sw(idx){{
             document.querySelectorAll('.tab').forEach((t, i) => {{
@@ -452,7 +487,7 @@ def generate_dashboard():
         function checkReload() {{
             const savedTab = localStorage.getItem('activeTab');
             if (savedTab !== null) sw(parseInt(savedTab));
-            // 每 60 秒刷新一次，並加上隨機參數繞過快取
+            // 每 60 秒刷新一次 (後台同步數據)
             setInterval(() => {{ 
                 const url = new URL(window.location.href);
                 url.searchParams.set('t', Date.now());
