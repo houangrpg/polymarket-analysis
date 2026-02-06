@@ -144,28 +144,34 @@ def generate_dashboard():
 
     filtered_hot = [m for m in raw_poly if m['edge_val'] > -50]
     hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
+    # 確保 hot_markets 有值，如果篩選後是空的，就直接用 raw_poly
+    if not hot_markets and raw_poly:
+        hot_markets = sorted(raw_poly, key=lambda x: get_vol_val(x['vol']), reverse=True)
+    
     hot_markets = hot_markets[:10]
 
-    poly_markets = raw_poly
     poly_html = ''
     
     # 打印調試資訊
     print(f"Total Raw Markets: {len(raw_poly)}")
     print(f"Arbitrage Opps: {len(arbitrage_opps)}")
-    print(f"Hot Markets: {len(hot_markets)}")
+    print(f"Hot Markets Count: {len(hot_markets)}")
 
     if not arbitrage_opps:
         poly_html += '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
         poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid var(--border);">🔥 熱門市場 (成交量 Top 10)</td></tr>'
-        for m in hot_markets:
-            poly_html += f'''
-            <tr>
-                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
-                <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
-                <td data-label="總價" class="mono val">{m['bundle']}</td>
-                <td data-label="獲利 (Edge)" class="mono val"><b class="{'text-green' if m['edge_val']>0 else ''}">{m['edge']}</b></td>
-                <td data-label="成交量" class="val">{m['vol']}</td>
-            </tr>'''
+        if not hot_markets:
+            poly_html += '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #999;">(暫無熱門市場數據)</td></tr>'
+        else:
+            for m in hot_markets:
+                poly_html += f'''
+                <tr>
+                    <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                    <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
+                    <td data-label="總價" class="mono val">{m['bundle']}</td>
+                    <td data-label="獲利 (Edge)" class="mono val"><b class="{'text-green' if m['edge_val']>0 else ''}">{m['edge']}</b></td>
+                    <td data-label="成交量" class="val">{m['vol']}</td>
+                </tr>'''
     else:
         # 有套利機會時
         for m in arbitrage_opps:
@@ -178,16 +184,17 @@ def generate_dashboard():
                 <td data-label="成交量" class="val">{m['vol']}</td>
             </tr>'''
         # 即使有套利，下方也附上熱門市場參考
-        poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">🔥 熱門市場 (成交量參考)</td></tr>'
-        for m in hot_markets[:5]:
-            poly_html += f'''
-            <tr>
-                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
-                <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
-                <td data-label="總價" class="mono val">{m['bundle']}</td>
-                <td data-label="獲利 (Edge)" class="mono val">{m['edge']}</td>
-                <td data-label="成交量" class="val">{m['vol']}</td>
-            </tr>'''
+        if hot_markets:
+            poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">🔥 熱門市場 (成交量參考)</td></tr>'
+            for m in hot_markets[:5]:
+                poly_html += f'''
+                <tr>
+                    <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                    <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
+                    <td data-label="總價" class="mono val">{m['bundle']}</td>
+                    <td data-label="獲利 (Edge)" class="mono val">{m['edge']}</td>
+                    <td data-label="成交量" class="val">{m['vol']}</td>
+                </tr>'''
     tw_stats = {}
     for s in stocks:
         pred_type = s['pred'] # '看漲', '看跌', '盤整'
