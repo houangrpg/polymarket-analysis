@@ -73,16 +73,21 @@ def get_clob_price(token_id):
 def fetch_polymarket_realtime():
     print("Fetching Polymarket Gamma API...")
     try:
-        # 獲取成交量前 40 的市場以確保涵蓋套利機會
-        url = "https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=40&order=volume24hrClob&dir=desc"
+        # 使用更寬鬆的條件確保一定能抓到資料
+        url = "https://gamma-api.polymarket.com/markets?closed=false&limit=40&order=volume24hrClob&ascending=false"
         resp = requests.get(url, timeout=10)
         markets = resp.json()
+        print(f"Gamma API returned {len(markets)} markets")
         
         results = []
         
         def process_market(m):
             try:
-                clob_ids = json.loads(m.get('clobTokenIds', '[]'))
+                # 兼容不同格式的 token IDs
+                token_ids_raw = m.get('clobTokenIds')
+                if not token_ids_raw: return None
+                
+                clob_ids = json.loads(token_ids_raw)
                 if len(clob_ids) < 2: return None
                 
                 # 同時獲取 Yes 和 No 的即時 Ask
@@ -93,7 +98,7 @@ def fetch_polymarket_realtime():
                     bundle = yes_ask + no_ask
                     edge = (1.0 - bundle) * 100
                     return {
-                        'title': m['question'],
+                        'title': m.get('question', m.get('title', 'Unknown')),
                         'yes': f"{yes_ask:.3f}",
                         'no': f"{no_ask:.3f}",
                         'bundle': f"{bundle:.3f}",
@@ -101,7 +106,8 @@ def fetch_polymarket_realtime():
                         'edge': f"{edge:.2f}%",
                         'vol': f"{float(m.get('volume24hrClob', 0))/1000:.1f}K"
                     }
-            except: pass
+            except Exception as e:
+                pass
             return None
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
@@ -110,7 +116,7 @@ def fetch_polymarket_realtime():
                 res = future.result()
                 if res: results.append(res)
         
-        # 返回原始處理後的列表，交由 generate_dashboard 進行過濾與排序
+        print(f"Processed {len(results)} valid markets")
         return results
     except Exception as e:
         print(f"Polymarket fetch error: {e}")
