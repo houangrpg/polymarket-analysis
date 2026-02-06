@@ -1,303 +1,417 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-TW">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Polymarket Top20 Monitor</title>
+  <title>Polymarket 套利監控面板</title>
   <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 24px; background-color: #f8f9fa; color: #333; }
-    .container { max-width: 1200px; margin: 0 auto; background: white; padding: 24px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    h2 { margin-top: 0; color: #1a1a1a; border-bottom: 2px solid #eee; padding-bottom: 12px; }
-    .meta { color: #666; font-size: 13px; margin-bottom: 20px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border-bottom: 1px solid #eee; padding: 12px 8px; font-size: 14px; vertical-align: middle; }
-    th { text-align: left; background: #fcfcfc; color: #555; font-weight: 600; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
-    .q { max-width: 500px; }
-    .good { background-color: #e6ffed !important; }
-    .mono { font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
-    a:hover { text-decoration: underline !important; }
+    :root {
+      --pm-blue: #0066ff;
+      --bg-gray: #f4f7f9;
+      --text-main: #1a1a1b;
+      --text-muted: #5f6368;
+      --opp-green: #e6f4ea;
+      --opp-text: #137333;
+      --border-color: #dadce0;
+    }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      margin: 0; background-color: var(--bg-gray); color: var(--text-main); line-height: 1.5;
+    }
+    .header { background: white; border-bottom: 1px solid var(--border-color); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
+    .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    h1 { margin: 0; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+    .card { background: white; border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .meta-bar { padding: 12px 20px; background: #fafafa; border-bottom: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted); display: flex; gap: 20px; }
+    
+    table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+    th { background: #f8f9fa; padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); }
+    td { padding: 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; overflow: hidden; }
+    
+    .market-cell { display: flex; align-items: center; gap: 12px; }
+    .m-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; flex-shrink: 0; }
+    .m-img-placeholder { width: 32px; height: 32px; border-radius: 50%; background: #eee; flex-shrink: 0; }
+    .q-wrap { overflow: hidden; }
+    .question-link { color: var(--text-main); text-decoration: none; font-weight: 500; font-size: 14px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .question-link:hover { color: var(--pm-blue); text-decoration: underline; }
+    .slug-text { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+    
+    .mono { font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px; }
+    .val { text-align: right; width: 80px; }
+    .highlight { font-weight: 700; color: var(--pm-blue); }
+    .edge-val { color: var(--opp-text); font-weight: 600; }
+    
+    .row-opportunity { background-color: var(--opp-green) !important; }
+    .badge-opp { background: var(--opp-text); color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800; }
+    
     tr:hover { background-color: #fcfcfc; }
+    
+    /* Column widths */
+    th:nth-child(1), td:nth-child(1) { width: auto; }
+    th:nth-child(n+2), td:nth-child(n+2) { width: 100px; text-align: right; }
+
+    @media (max-width: 768px) {
+      th:nth-child(2), td:nth-child(2), th:nth-child(3), td:nth-child(3) { display: none; }
+      .container { margin: 12px auto; }
+    }
   </style>
 </head>
 <body>
+  <div class="header">
+    <div class="header-content">
+      <h1>📊 Polymarket Top 20 監控</h1>
+      <div style="font-size: 12px; color: var(--text-muted);">自動化套利分析面板</div>
+    </div>
+  </div>
+
   <div class="container">
-    <h2>Polymarket Top20 Bundle Monitor</h2>
-    <div class="meta">🕒 更新時間: 2026-02-06 12:02:56 CST · 🔄 每小時自動更新</div>
-    <table>
-      <thead>
-        <tr>
-          <th>Market / Question</th>
-          <th>Yes Ask</th>
-          <th>No Ask</th>
-          <th>Bundle Cost</th>
-          <th>Edge</th>
-          <th>Vol (24h)</th>
-        </tr>
-      </thead>
-      <tbody>
-        
+    <div class="card">
+      <div class="meta-bar">
+        <span>🕒 更新時間: 2026-02-06 12:03:37</span>
+        <span>🔄 頻率: 每小時更新</span>
+        <span>🎯 策略: Yes+No Bundle < 1.00</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>市場項目</th>
+            <th>Yes Ask</th>
+            <th>No Ask</th>
+            <th>Bundle</th>
+            <th>Edge</th>
+            <th>Vol(24h)</th>
+          </tr>
+        </thead>
+        <tbody>
+          
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-the-fed-decrease-interest-rates-by-50-bps-after-the-march-2026-meeting" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will the Fed decrease interest rates by 50+ bps after the March 2026 meeting?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-the-fed-decrease-interest-rates-by-50-bps-after-the-march-2026-meeting</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/jerome+powell+glasses1.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-the-fed-decrease-interest-rates-by-50-bps-after-the-march-2026-meeting" target="_blank" class="question-link">Will the Fed decrease interest rates by 50+ bps after the March 2026 meeting?</a>
+              <div class="slug-text">will-the-fed-decrease-interest-rates-by-50-bps-after-the-march-2026-meeting </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0160</td>
-        <td class="mono">0.9850</td>
-        <td class="mono">1.0010</td>
-        <td class="mono">-0.0010</td>
-        <td class="mono">3,607,877</td>
+        <td class="mono val">0.016</td>
+        <td class="mono val">0.985</td>
+        <td class="mono val highlight">1.001</td>
+        <td class="mono val edge-val">-0.10%</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-trump-nominate-judy-shelton-as-the-next-fed-chair" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will Trump nominate Judy Shelton as the next Fed chair?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-trump-nominate-judy-shelton-as-the-next-fed-chair</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/judy-shelton-15c5dd306b.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-trump-nominate-judy-shelton-as-the-next-fed-chair" target="_blank" class="question-link">Will Trump nominate Judy Shelton as the next Fed chair?</a>
+              <div class="slug-text">will-trump-nominate-judy-shelton-as-the-next-fed-chair </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0340</td>
-        <td class="mono">0.9670</td>
-        <td class="mono">1.0010</td>
-        <td class="mono">-0.0010</td>
-        <td class="mono">3,043,541</td>
+        <td class="mono val">0.035</td>
+        <td class="mono val">0.966</td>
+        <td class="mono val highlight">1.001</td>
+        <td class="mono val edge-val">-0.10%</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-the-fed-increase-interest-rates-by-25-bps-after-the-march-2026-meeting" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will the Fed increase interest rates by 25+ bps after the March 2026 meeting?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-the-fed-increase-interest-rates-by-25-bps-after-the-march-2026-meeting</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/jerome+powell+glasses1.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-the-fed-increase-interest-rates-by-25-bps-after-the-march-2026-meeting" target="_blank" class="question-link">Will the Fed increase interest rates by 25+ bps after the March 2026 meeting?</a>
+              <div class="slug-text">will-the-fed-increase-interest-rates-by-25-bps-after-the-march-2026-meeting </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0120</td>
-        <td class="mono">0.9890</td>
-        <td class="mono">1.0010</td>
-        <td class="mono">-0.0010</td>
-        <td class="mono">2,613,542</td>
+        <td class="mono val">0.012</td>
+        <td class="mono val">0.989</td>
+        <td class="mono val highlight">1.001</td>
+        <td class="mono val edge-val">-0.10%</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-trump-nominate-no-one-before-2027" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will Trump nominate no one before 2027?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-trump-nominate-no-one-before-2027</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/who-will-trump-nominate-as-fed-chair-9p19ttRwsbKL.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-trump-nominate-no-one-before-2027" target="_blank" class="question-link">Will Trump nominate no one before 2027?</a>
+              <div class="slug-text">will-trump-nominate-no-one-before-2027 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">2,018,121</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val">-</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-there-be-no-change-in-fed-interest-rates-after-the-march-2026-meeting" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will there be no change in Fed interest rates after the March 2026 meeting?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-there-be-no-change-in-fed-interest-rates-after-the-march-2026-meeting</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/jerome+powell+glasses1.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-there-be-no-change-in-fed-interest-rates-after-the-march-2026-meeting" target="_blank" class="question-link">Will there be no change in Fed interest rates after the March 2026 meeting?</a>
+              <div class="slug-text">will-there-be-no-change-in-fed-interest-rates-after-the-march-2026-meeting </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.8000</td>
-        <td class="mono">0.2100</td>
-        <td class="mono">1.0100</td>
-        <td class="mono">-0.0100</td>
-        <td class="mono">1,802,008</td>
+        <td class="mono val">0.800</td>
+        <td class="mono val">0.210</td>
+        <td class="mono val highlight">1.010</td>
+        <td class="mono val edge-val">-1.00%</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/us-strikes-iran-by-february-5-2026" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">US strikes Iran by February 5, 2026?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">us-strikes-iran-by-february-5-2026</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/us-strikes-iran-by-october-3-2sVnIHq3sjqF.jpg" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/us-strikes-iran-by-february-5-2026" target="_blank" class="question-link">US strikes Iran by February 5, 2026?</a>
+              <div class="slug-text">us-strikes-iran-by-february-5-2026 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0020</td>
-        <td class="mono">0.9990</td>
-        <td class="mono">1.0010</td>
-        <td class="mono">-0.0010</td>
-        <td class="mono">1,698,629</td>
+        <td class="mono val">0.002</td>
+        <td class="mono val">0.999</td>
+        <td class="mono val highlight">1.001</td>
+        <td class="mono val edge-val">-0.10%</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-the-fed-decrease-interest-rates-by-25-bps-after-the-march-2026-meeting" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will the Fed decrease interest rates by 25 bps after the March 2026 meeting?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-the-fed-decrease-interest-rates-by-25-bps-after-the-march-2026-meeting</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/jerome+powell+glasses1.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-the-fed-decrease-interest-rates-by-25-bps-after-the-march-2026-meeting" target="_blank" class="question-link">Will the Fed decrease interest rates by 25 bps after the March 2026 meeting?</a>
+              <div class="slug-text">will-the-fed-decrease-interest-rates-by-25-bps-after-the-march-2026-meeting </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.1700</td>
-        <td class="mono">0.8400</td>
-        <td class="mono">1.0100</td>
-        <td class="mono">-0.0100</td>
-        <td class="mono">1,604,708</td>
+        <td class="mono val">0.170</td>
+        <td class="mono val">0.840</td>
+        <td class="mono val highlight">1.010</td>
+        <td class="mono val edge-val">-1.00%</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nba-cha-hou-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Hornets vs. Rockets</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nba-cha-hou-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nba-cha-hou-2026-02-05" target="_blank" class="question-link">Hornets vs. Rockets</a>
+              <div class="slug-text">nba-cha-hou-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">-</td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">1,528,398</td>
+        <td class="mono val">-</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nba-was-det-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Wizards vs. Pistons</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nba-was-det-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nba-was-det-2026-02-05" target="_blank" class="question-link">Wizards vs. Pistons</a>
+              <div class="slug-text">nba-was-det-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">-</td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">1,372,902</td>
+        <td class="mono val">-</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nhl-lak-las-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Kings vs. Golden Knights</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nhl-lak-las-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/nhl.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nhl-lak-las-2026-02-05" target="_blank" class="question-link">Kings vs. Golden Knights</a>
+              <div class="slug-text">nhl-lak-las-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0590</td>
-        <td class="mono">0.9480</td>
-        <td class="mono">1.0070</td>
-        <td class="mono">-0.0070</td>
-        <td class="mono">1,240,013</td>
+        <td class="mono val">0.059</td>
+        <td class="mono val">0.956</td>
+        <td class="mono val highlight">1.015</td>
+        <td class="mono val edge-val">-1.50%</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nhl-fla-tb-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Panthers vs. Lightning</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nhl-fla-tb-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/nhl.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nhl-fla-tb-2026-02-05" target="_blank" class="question-link">Panthers vs. Lightning</a>
+              <div class="slug-text">nhl-fla-tb-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">1,230,951</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val">-</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-trump-nominate-kevin-warsh-as-the-next-fed-chair" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will Trump nominate Kevin Warsh as the next Fed chair?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-trump-nominate-kevin-warsh-as-the-next-fed-chair</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/will-trump-nominate-kevin-warsh-as-the-next-fed-chair-Bc-vVyyVjhsS.jpg" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-trump-nominate-kevin-warsh-as-the-next-fed-chair" target="_blank" class="question-link">Will Trump nominate Kevin Warsh as the next Fed chair?</a>
+              <div class="slug-text">will-trump-nominate-kevin-warsh-as-the-next-fed-chair </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.9530</td>
-        <td class="mono">0.0490</td>
-        <td class="mono">1.0020</td>
-        <td class="mono">-0.0020</td>
-        <td class="mono">1,192,865</td>
+        <td class="mono val">0.951</td>
+        <td class="mono val">0.051</td>
+        <td class="mono val highlight">1.002</td>
+        <td class="mono val edge-val">-0.20%</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nhl-nyi-nj-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Islanders vs. Devils</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nhl-nyi-nj-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/nhl.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nhl-nyi-nj-2026-02-05" target="_blank" class="question-link">Islanders vs. Devils</a>
+              <div class="slug-text">nhl-nyi-nj-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">-</td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">1,171,294</td>
+        <td class="mono val">-</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nhl-nsh-wsh-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Predators vs. Capitals</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nhl-nsh-wsh-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/nhl.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nhl-nsh-wsh-2026-02-05" target="_blank" class="question-link">Predators vs. Capitals</a>
+              <div class="slug-text">nhl-nsh-wsh-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">1,171,059</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val">-</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-athletic-bilbao-win-the-202526-la-liga" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will Athletic Bilbao win the 2025–26 La Liga?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-athletic-bilbao-win-the-202526-la-liga</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/will-athletic-bilbao-win-the-202526-la-liga-64c1C-MxElrB.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-athletic-bilbao-win-the-202526-la-liga" target="_blank" class="question-link">Will Athletic Bilbao win the 2025–26 La Liga?</a>
+              <div class="slug-text">will-athletic-bilbao-win-the-202526-la-liga </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0020</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">1,127,621</td>
+        <td class="mono val">0.002</td>
+        <td class="mono val">-</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/will-bitcoin-dip-to-60k-in-february-2026" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Will Bitcoin dip to $60,000 in February?</a>
-            <div class="mono" style="color:#777; font-size: 11px;">will-bitcoin-dip-to-60k-in-february-2026</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC+fullsize.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/will-bitcoin-dip-to-60k-in-february-2026" target="_blank" class="question-link">Will Bitcoin dip to $60,000 in February?</a>
+              <div class="slug-text">will-bitcoin-dip-to-60k-in-february-2026 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">-</td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">1,063,872</td>
+        <td class="mono val">-</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nba-chi-tor-2026-02-05-total-225pt5" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Bulls vs. Raptors: O/U 225.5</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nba-chi-tor-2026-02-05-total-225pt5</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nba-chi-tor-2026-02-05-total-225pt5" target="_blank" class="question-link">Bulls vs. Raptors: O/U 225.5</a>
+              <div class="slug-text">nba-chi-tor-2026-02-05-total-225pt5 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">-</td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">1,054,911</td>
+        <td class="mono val">-</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">M</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nba-sas-dal-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Spurs vs. Mavericks</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nba-sas-dal-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nba-sas-dal-2026-02-05" target="_blank" class="question-link">Spurs vs. Mavericks</a>
+              <div class="slug-text">nba-sas-dal-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">-</td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">994,566</td>
+        <td class="mono val">-</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">K</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nba-uta-atl-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Jazz vs. Hawks</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nba-uta-atl-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nba-uta-atl-2026-02-05" target="_blank" class="question-link">Jazz vs. Hawks</a>
+              <div class="slug-text">nba-uta-atl-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">965,826</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val">-</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">K</td>
       </tr>
       <tr>
         <td>
-          <div class="q">
-            <a href="https://polymarket.com/market/nba-chi-tor-2026-02-05" target="_blank" rel="noreferrer" style="color: #0066cc; text-decoration: none;">Bulls vs. Raptors</a>
-            <div class="mono" style="color:#777; font-size: 11px;">nba-chi-tor-2026-02-05</div>
+          <div class="market-cell">
+            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
+            <div class="q-wrap">
+              <a href="https://polymarket.com/market/nba-chi-tor-2026-02-05" target="_blank" class="question-link">Bulls vs. Raptors</a>
+              <div class="slug-text">nba-chi-tor-2026-02-05 </div>
+            </div>
           </div>
         </td>
-        <td class="mono">0.0010</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">-</td>
-        <td class="mono">890,954</td>
+        <td class="mono val">0.001</td>
+        <td class="mono val">-</td>
+        <td class="mono val highlight">-</td>
+        <td class="mono val edge-val">-</td>
+        <td class="mono val">K</td>
       </tr>
-      </tbody>
-    </table>
+        </tbody>
+      </table>
+    </div>
+    
+    <div style="margin-top: 24px; font-size: 12px; color: var(--text-muted); text-align: center;">
+      本頁面由 OpenClaw 自動生成，數據僅供參考。
+    </div>
   </div>
 </body>
 </html>
