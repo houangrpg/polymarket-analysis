@@ -104,10 +104,9 @@ def generate_dashboard():
     stocks = fetch_stock_data()
     raw_poly = fetch_polymarket_realtime()
     
-    # --- Polymarket Logic ---
+    # --- Polymarket ---
     arbitrage_opps = [m for m in raw_poly if 0 < m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
     arbitrage_opps.sort(key=lambda x: x['edge_val'], reverse=True)
-    
     opportunity_markets = [m for m in raw_poly if abs(1.0 - float(m['bundle'])) > 0.005 and float(m['bundle']) <= 1.05]
     def get_v(v): 
         try: return float(v.replace('K',''))
@@ -117,34 +116,23 @@ def generate_dashboard():
     poly_html = ""
     if arbitrage_opps:
         for m in arbitrage_opps:
-            poly_html += f'''
-            <div class="row opp-highlight">
-                <div class="item-header"><div class="item-name">{m['title']} 🚀</div><div class="edge-val">{m['edge']}</div></div>
-                <div class="item-detail"><span class="badge">Bundle: {m['bundle']}</span><span class="badge">Vol: {m['vol']}</span></div>
-            </div>'''
+            poly_html += f'<div class="row opp-highlight"><div class="item-header"><div class="item-name">{m["title"]} 🚀</div><div class="edge-val text-green">{m["edge"]}</div></div><div class="item-detail"><span class="badge">Bundle: {m["bundle"]}</span><span class="badge">Vol: {m["vol"]}</span></div></div>'
     else:
-        poly_html += '<div style="text-align:center; padding:20px; color:#999; font-size:13px;">⚠️ 暫無套利空間，監測異常中...</div>'
+        poly_html += '<div style="text-align:center; padding:20px; color:#999; font-size:13px;">⚠️ 暫無套利空間</div>'
         for m in hot_markets:
-            poly_html += f'''
-            <div class="row">
-                <div class="item-header"><div class="item-name" style="font-size:14px;">{m['title']}</div><div class="item-price"><span class="price-now" style="font-size:14px;">{m['bundle']}</span></div></div>
-                <div class="item-detail"><span class="badge">Y: {m['yes']}</span><span class="badge">N: {m['no']}</span><span style="margin-left:auto; font-weight:700;" class="{"text-green" if m["edge_val"]>0 else "text-red"}">{m['edge']}</span></div>
-            </div>'''
+            poly_html += f'<div class="row"><div class="item-header"><div class="item-name" style="font-size:14px;">{m["title"]}</div><div class="price-now" style="font-size:14px;">{m["bundle"]}</div></div><div class="item-detail"><span class="badge">Y:{m["yes"]} N:{m["no"]}</span><span style="margin-left:auto; font-weight:700;" class="{"text-green" if m["edge_val"]>0 else "text-red"}">{m["edge"]}</span></div></div>'
 
-    # --- TW Stock Logic ---
+    # --- TW Stock ---
     tw_stats = {}
     for s in stocks:
-        tw_stocks = [x.strip() for x in s['tw'].replace('、', ',').split(',')]
-        for ts in tw_stocks:
-            if not ts: continue
+        for ts in [x.strip() for x in s['tw'].replace('、', ',').split(',') if x.strip()]:
             if ts not in tw_stats: tw_stats[ts] = {'bull':0, 'bear':0}
             if s['pred'] == '看漲': tw_stats[ts]['bull'] += 1
             elif s['pred'] == '看跌': tw_stats[ts]['bear'] += 1
     
     sorted_tw = sorted(tw_stats.items(), key=lambda x: (x[1]['bull'], -x[1]['bear']), reverse=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as ex:
-        names = [ts for ts, _ in sorted_tw]
-        tickers = list(ex.map(search_tw_ticker, names))
+        tickers = list(ex.map(search_tw_ticker, [ts for ts, _ in sorted_tw]))
 
     tw_html, total_f, correct_f = "", 0, 0
     for (ts, counts), ticker in zip(sorted_tw, tickers):
@@ -166,34 +154,12 @@ def generate_dashboard():
             if win: correct_f += 1; accuracy_icon = "✅"
             else: accuracy_icon = "❌"
 
-        tw_html += f'''
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name" style="color:#202124;">{ts}{symbol_text} {accuracy_icon}</div>
-                <div class="item-price"><div class="price-now">{p_now}</div><div class="price-prev">昨收: {p_prev}</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge {'badge-bull' if sentiment=='偏多' else 'badge-bear' if sentiment=='偏空' else ''}">{sentiment}</span>
-                <div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>{counts['bull']}</b> | 空 <b>{counts['bear']}</b></div>
-            </div>
-        </div>'''
+        tw_html += f'<div class="row"><div class="item-header"><div class="item-name">{ts}{symbol_text} {accuracy_icon}</div><div class="item-price"><div class="price-now">{p_now}</div><div class="price-prev">昨收: {p_prev}</div></div></div><div class="item-detail"><span class="badge {"badge-bull" if sentiment=="偏多" else "badge-bear" if sentiment=="偏空" else ""}">{sentiment}</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>{counts["bull"]}</b> | 空 <b>{counts["bear"]}</b></div></div></div>'
 
-    # --- US Stock Logic ---
-    us_html = ""
-    for s in stocks:
-        us_html += f'''
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">{s['s']} <small style="color:#666; font-weight:400;">{s['n']}</small></div>
-                <div class="item-price"><div class="price-now">${s['p']:.2f}</div><div class="{"text-green" if s["cv"]>=0 else "text-red"}" style="font-size:12px; font-weight:700;">{s['c']}</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge {'badge-bull' if s['pred']=='看漲' else 'badge-bear' if s['pred']=='看跌' else ''}">{s['pred']}</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">{s['tw']}</div>
-            </div>
-        </div>'''
+    # --- US Stock ---
+    us_html = "".join([f'<div class="row"><div class="item-header"><div class="item-name">{s["s"]} <small style="color:#666;">{s["n"]}</small></div><div class="item-price"><div class="price-now">${s["p"]:.2f}</div><div class="{"text-green" if s["cv"]>=0 else "text-red"}" style="font-size:12px; font-weight:700;">{s["c"]}</div></div></div><div class="item-detail"><span class="badge {"badge-bull" if s["pred"]=="看漲" else "badge-bear" if s["pred"]=="看跌" else ""}">{s["pred"]}</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">{s["imp"]}</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: {s["tw"]}</div></div>' for s in stocks])
 
-    # --- History Logic ---
+    # --- History ---
     acc_rate = (correct_f / total_f * 100) if total_f > 0 else 0
     history = []
     try:
@@ -206,7 +172,21 @@ def generate_dashboard():
         else: history[-1].update({'accuracy':round(acc_rate,1), 'correct':correct_f, 'total':total_f})
         with open('prediction_history.json', 'w') as f: json.dump(history[-60:], f, indent=2)
 
+    total_c_all = sum(h['correct'] for h in history)
+    total_f_all = sum(h['total'] for h in history)
     hist_rows = "".join([f"<tr><td>{h['date']}</td><td>{h['accuracy']}%</td><td style='text-align:right;'>{h['correct']}/{h['total']}</td></tr>" for h in reversed(history)])
+
+    # --- PK Bar Logic ---
+    pk_ratio = (total_c_all / total_f_all * 100) if total_f_all > 0 else 0
+    pk_html = f'''
+    <div style="padding:16px 16px 0 16px;">
+        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; font-weight:700;">
+            <span class="text-green">正確: {total_c_all}</span><span class="text-red">錯誤: {total_f_all - total_c_all}</span>
+        </div>
+        <div style="height:12px; background:#fce8e6; border-radius:6px; overflow:hidden; display:flex;">
+            <div style="width:{pk_ratio}%; background:#e6f4ea; transition:width 0.5s;"></div>
+        </div>
+    </div>'''
 
     # --- Final HTML ---
     full_html = f'''<!doctype html>
@@ -263,7 +243,11 @@ def generate_dashboard():
                 <div style="display:{'block' if total_f<=0 else 'none'}; font-size:16px; margin-top:5px;">⏳ 等待開盤驗證...</div>
             </div>
             <div class="card"><div class="title">台股預測清單</div>{tw_html}</div>
-            <div class="card"><div class="title">歷史結算 (每日一列)</div><table style="width:100%; padding:10px 16px; border-spacing:0 8px;">{hist_rows}</table></div>
+            <div class="card">
+                <div class="title">歷史結算與累積對決 (PK)</div>
+                {pk_html}
+                <table style="width:100%; padding:10px 16px; border-spacing:0 8px; font-size:13px;">{hist_rows}</table>
+            </div>
         </div>
     </div>
     <script>

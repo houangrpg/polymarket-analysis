@@ -32,7 +32,7 @@
 </head>
 <body onload="ch()">
     <div class="header">
-        <div class="brand"><b>JoeClowAI</b> <span style="font-size:10px; color:#999;">2026-02-07 04:48:14</span></div>
+        <div class="brand"><b>JoeClowAI</b> <span style="font-size:10px; color:#999;">2026-02-07 04:55:56</span></div>
         <div class="tabs">
             <div class="tab active" onclick="sw(0)">🔮 套利</div>
             <div class="tab" onclick="sw(1)">📈 美股</div>
@@ -40,118 +40,8 @@
         </div>
     </div>
     <div class="container">
-        <div id="t0" class="tab-content active"><div class="card"><div class="title">套利與異常監測</div><div style="text-align:center; padding:20px; color:#999; font-size:13px;">⚠️ 暫無套利空間，監測異常中...</div></div></div>
-        <div id="t1" class="tab-content"><div class="card"><div class="title">美股聯動分析</div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">TSLA <small style="color:#666; font-weight:400;">Tesla, Inc.</small></div>
-                <div class="item-price"><div class="price-now">$414.48</div><div class="text-green" style="font-size:12px; font-weight:700;">+4.35%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">看漲</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、鴻海、貿聯-KY</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">NVDA <small style="color:#666; font-weight:400;">NVIDIA Corporation</small></div>
-                <div class="item-price"><div class="price-now">$186.35</div><div class="text-green" style="font-size:12px; font-weight:700;">+8.47%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">看漲</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、廣達、技嘉、世芯-KY</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">AAPL <small style="color:#666; font-weight:400;">Apple Inc.</small></div>
-                <div class="item-price"><div class="price-now">$278.51</div><div class="text-green" style="font-size:12px; font-weight:700;">+0.94%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">看漲</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、鴻海、大立光、廣達</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">MSFT <small style="color:#666; font-weight:400;">Microsoft Corporation</small></div>
-                <div class="item-price"><div class="price-now">$400.83</div><div class="text-green" style="font-size:12px; font-weight:700;">+1.82%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">看漲</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、鴻海、大立光、廣達</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">AMZN <small style="color:#666; font-weight:400;">Amazon.com, Inc.</small></div>
-                <div class="item-price"><div class="price-now">$208.99</div><div class="text-red" style="font-size:12px; font-weight:700;">-6.15%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge ">盤整</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、鴻海、大立光、廣達</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">GOOGL <small style="color:#666; font-weight:400;">Alphabet Inc.</small></div>
-                <div class="item-price"><div class="price-now">$323.00</div><div class="text-red" style="font-size:12px; font-weight:700;">-2.49%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge ">盤整</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、鴻海、大立光、廣達</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">META <small style="color:#666; font-weight:400;">Meta Platforms, Inc.</small></div>
-                <div class="item-price"><div class="price-now">$660.89</div><div class="text-red" style="font-size:12px; font-weight:700;">-1.39%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge ">盤整</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、鴻海、大立光、廣達</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">AVGO <small style="color:#666; font-weight:400;">Broadcom Inc.</small></div>
-                <div class="item-price"><div class="price-now">$334.13</div><div class="text-green" style="font-size:12px; font-weight:700;">+7.61%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">看漲</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、廣達、技嘉、世芯-KY</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">TSM <small style="color:#666; font-weight:400;">Taiwan Semiconductor Manufacturing Company Limited</small></div>
-                <div class="item-price"><div class="price-now">$349.40</div><div class="text-green" style="font-size:12px; font-weight:700;">+5.64%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">看漲</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、廣達、技嘉、世芯-KY</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">ASML <small style="color:#666; font-weight:400;">ASML Holding N.V.</small></div>
-                <div class="item-price"><div class="price-now">$1414.56</div><div class="text-green" style="font-size:12px; font-weight:700;">+4.77%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">看漲</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、廣達、技嘉、世芯-KY</div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name">ARM <small style="color:#666; font-weight:400;">Arm Holdings plc</small></div>
-                <div class="item-price"><div class="price-now">$123.81</div><div class="text-green" style="font-size:12px; font-weight:700;">+11.66%</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">看漲</span>
-                <div style="margin-left:auto; font-size:11px; text-align:right; color:#555;">台積電、廣達、技嘉、世芯-KY</div>
-            </div>
-        </div></div></div>
+        <div id="t0" class="tab-content active"><div class="card"><div class="title">套利與異常監測</div><div style="text-align:center; padding:20px; color:#999; font-size:13px;">⚠️ 暫無套利空間</div></div></div>
+        <div id="t1" class="tab-content"><div class="card"><div class="title">美股聯動分析</div><div class="row"><div class="item-header"><div class="item-name">TSLA <small style="color:#666;">Tesla, Inc.</small></div><div class="item-price"><div class="price-now">$410.77</div><div class="text-green" style="font-size:12px; font-weight:700;">+3.41%</div></div></div><div class="item-detail"><span class="badge badge-bull">看漲</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">電動車供應鏈受惠</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、鴻海、貿聯-KY</div></div><div class="row"><div class="item-header"><div class="item-name">NVDA <small style="color:#666;">NVIDIA Corporation</small></div><div class="item-price"><div class="price-now">$186.00</div><div class="text-green" style="font-size:12px; font-weight:700;">+8.26%</div></div></div><div class="item-detail"><span class="badge badge-bull">看漲</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">AI 半導體需求強勁</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、廣達、技嘉、世芯-KY</div></div><div class="row"><div class="item-header"><div class="item-name">AAPL <small style="color:#666;">Apple Inc.</small></div><div class="item-price"><div class="price-now">$278.68</div><div class="text-green" style="font-size:12px; font-weight:700;">+1.00%</div></div></div><div class="item-detail"><span class="badge badge-bull">看漲</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">大型科技股資本支出</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、鴻海、大立光、廣達</div></div><div class="row"><div class="item-header"><div class="item-name">MSFT <small style="color:#666;">Microsoft Corporation</small></div><div class="item-price"><div class="price-now">$401.38</div><div class="text-green" style="font-size:12px; font-weight:700;">+1.96%</div></div></div><div class="item-detail"><span class="badge badge-bull">看漲</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">大型科技股資本支出</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、鴻海、大立光、廣達</div></div><div class="row"><div class="item-header"><div class="item-name">AMZN <small style="color:#666;">Amazon.com, Inc.</small></div><div class="item-price"><div class="price-now">$210.32</div><div class="text-red" style="font-size:12px; font-weight:700;">-5.55%</div></div></div><div class="item-detail"><span class="badge ">盤整</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">科技股高檔震盪</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、鴻海、大立光、廣達</div></div><div class="row"><div class="item-header"><div class="item-name">GOOGL <small style="color:#666;">Alphabet Inc.</small></div><div class="item-price"><div class="price-now">$323.18</div><div class="text-red" style="font-size:12px; font-weight:700;">-2.44%</div></div></div><div class="item-detail"><span class="badge ">盤整</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">科技股高檔震盪</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、鴻海、大立光、廣達</div></div><div class="row"><div class="item-header"><div class="item-name">META <small style="color:#666;">Meta Platforms, Inc.</small></div><div class="item-price"><div class="price-now">$661.88</div><div class="text-red" style="font-size:12px; font-weight:700;">-1.24%</div></div></div><div class="item-detail"><span class="badge ">盤整</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">科技股高檔震盪</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、鴻海、大立光、廣達</div></div><div class="row"><div class="item-header"><div class="item-name">AVGO <small style="color:#666;">Broadcom Inc.</small></div><div class="item-price"><div class="price-now">$333.02</div><div class="text-green" style="font-size:12px; font-weight:700;">+7.25%</div></div></div><div class="item-detail"><span class="badge badge-bull">看漲</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">AI 半導體需求強勁</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、廣達、技嘉、世芯-KY</div></div><div class="row"><div class="item-header"><div class="item-name">TSM <small style="color:#666;">Taiwan Semiconductor Manufacturing Company Limited</small></div><div class="item-price"><div class="price-now">$348.95</div><div class="text-green" style="font-size:12px; font-weight:700;">+5.51%</div></div></div><div class="item-detail"><span class="badge badge-bull">看漲</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">AI 半導體需求強勁</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、廣達、技嘉、世芯-KY</div></div><div class="row"><div class="item-header"><div class="item-name">ASML <small style="color:#666;">ASML Holding N.V.</small></div><div class="item-price"><div class="price-now">$1413.56</div><div class="text-green" style="font-size:12px; font-weight:700;">+4.70%</div></div></div><div class="item-detail"><span class="badge badge-bull">看漲</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">AI 半導體需求強勁</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、廣達、技嘉、世芯-KY</div></div><div class="row"><div class="item-header"><div class="item-name">ARM <small style="color:#666;">Arm Holdings plc</small></div><div class="item-price"><div class="price-now">$123.53</div><div class="text-green" style="font-size:12px; font-weight:700;">+11.41%</div></div></div><div class="item-detail"><span class="badge badge-bull">看漲</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">AI 半導體需求強勁</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: 台積電、廣達、技嘉、世芯-KY</div></div></div></div>
         <div id="t2" class="tab-content">
             <div class="card acc-card">
                 <div style="font-size:12px; opacity:0.8; font-weight:600;">今日準確率</div>
@@ -161,78 +51,20 @@
                 </div>
                 <div style="display:block; font-size:16px; margin-top:5px;">⏳ 等待開盤驗證...</div>
             </div>
-            <div class="card"><div class="title">台股預測清單</div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name" style="color:#202124;">台積電 (2330) </div>
-                <div class="item-price"><div class="price-now">$1780.00</div><div class="price-prev">昨收: $1765.00</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">偏多</span>
-                <div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>8</b> | 空 <b>0</b></div>
-            </div>
+            <div class="card"><div class="title">台股預測清單</div><div class="row"><div class="item-header"><div class="item-name">台積電 (2330) </div><div class="item-price"><div class="price-now">$1780.00</div><div class="price-prev">昨收: $1765.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>8</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">廣達 (2382) </div><div class="item-price"><div class="price-now">$279.50</div><div class="price-prev">昨收: $273.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>7</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">技嘉 (2376) </div><div class="item-price"><div class="price-now">$227.50</div><div class="price-prev">昨收: $226.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>5</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">世芯-KY (3661) </div><div class="item-price"><div class="price-now">$3115.00</div><div class="price-prev">昨收: $3245.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>5</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">鴻海 (2317) </div><div class="item-price"><div class="price-now">$215.00</div><div class="price-prev">昨收: $215.50</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>3</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">大立光 (3008) </div><div class="item-price"><div class="price-now">$2330.00</div><div class="price-prev">昨收: $2300.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>2</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">貿聯-KY (3665) </div><div class="item-price"><div class="price-now">$1285.00</div><div class="price-prev">昨收: $1260.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>1</b> | 空 <b>0</b></div></div></div></div>
+            <div class="card">
+                <div class="title">歷史結算與累積對決 (PK)</div>
+                
+    <div style="padding:16px 16px 0 16px;">
+        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; font-weight:700;">
+            <span class="text-green">正確: 3</span><span class="text-red">錯誤: 2</span>
         </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name" style="color:#202124;">廣達 (2382) </div>
-                <div class="item-price"><div class="price-now">$279.50</div><div class="price-prev">昨收: $273.00</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">偏多</span>
-                <div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>7</b> | 空 <b>0</b></div>
-            </div>
+        <div style="height:12px; background:#fce8e6; border-radius:6px; overflow:hidden; display:flex;">
+            <div style="width:60.0%; background:#e6f4ea; transition:width 0.5s;"></div>
         </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name" style="color:#202124;">技嘉 (2376) </div>
-                <div class="item-price"><div class="price-now">$227.50</div><div class="price-prev">昨收: $226.00</div></div>
+    </div>
+                <table style="width:100%; padding:10px 16px; border-spacing:0 8px; font-size:13px;"><tr><td>2026-02-06</td><td>60.0%</td><td style='text-align:right;'>3/5</td></tr></table>
             </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">偏多</span>
-                <div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>5</b> | 空 <b>0</b></div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name" style="color:#202124;">世芯-KY (3661) </div>
-                <div class="item-price"><div class="price-now">$3115.00</div><div class="price-prev">昨收: $3245.00</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">偏多</span>
-                <div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>5</b> | 空 <b>0</b></div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name" style="color:#202124;">鴻海 (2317) </div>
-                <div class="item-price"><div class="price-now">$215.00</div><div class="price-prev">昨收: $215.50</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">偏多</span>
-                <div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>3</b> | 空 <b>0</b></div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name" style="color:#202124;">大立光 (3008) </div>
-                <div class="item-price"><div class="price-now">$2330.00</div><div class="price-prev">昨收: $2300.00</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">偏多</span>
-                <div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>2</b> | 空 <b>0</b></div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="item-header">
-                <div class="item-name" style="color:#202124;">貿聯-KY (3665) </div>
-                <div class="item-price"><div class="price-now">$1285.00</div><div class="price-prev">昨收: $1260.00</div></div>
-            </div>
-            <div class="item-detail">
-                <span class="badge badge-bull">偏多</span>
-                <div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>1</b> | 空 <b>0</b></div>
-            </div>
-        </div></div>
-            <div class="card"><div class="title">歷史結算 (每日一列)</div><table style="width:100%; padding:10px 16px; border-spacing:0 8px;"><tr><td>2026-02-06</td><td>60.0%</td><td style='text-align:right;'>3/5</td></tr></table></div>
         </div>
     </div>
     <script>
