@@ -1,183 +1,166 @@
 <!doctype html>
 <html lang="zh-TW">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>OpenClaw 綜合面板</title>
-  <style>
-    :root { --pm-blue: #1a73e8; --bg-gray: #f8f9fa; --text-main: #202124; --text-muted: #5f6368; --border-color: #dadce0; --up-green: #137333; --down-red: #d93025; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg-gray); }
-    .header { background: white; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; padding: 0 16px; }
-    .header-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; height: 56px; justify-content: space-between; }
-    h1 { font-size: 16px; color: var(--pm-blue); margin: 0; }
-    .tabs { display: flex; gap: 4px; overflow-x: auto; }
-    .tab { padding: 12px 12px; font-size: 13px; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; white-space: nowrap; }
-    .tab.active { color: var(--pm-blue); border-bottom-color: var(--pm-blue); font-weight: 600; }
-    .container { max-width: 1200px; margin: 16px auto; padding: 0 8px; }
-    .tab-content { display: none; } .tab-content.active { display: block; }
-    .card { background: white; border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #f8f9fa; padding: 10px 12px; text-align: left; font-size: 11px; color: var(--text-muted); border-bottom: 1px solid var(--border-color); }
-    td { padding: 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
-    .market-cell { display: flex; align-items: center; gap: 8px; }
-    .m-img-placeholder { width: 32px; height: 32px; border-radius: 4px; background: #e8f0fe; color: #1a73e8; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-    .news-title { font-weight: 500; font-size: 13px; }
-    .impact-text { font-size: 11px; color: var(--pm-blue); margin-top: 2px; }
-    .badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
-    .badge-bull { background: #e6f4ea; color: #137333; }
-    .badge-red { background: #fce8e6; color: #d93025; }
-    .badge-neutral { background: #f1f3f4; color: #3c4043; }
-    .text-green { color: var(--up-green); } .text-red { color: var(--down-red); } .mono { font-family: monospace; }
-    
-    @media (max-width: 600px) {
-      th { display: none; }
-      td { display: block; padding: 8px 12px; border: none; text-align: right; }
-      td:before { content: attr(data-label); float: left; font-weight: 600; color: var(--text-muted); font-size: 12px; }
-      tr { display: block; border-bottom: 8px solid #f1f3f4; padding: 8px 0; }
-      td[data-label="標的"] { text-align: left; background: #fafafa; }
-      td[data-label="標的"]:before { content: ""; }
-      .news-title { text-align: left; } .impact-text { text-align: left; }
-    }
-  </style>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>OpenClaw 綜合面板</title>
+    <style>
+        :root { --blue: #1a73e8; --bg: #f1f3f4; --border: #dadce0; --up: #137333; --down: #d93025; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: #202124; }
+        .header { background: white; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .header-top { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
+        .tabs { display: flex; background: white; }
+        .tab { flex: 1; text-align: center; padding: 14px; font-size: 14px; font-weight: 500; color: #5f6368; border-bottom: 3px solid transparent; }
+        .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+        
+        .container { padding: 12px; max-width: 800px; margin: 0 auto; }
+        .tab-content { display: none; } .tab-content.active { display: block; }
+        .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .meta { padding: 10px 16px; background: #fafafa; font-size: 12px; color: #70757a; border-bottom: 1px solid var(--border); }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 11px; color: #5f6368; border-bottom: 1px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .val { text-align: right; } .mono { font-family: "SF Mono", monospace; }
+        .text-green { color: var(--up); font-weight: 600; } .text-red { color: var(--down); font-weight: 600; }
+        
+        .badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-bull { background: #e6f4ea; color: #137333; }
+        .badge-red { background: #fce8e6; color: #d93025; }
+        .badge-neutral { background: #f1f3f4; color: #3c4043; }
+        
+        .tw-text { font-size: 12px; font-weight: 600; margin-top: 4px; }
+        .imp-text { font-size: 11px; color: var(--blue); }
+        .opp-highlight { background-color: #e6f4ea; }
+        
+        @media (max-width: 600px) {
+            th { display: none; }
+            td { display: block; padding: 10px 16px; border: none; text-align: right; }
+            td:before { content: attr(data-label); float: left; font-size: 12px; color: #70757a; font-weight: 600; }
+            tr { display: block; border-bottom: 8px solid var(--bg); }
+            td[data-label="標載"], td[data-label="預測市場"], td[data-label="標的"] { text-align: left; background: #f8f9fa; }
+            td[data-label="標載"]:before, td[data-label="預測市場"]:before, td[data-label="標的"]:before { content: ""; }
+            .q-text { font-weight: 600; color: #1a1a1a; }
+        }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-content">
-      <h1>OpenClaw</h1>
-      <div class="tabs">
-        <div class="tab active" onclick="sw('stock')">📈 股市預測</div>
-        <div class="tab" onclick="sw('poly')">🔮 Polymarket</div>
-      </div>
+    <div class="header">
+        <div class="header-top">
+            <div style="font-weight: 700; color: var(--blue);">OPENCLAW PRO</div>
+            <div style="font-size: 12px; color: #70757a;">2026-02-06 12:55:36</div>
+        </div>
+        <div class="tabs">
+            <div class="tab active" onclick="sw(0)">📈 美股台股</div>
+            <div class="tab" onclick="sw(1)">🔮 POLYMARKET</div>
+        </div>
     </div>
-  </div>
-  <div class="container">
-    <div id="stock-tab" class="tab-content active"><div class="card"><table>
-      <thead><tr><th>標的</th><th>最新價</th><th>漲跌幅</th><th>動態分析</th><th>台股聯動</th></tr></thead>
-      <tbody>
-      <tr>
-        <td data-label="標的">
-          <div class="market-cell">
-            <div class="m-img-placeholder">T</div>
-            <div>
-              <div class="question-link">Tesla, Inc.</div>
-              <div class="slug-text">TSLA</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val highlight" data-label="最新價">$397.21</td>
-        <td class="mono val text-red" data-label="漲跌幅">-2.17%</td>
-        <td class="news-cell" data-label="動態分析">
-            <div class="news-title">IPOs: How companies get into an index when planning to go public</div>
-            <div class="impact-text">影響：需求擔憂影響</div>
-        </td>
-        <td class="val" data-label="台股聯動">
-            <div class="prediction-box">
+    
+    <div class="container">
+        <div id="t0" class="tab-content active">
+            <div class="card">
+                <table>
+                    <thead><tr><th>標的</th><th class="val">價格</th><th class="val">漲跌</th><th>聯動預測</th></tr></thead>
+                    <tbody>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>TSLA</b><br><small>Tesla, Inc.</small></div></td>
+            <td data-label="價格" class="mono val"><b>$397.21</b></td>
+            <td data-label="漲跌" class="mono val text-red">-2.17%</td>
+            <td data-label="聯動預測">
                 <span class="badge badge-red">看跌</span>
-                <div class="tw-stocks">台積電、鴻海、貿聯-KY</div>
-            </div>
-        </td>
-      </tr>
-      <tr>
-        <td data-label="標的">
-          <div class="market-cell">
-            <div class="m-img-placeholder">N</div>
-            <div>
-              <div class="question-link">NVIDIA Corporation</div>
-              <div class="slug-text">NVDA</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val highlight" data-label="最新價">$171.88</td>
-        <td class="mono val text-red" data-label="漲跌幅">-1.33%</td>
-        <td class="news-cell" data-label="動態分析">
-            <div class="news-title">Big Tech CEOs seek to quell AI worries hammering software stocks</div>
-            <div class="impact-text">影響：AI 概念股回檔</div>
-        </td>
-        <td class="val" data-label="台股聯動">
-            <div class="prediction-box">
+                <div class="tw-text">台積電、鴻海、貿聯-KY</div>
+                <div class="imp-text">電動車需求趨勢</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>NVDA</b><br><small>NVIDIA Corporation</small></div></td>
+            <td data-label="價格" class="mono val"><b>$171.88</b></td>
+            <td data-label="漲跌" class="mono val text-red">-1.33%</td>
+            <td data-label="聯動預測">
                 <span class="badge badge-red">看跌</span>
-                <div class="tw-stocks">台積電、廣達、技嘉</div>
-            </div>
-        </td>
-      </tr>
-      <tr>
-        <td data-label="標的">
-          <div class="market-cell">
-            <div class="m-img-placeholder">A</div>
-            <div>
-              <div class="question-link">Apple Inc.</div>
-              <div class="slug-text">AAPL</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val highlight" data-label="最新價">$275.91</td>
-        <td class="mono val text-red" data-label="漲跌幅">-0.21%</td>
-        <td class="news-cell" data-label="動態分析">
-            <div class="news-title">What Alphabet's earnings reveal about the decline in software stocks</div>
-            <div class="impact-text">影響：蘋概股拉貨動能</div>
-        </td>
-        <td class="val" data-label="台股聯動">
-            <div class="prediction-box">
+                <div class="tw-text">台積電、廣達、技嘉</div>
+                <div class="imp-text">AI 伺服器需求</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>AAPL</b><br><small>Apple Inc.</small></div></td>
+            <td data-label="價格" class="mono val"><b>$275.91</b></td>
+            <td data-label="漲跌" class="mono val text-red">-0.21%</td>
+            <td data-label="聯動預測">
                 <span class="badge badge-neutral">盤整</span>
-                <div class="tw-stocks">台積電、鴻海、大立光</div>
-            </div>
-        </td>
-      </tr>
-      <tr>
-        <td data-label="標的">
-          <div class="market-cell">
-            <div class="m-img-placeholder">M</div>
-            <div>
-              <div class="question-link">Microsoft Corporation</div>
-              <div class="slug-text">MSFT</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val highlight" data-label="最新價">$393.67</td>
-        <td class="mono val text-red" data-label="漲跌幅">-4.95%</td>
-        <td class="news-cell" data-label="動態分析">
-            <div class="news-title">Amazon plans $200B AI spending surge, sinking stock</div>
-            <div class="impact-text">影響：市場觀望</div>
-        </td>
-        <td class="val" data-label="台股聯動">
-            <div class="prediction-box">
+                <div class="tw-text">待分析</div>
+                <div class="imp-text">市場觀望</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>MSFT</b><br><small>Microsoft Corporation</small></div></td>
+            <td data-label="價格" class="mono val"><b>$393.67</b></td>
+            <td data-label="漲跌" class="mono val text-red">-4.95%</td>
+            <td data-label="聯動預測">
                 <span class="badge badge-neutral">盤整</span>
-                <div class="tw-stocks">待分析</div>
-            </div>
-        </td>
-      </tr>
-      <tr>
-        <td data-label="標的">
-          <div class="market-cell">
-            <div class="m-img-placeholder">A</div>
-            <div>
-              <div class="question-link">Amazon.com, Inc.</div>
-              <div class="slug-text">AMZN</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val highlight" data-label="最新價">$222.69</td>
-        <td class="mono val text-red" data-label="漲跌幅">-4.42%</td>
-        <td class="news-cell" data-label="動態分析">
-            <div class="news-title">Stock market today: Dow, S&P 500, Nasdaq futures plummet as Amazon's earnings flop set to deepen tech rout</div>
-            <div class="impact-text">影響：市場觀望</div>
-        </td>
-        <td class="val" data-label="台股聯動">
-            <div class="prediction-box">
+                <div class="tw-text">待分析</div>
+                <div class="imp-text">市場觀望</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>AMZN</b><br><small>Amazon.com, Inc.</small></div></td>
+            <td data-label="價格" class="mono val"><b>$222.69</b></td>
+            <td data-label="漲跌" class="mono val text-red">-4.42%</td>
+            <td data-label="聯動預測">
                 <span class="badge badge-neutral">盤整</span>
-                <div class="tw-stocks">待分析</div>
+                <div class="tw-text">待分析</div>
+                <div class="imp-text">市場觀望</div>
+            </td>
+        </tr></tbody>
+                </table>
             </div>
-        </td>
-      </tr></tbody>
-    </table></div></div>
-    <div id="poly-tab" class="tab-content"><iframe src="../../index.html" style="width:100%; height:600px; border:none;"></iframe></div>
-  </div>
-  <script>
-    function sw(t) {
-      document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
-      event.currentTarget.classList.add('active');
-      document.getElementById(t+'-tab').classList.add('active');
-    }
-  </script>
+        </div>
+        
+        <div id="t1" class="tab-content">
+            <div class="card">
+                <div class="meta">🟢 綠色標示代表潛在套利空間 (Total < 1.0)</div>
+                <table>
+                    <thead><tr><th>預測市場</th><th class="val">Yes</th><th class="val">No</th><th class="val">總價</th><th class="val">量</th></tr></thead>
+                    <tbody>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Who will win the 2024 Presidential Election?</div></td>
+            <td data-label="Yes 價格" class="mono val">$0.52</td>
+            <td data-label="No 價格" class="mono val">$0.48</td>
+            <td data-label="總價" class="mono val"><b>1.000</b></td>
+            <td data-label="成交量" class="val">542.1M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Fed interest rate cut in March?</div></td>
+            <td data-label="Yes 價格" class="mono val">$0.35</td>
+            <td data-label="No 價格" class="mono val">$0.65</td>
+            <td data-label="總價" class="mono val"><b>1.000</b></td>
+            <td data-label="成交量" class="val">12.4M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Bitcoin to hit $100k in 2026?</div></td>
+            <td data-label="Yes 價格" class="mono val">$0.68</td>
+            <td data-label="No 價格" class="mono val">$0.32</td>
+            <td data-label="總價" class="mono val"><b>1.000</b></td>
+            <td data-label="成交量" class="val">45.8M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Will TikTok be banned in the US?</div></td>
+            <td data-label="Yes 價格" class="mono val">$0.41</td>
+            <td data-label="No 價格" class="mono val">$0.59</td>
+            <td data-label="總價" class="mono val"><b>1.000</b></td>
+            <td data-label="成交量" class="val">8.2M</td>
+        </tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function sw(idx) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', i === idx);
+                document.getElementById('t'+i).classList.toggle('active', i === idx);
+            });
+        }
+    </script>
 </body>
 </html>
