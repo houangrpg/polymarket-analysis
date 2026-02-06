@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>OpenClaw 綜合面板 Pro</title>
+    <title>OpenClaw Pro - 綜合監控面板</title>
     <style>
         :root { --blue: #1a73e8; --bg: #f1f3f4; --border: #dadce0; --up: #137333; --down: #d93025; }
         body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: #202124; }
@@ -12,7 +12,7 @@
         .tab { flex: 1; text-align: center; padding: 14px; font-size: 14px; font-weight: 500; color: #5f6368; border-bottom: 3px solid transparent; }
         .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
         
-        .container { padding: 12px; max-width: 900px; margin: 0 auto; }
+        .container { padding: 12px; max-width: 950px; margin: 0 auto; }
         .tab-content { display: none; } .tab-content.active { display: block; }
         .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .meta { padding: 10px 16px; background: #fafafa; font-size: 12px; color: #70757a; border-bottom: 1px solid var(--border); }
@@ -47,7 +47,7 @@
     <div class="header">
         <div class="header-top">
             <div style="font-weight: 700; color: var(--blue);">OPENCLAW PRO</div>
-            <div style="font-size: 12px; color: #70757a;">2026-02-06 12:58:07</div>
+            <div style="font-size: 12px; color: #70757a;">2026-02-06 13:01:28</div>
         </div>
         <div class="tabs">
             <div class="tab active" onclick="sw(0)">📈 美股台股</div>
@@ -58,6 +58,7 @@
     <div class="container">
         <div id="t0" class="tab-content active">
             <div class="card">
+                <div class="meta">💡 已監控 10+ 檔美股半導體與科技巨頭標的</div>
                 <table>
                     <thead><tr><th>標的</th><th class="val">價格</th><th class="val">漲跌</th><th>聯動預測</th></tr></thead>
                     <tbody>
@@ -77,8 +78,8 @@
             <td data-label="漲跌" class="mono val text-red">-1.33%</td>
             <td data-label="聯動預測">
                 <span class="badge badge-red">看跌</span>
-                <div class="tw-text">台積電、廣達、技嘉</div>
-                <div class="imp-text">AI 概念股回檔</div>
+                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
+                <div class="imp-text">半導體族群回檔</div>
             </td>
         </tr>
         <tr>
@@ -87,8 +88,8 @@
             <td data-label="漲跌" class="mono val text-red">-0.21%</td>
             <td data-label="聯動預測">
                 <span class="badge badge-neutral">盤整</span>
-                <div class="tw-text">台積電、鴻海、大立光</div>
-                <div class="imp-text">蘋概股拉貨動能</div>
+                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
+                <div class="imp-text">科技股高檔震盪</div>
             </td>
         </tr>
         <tr>
@@ -97,8 +98,8 @@
             <td data-label="漲跌" class="mono val text-red">-4.95%</td>
             <td data-label="聯動預測">
                 <span class="badge badge-neutral">盤整</span>
-                <div class="tw-text">待分析</div>
-                <div class="imp-text">市場觀望</div>
+                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
+                <div class="imp-text">科技股高檔震盪</div>
             </td>
         </tr>
         <tr>
@@ -107,8 +108,68 @@
             <td data-label="漲跌" class="mono val text-red">-4.42%</td>
             <td data-label="聯動預測">
                 <span class="badge badge-neutral">盤整</span>
-                <div class="tw-text">待分析</div>
-                <div class="imp-text">市場觀望</div>
+                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
+                <div class="imp-text">科技股高檔震盪</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>GOOGL</b><br><small>Alphabet Inc.</small></div></td>
+            <td data-label="價格" class="mono val"><b>$331.25</b></td>
+            <td data-label="漲跌" class="mono val text-red">-0.54%</td>
+            <td data-label="聯動預測">
+                <span class="badge badge-neutral">盤整</span>
+                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
+                <div class="imp-text">科技股高檔震盪</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>META</b><br><small>Meta Platforms, Inc.</small></div></td>
+            <td data-label="價格" class="mono val"><b>$670.21</b></td>
+            <td data-label="漲跌" class="mono val text-green">+0.18%</td>
+            <td data-label="聯動預測">
+                <span class="badge badge-neutral">盤整</span>
+                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
+                <div class="imp-text">科技股高檔震盪</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>AVGO</b><br><small>Broadcom Inc.</small></div></td>
+            <td data-label="價格" class="mono val"><b>$310.51</b></td>
+            <td data-label="漲跌" class="mono val text-green">+0.80%</td>
+            <td data-label="聯動預測">
+                <span class="badge badge-neutral">盤整</span>
+                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
+                <div class="imp-text">半導體族群回檔</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>TSM</b><br><small>Taiwan Semiconductor Manufacturing Company Limited</small></div></td>
+            <td data-label="價格" class="mono val"><b>$330.73</b></td>
+            <td data-label="漲跌" class="mono val text-green">+1.53%</td>
+            <td data-label="聯動預測">
+                <span class="badge badge-bull">看漲</span>
+                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
+                <div class="imp-text">AI 半導體需求強勁</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>ASML</b><br><small>ASML Holding N.V.</small></div></td>
+            <td data-label="價格" class="mono val"><b>$1350.16</b></td>
+            <td data-label="漲跌" class="mono val text-green">+0.82%</td>
+            <td data-label="聯動預測">
+                <span class="badge badge-neutral">盤整</span>
+                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
+                <div class="imp-text">半導體族群回檔</div>
+            </td>
+        </tr>
+        <tr>
+            <td data-label="標的"><div class="m-cell"><b>ARM</b><br><small>Arm Holdings plc</small></div></td>
+            <td data-label="價格" class="mono val"><b>$110.88</b></td>
+            <td data-label="漲跌" class="mono val text-green">+5.70%</td>
+            <td data-label="聯動預測">
+                <span class="badge badge-bull">看漲</span>
+                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
+                <div class="imp-text">AI 半導體需求強勁</div>
             </td>
         </tr></tbody>
                 </table>
@@ -117,7 +178,7 @@
         
         <div id="t1" class="tab-content">
             <div class="card">
-                <div class="meta">🎯 已同步 Polymarket Top 20 熱門市場 (綠色為套利機會)</div>
+                <div class="meta">🔥 已依據「套利機會 (Bundle < 1.0)」由高至低自動排序</div>
                 <table>
                     <thead><tr><th>預測市場</th><th class="val">Yes</th><th class="val">No</th><th class="val">總價</th><th class="val">量</th></tr></thead>
                     <tbody>
@@ -143,10 +204,17 @@
             <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
-            <td data-label="預測市場"><div class="q-text">Will Trump nominate no one before 2027?</div></td>
-            <td data-label="Yes" class="mono val">0.001</td>
-            <td data-label="No" class="mono val">-</td>
-            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="預測市場"><div class="q-text">US strikes Iran by February 5, 2026?</div></td>
+            <td data-label="Yes" class="mono val">0.002</td>
+            <td data-label="No" class="mono val">0.999</td>
+            <td data-label="總價" class="mono val"><b>1.001</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Will Trump nominate Kevin Warsh as the next Fed chair?</div></td>
+            <td data-label="Yes" class="mono val">0.951</td>
+            <td data-label="No" class="mono val">0.051</td>
+            <td data-label="總價" class="mono val"><b>1.002</b></td>
             <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
@@ -157,17 +225,24 @@
             <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
-            <td data-label="預測市場"><div class="q-text">US strikes Iran by February 5, 2026?</div></td>
-            <td data-label="Yes" class="mono val">0.002</td>
-            <td data-label="No" class="mono val">0.999</td>
-            <td data-label="總價" class="mono val"><b>1.001</b></td>
-            <td data-label="成交量" class="val">M</td>
-        </tr>
-        <tr class="">
             <td data-label="預測市場"><div class="q-text">Will the Fed decrease interest rates by 25 bps after the March 2026 meeting?</div></td>
             <td data-label="Yes" class="mono val">0.170</td>
             <td data-label="No" class="mono val">0.840</td>
             <td data-label="總價" class="mono val"><b>1.010</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Kings vs. Golden Knights</div></td>
+            <td data-label="Yes" class="mono val">0.059</td>
+            <td data-label="No" class="mono val">0.956</td>
+            <td data-label="總價" class="mono val"><b>1.015</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Will Trump nominate no one before 2027?</div></td>
+            <td data-label="Yes" class="mono val">0.001</td>
+            <td data-label="No" class="mono val">-</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
             <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
@@ -185,24 +260,10 @@
             <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
-            <td data-label="預測市場"><div class="q-text">Kings vs. Golden Knights</div></td>
-            <td data-label="Yes" class="mono val">0.059</td>
-            <td data-label="No" class="mono val">0.956</td>
-            <td data-label="總價" class="mono val"><b>1.015</b></td>
-            <td data-label="成交量" class="val">M</td>
-        </tr>
-        <tr class="">
             <td data-label="預測市場"><div class="q-text">Panthers vs. Lightning</div></td>
             <td data-label="Yes" class="mono val">0.001</td>
             <td data-label="No" class="mono val">-</td>
             <td data-label="總價" class="mono val"><b>-</b></td>
-            <td data-label="成交量" class="val">M</td>
-        </tr>
-        <tr class="">
-            <td data-label="預測市場"><div class="q-text">Will Trump nominate Kevin Warsh as the next Fed chair?</div></td>
-            <td data-label="Yes" class="mono val">0.951</td>
-            <td data-label="No" class="mono val">0.051</td>
-            <td data-label="總價" class="mono val"><b>1.002</b></td>
             <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
