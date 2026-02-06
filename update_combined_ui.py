@@ -148,23 +148,26 @@ def generate_dashboard():
     tw_ticker_map = dict(zip(names, ticker_results))
 
     for ts, counts in sorted_tw:
-        price_str = "-"
+        price_now = "-"
+        price_prev = "-"
         ticker = tw_ticker_map.get(ts)
         if ticker:
             try:
                 t_data = yf.Ticker(ticker)
-                # 獲取最新收盤價 (如果盤中則為即時價)
-                info = t_data.info
-                p = info.get('regularMarketPrice') or info.get('currentPrice')
-                if p:
-                    price_str = f"${p:.2f}"
+                # 獲取最新與昨日價格
+                # 為了穩定獲取昨日收盤，使用 history
+                hist = t_data.history(period="2d")
+                if len(hist) >= 1:
+                    price_prev = f"${hist['Close'].iloc[0]:.2f}"
+                    price_now = f"${hist['Close'].iloc[-1]:.2f}"
             except: pass
 
         score_cls = 'text-green' if counts['bull'] > counts['bear'] else ('text-red' if counts['bear'] > counts['bull'] else '')
         tw_html += f'''
         <tr>
             <td data-label="台股標的"><b>{ts}</b></td>
-            <td data-label="昨收價" class="mono val">{price_str}</td>
+            <td data-label="現價" class="mono val"><b>{price_now}</b></td>
+            <td data-label="昨收" class="mono val">{price_prev}</td>
             <td data-label="看漲次數" class="mono val text-green">{counts['bull']}</td>
             <td data-label="看跌次數" class="mono val text-red">{counts['bear']}</td>
             <td data-label="綜合情緒" class="val"><b class="{score_cls}">{'偏多' if counts['bull']>counts['bear'] else ('偏空' if counts['bear']>counts['bull'] else '中性')}</b></td>
@@ -286,7 +289,7 @@ def generate_dashboard():
 
         <!-- Tab 2: TW Forecast -->
         <div id="t2" class="tab-content"><div class="card"><table>
-            <thead><tr><th>台股標的</th><th class="val">昨收價</th><th class="val">看漲次數</th><th class="val">看跌次數</th><th class="val">綜合情緒</th></tr></thead>
+            <thead><tr><th>台股標的</th><th class="val">現價</th><th class="val">昨收</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
             <tbody>{tw_html}</tbody>
         </table></div></div>
     </div>
