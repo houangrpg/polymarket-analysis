@@ -286,9 +286,10 @@ def generate_dashboard():
             <td data-label="綜合情緒" class="val"><b class="{score_cls}">{sentiment}</b></td>
         </tr>'''
 
-    acc_rate = (correct_forecasts / total_forecasts * 100) if total_forecasts > 0 else 0
+    # --- 統計準確度 (當天結算邏輯) ---
+    today_str = time.strftime('%Y-%m-%d', time.localtime())
     
-    # 保存歷史紀錄
+    # 讀取現有的歷史紀錄
     history = []
     try:
         log_file = 'prediction_history.json'
@@ -296,11 +297,26 @@ def generate_dashboard():
             with open(log_file, 'r') as f:
                 content = f.read()
                 if content: history = json.loads(content)
-        
-        # 避免同日重複紀錄（以日期為 key，更新當日最新的準確率）
-        today_str = time.strftime('%Y-%m-%d', time.localtime())
-        history = [h for h in history if h.get('date') != today_str]
-        
+    except: pass
+
+    # 過濾掉「非今日」的累積數據，只保留歷史每天的結算點
+    # 歷史紀錄中：每一筆應該代表一天的最終結果
+    
+    # 計算「當下」的準確率
+    acc_rate = (correct_forecasts / total_forecasts * 100) if total_forecasts > 0 else 0
+    
+    # 更新歷史紀錄：
+    # 1. 如果歷史最後一筆是今天，則更新它（代表當天還在跳動）
+    # 2. 如果最後一筆是昨天，則新增一筆今天的
+    if history and history[-1].get('date') == today_str:
+        history[-1] = {
+            'date': today_str,
+            'time': updated_at,
+            'accuracy': round(acc_rate, 1),
+            'correct': correct_forecasts,
+            'total': total_forecasts
+        }
+    else:
         history.append({
             'date': today_str,
             'time': updated_at,
@@ -308,17 +324,21 @@ def generate_dashboard():
             'correct': correct_forecasts,
             'total': total_forecasts
         })
-        # 保留最近 60 筆
-        history = history[-60:]
+
+    # 保留最近 60 筆歷史（天）
+    history = history[-60:]
+    try:
         with open(log_file, 'w') as f: json.dump(history, f, indent=2)
     except: pass
 
     # 生成歷史記錄 HTML
     history_rows = ""
+    # 累積 PK 依然是所有歷史天數的總和
     total_correct_all = sum(h['correct'] for h in history)
     total_forecasts_all = sum(h['total'] for h in history)
     
     for h in reversed(history):
+        # 顯示每一天的獨立戰果
         history_rows += f"<tr><td>{h['date']}</td><td class='val'>{h['accuracy']}%</td><td class='val'>{h['correct']}/{h['total']}</td></tr>"
 
     accuracy_html = f'''
