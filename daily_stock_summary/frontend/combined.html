@@ -1,343 +1,64 @@
 <!doctype html>
 <html lang="zh-TW">
 <head>
-    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>JoeClowAI - 實時監控</title>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>JoeClowAI - 監控</title>
     <style>
-        :root { --blue: #1a73e8; --bg: #f1f3f4; --border: #dadce0; --up: #137333; --down: #d93025; }
-        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: #202124; }
-        .header { background: white; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        .header-top { padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; }
-        .tabs { display: flex; background: white; }
-        .tab { flex: 1; text-align: center; padding: 14px; font-size: 14px; font-weight: 500; color: #5f6368; border-bottom: 3px solid transparent; }
-        .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
-        .container { padding: 12px; max-width: 950px; margin: 0 auto; }
-        .tab-content { display: none; } .tab-content.active { display: block; }
-        .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8f9fa; padding: 12px; text-align: left; font-size: 11px; color: #5f6368; border-bottom: 1px solid var(--border); }
-        td { padding: 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        .val { text-align: right; } .mono { font-family: "SF Mono", monospace; }
-        .text-green { color: var(--up); font-weight: 600; } .text-red { color: var(--down); font-weight: 600; }
-        .badge { padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
-        .badge-bull { background: #e6f4ea; color: #137333; }
-        .badge-red { background: #fce8e6; color: #d93025; }
-        .badge-neutral { background: #f1f3f4; color: #3c4043; }
-        .tw-text { font-size: 12px; font-weight: 600; margin-top: 4px; }
-        .imp-text { font-size: 11px; color: var(--blue); }
-        .opp-highlight { background-color: #e6f4ea; }
-        .q-text { font-weight: 500; color: #1a0dab; }
-        @media (max-width: 600px) {
-            th { display: none; }
-            td { display: block; padding: 10px 16px; border: none; text-align: right; }
-            td:before { content: attr(data-label); float: left; font-size: 12px; color: #70757a; font-weight: 600; }
-            tr { display: block; border-bottom: 8px solid var(--bg); }
-            td[data-label="標的"], td[data-label="預測市場"] { text-align: left; background: #f8f9fa; }
-            td[data-label="標的"]:before, td[data-label="預測市場"]:before { content: ""; }
-        }
+        :root { --blue:#1a73e8; --bg:#f1f3f4; --up:#137333; --down:#d93025; }
+        body { font-family:sans-serif; margin:0; background:var(--bg); }
+        .header { background:white; border-bottom:1px solid #dadce0; position:sticky; top:0; z-index:100; }
+        .tabs { display:flex; } .tab { flex:1; text-align:center; padding:14px; color:#5f6368; border-bottom:3px solid transparent; cursor:pointer; }
+        .tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+        .container { padding:12px; max-width:900px; margin:0 auto; }
+        .card { background:white; border-radius:12px; border:1px solid #dadce0; margin-bottom:20px; overflow:hidden; }
+        table { width:100%; border-collapse:collapse; } td, th { padding:12px; border-bottom:1px solid #eee; font-size:14px; }
+        .val { text-align:right; } .text-green { color:var(--up); } .text-red { color:var(--down); }
+        .tab-content { display:none; } .tab-content.active { display:block; }
+        @media (max-width:600px) { td { display:block; text-align:right; } td:before { content:attr(data-label); float:left; color:#70757a; } }
     </style>
 </head>
 <body onload="checkReload()">
-    
-    <script>
-        // 定義需要監控的標的清單
-        const STOCKS = {
-            "US": ["NVDA", "AAPL", "TSLA", "MSFT", "GOOGL", "AMZN", "META", "AVGO", "SMCI"],
-            "TW": ["2330.TW", "2317.TW", "2454.TW", "2382.TW", "2308.TW", "3008.TW", "2303.TW", "2412.TW"]
-        };
-
-        async function updatePrices() {
-            try {
-                // 使用 Yahoo Finance Query API (前端可用的 CORS proxy 或公開介面)
-                // 為了穩定性，這裡使用一個輕量化的彙整邏輯
-                for (const symbol of [...STOCKS.US, ...STOCKS.TW]) {
-                    // 模擬實時抓取邏輯 (實際部署時可對接特定的 Finance API)
-                    // 這裡先實作 UI 閃爍與動態更新的框架
-                    const cells = document.querySelectorAll(`[data-symbol="${symbol}"]`);
-                    cells.forEach(cell => {
-                        // 這裡未來可對接即時 API 數據
-                        // cell.classList.add('updating');
-                        // setTimeout(() => cell.classList.remove('updating'), 500);
-                    });
-                }
-            } catch (e) { console.error("Price update failed", e); }
-        }
-        
-        // 每 15 秒更新一次前端報價 (不經過 GitHub)
-        // setInterval(updatePrices, 15000);
-    </script>
-    <style>
-        .updating { background-color: rgba(26, 115, 232, 0.1); transition: background 0.3s; }
-    </style>
-    
-    <script>
-        function sw(idx){
-            document.querySelectorAll('.tab').forEach((t, i) => {
-                t.classList.toggle('active', i === idx);
-                document.getElementById('t'+i).classList.toggle('active', i === idx);
-            });
-            localStorage.setItem('activeTab', idx);
-        }
-        function checkReload() {
-            const savedTab = localStorage.getItem('activeTab');
-            if (savedTab !== null) sw(parseInt(savedTab));
-            // 每 60 秒刷新一次 (後台同步數據)
-            setInterval(() => { 
-                const url = new URL(window.location.href);
-                url.searchParams.set('t', Date.now());
-                window.location.href = url.href;
-            }, 60000);
-        }
-    </script>
     <div class="header">
-        <div class="header-top"><div style="font-weight:700; color:var(--blue);">JoeClowAI</div><div style="font-size:12px; color:#70757a;">更新時間: 2026-02-07 04:27:16</div></div>
+        <div style="padding:10px 16px; font-weight:700; color:var(--blue);">JoeClowAI <span style="font-size:10px; color:#999; font-weight:400;">2026-02-07 04:38:00</span></div>
         <div class="tabs">
-            <div class="tab" onclick="sw(0)">🔮 套利</div>
+            <div class="tab active" onclick="sw(0)">🔮 套利</div>
             <div class="tab" onclick="sw(1)">📈 美股</div>
             <div class="tab" onclick="sw(2)">🇹🇼 台股預測</div>
         </div>
     </div>
     <div class="container">
-        <!-- Tab 0: Polymarket -->
-        <div id="t0" class="tab-content active"><div class="card"><table>
-            <thead><tr><th>預測市場</th><th class="val">Yes / No Ask</th><th class="val">總價</th><th class="val">獲利 (Edge)</th><th class="val">成交量</th></tr></thead>
-            <tbody><tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr><tr><td colspan="5" style="background: #e8f0fe; color: #1a73e8; font-size: 12px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid var(--border);">📊 異常波動與潛在機會監測 (排除總價 ≈ 1.00)</td></tr><tr><td colspan="5" style="text-align:center; padding: 20px; color: #999;">(目前所有主流市場報價均趨於完美，無異常機會)</td></tr></tbody>
-        </table></div></div>
-        
-        <!-- Tab 1: US Stocks -->
-        <div id="t1" class="tab-content"><div class="card"><table>
-            <thead><tr><th>標的</th><th class="val">價格</th><th class="val">漲跌</th><th>聯動預測</th></tr></thead>
-            <tbody>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>TSLA</b><br><small>Tesla, Inc.</small></div></td>
-            <td data-label="價格" class="mono val"><b>$413.40</b></td>
-            <td data-label="漲跌" class="mono val text-green">+4.08%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-bull">看漲</span>
-                <div class="tw-text">台積電、鴻海、貿聯-KY</div>
-                <div class="imp-text">電動車供應鏈受惠</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>NVDA</b><br><small>NVIDIA Corporation</small></div></td>
-            <td data-label="價格" class="mono val"><b>$185.44</b></td>
-            <td data-label="漲跌" class="mono val text-green">+7.93%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-bull">看漲</span>
-                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
-                <div class="imp-text">AI 半導體需求強勁</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>AAPL</b><br><small>Apple Inc.</small></div></td>
-            <td data-label="價格" class="mono val"><b>$277.86</b></td>
-            <td data-label="漲跌" class="mono val text-green">+0.70%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-bull">看漲</span>
-                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
-                <div class="imp-text">大型科技股資本支出</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>MSFT</b><br><small>Microsoft Corporation</small></div></td>
-            <td data-label="價格" class="mono val"><b>$399.57</b></td>
-            <td data-label="漲跌" class="mono val text-green">+1.50%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-bull">看漲</span>
-                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
-                <div class="imp-text">大型科技股資本支出</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>AMZN</b><br><small>Amazon.com, Inc.</small></div></td>
-            <td data-label="價格" class="mono val"><b>$207.78</b></td>
-            <td data-label="漲跌" class="mono val text-red">-6.70%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-neutral">盤整</span>
-                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
-                <div class="imp-text">科技股高檔震盪</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>GOOGL</b><br><small>Alphabet Inc.</small></div></td>
-            <td data-label="價格" class="mono val"><b>$323.03</b></td>
-            <td data-label="漲跌" class="mono val text-red">-2.48%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-neutral">盤整</span>
-                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
-                <div class="imp-text">科技股高檔震盪</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>META</b><br><small>Meta Platforms, Inc.</small></div></td>
-            <td data-label="價格" class="mono val"><b>$660.79</b></td>
-            <td data-label="漲跌" class="mono val text-red">-1.40%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-neutral">盤整</span>
-                <div class="tw-text">台積電、鴻海、大立光、廣達</div>
-                <div class="imp-text">科技股高檔震盪</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>AVGO</b><br><small>Broadcom Inc.</small></div></td>
-            <td data-label="價格" class="mono val"><b>$333.10</b></td>
-            <td data-label="漲跌" class="mono val text-green">+7.28%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-bull">看漲</span>
-                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
-                <div class="imp-text">AI 半導體需求強勁</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>TSM</b><br><small>Taiwan Semiconductor Manufacturing Company Limited</small></div></td>
-            <td data-label="價格" class="mono val"><b>$348.92</b></td>
-            <td data-label="漲跌" class="mono val text-green">+5.50%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-bull">看漲</span>
-                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
-                <div class="imp-text">AI 半導體需求強勁</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>ASML</b><br><small>ASML Holding N.V.</small></div></td>
-            <td data-label="價格" class="mono val"><b>$1413.18</b></td>
-            <td data-label="漲跌" class="mono val text-green">+4.67%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-bull">看漲</span>
-                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
-                <div class="imp-text">AI 半導體需求強勁</div>
-            </td>
-        </tr>
-        <tr>
-            <td data-label="標的"><div class="m-cell"><b>ARM</b><br><small>Arm Holdings plc</small></div></td>
-            <td data-label="價格" class="mono val"><b>$123.72</b></td>
-            <td data-label="漲跌" class="mono val text-green">+11.58%</td>
-            <td data-label="聯動預測">
-                <span class="badge badge-bull">看漲</span>
-                <div class="tw-text">台積電、廣達、技嘉、世芯-KY</div>
-                <div class="imp-text">AI 半導體需求強勁</div>
-            </td>
-        </tr></tbody>
-        </table></div></div>
-
-        <!-- Tab 2: TW Forecast -->
+        <div id="t0" class="tab-content active"><div class="card"><table><tr><td colspan="5" style="text-align:center; background:#fff3e0; color:#e65100; padding:10px;">⚠️ 暫無即時套利空間</td></tr><tr><td colspan="5" style="background:#e8f0fe; color:#1a73e8; font-weight:700; padding:8px 12px;">📊 異常波動監測</td></tr></table></div></div>
+        <div id="t1" class="tab-content"><div class="card"><table><tr><td><b>TSLA</b><br><small>Tesla, Inc.</small></td><td class="val"><b>$413.79</b></td><td class="val text-green">+4.17%</td><td><span class="badge">預測:看漲</span><br><small>台積電、鴻海、貿聯-KY</small></td></tr><tr><td><b>NVDA</b><br><small>NVIDIA Corporation</small></td><td class="val"><b>$185.51</b></td><td class="val text-green">+7.98%</td><td><span class="badge">預測:看漲</span><br><small>台積電、廣達、技嘉、世芯-KY</small></td></tr><tr><td><b>AAPL</b><br><small>Apple Inc.</small></td><td class="val"><b>$277.77</b></td><td class="val text-green">+0.67%</td><td><span class="badge">預測:看漲</span><br><small>台積電、鴻海、大立光、廣達</small></td></tr><tr><td><b>MSFT</b><br><small>Microsoft Corporation</small></td><td class="val"><b>$399.62</b></td><td class="val text-green">+1.51%</td><td><span class="badge">預測:看漲</span><br><small>台積電、鴻海、大立光、廣達</small></td></tr><tr><td><b>AMZN</b><br><small>Amazon.com, Inc.</small></td><td class="val"><b>$208.38</b></td><td class="val text-red">-6.43%</td><td><span class="badge">預測:盤整</span><br><small>台積電、鴻海、大立光、廣達</small></td></tr><tr><td><b>GOOGL</b><br><small>Alphabet Inc.</small></td><td class="val"><b>$322.39</b></td><td class="val text-red">-2.67%</td><td><span class="badge">預測:盤整</span><br><small>台積電、鴻海、大立光、廣達</small></td></tr><tr><td><b>META</b><br><small>Meta Platforms, Inc.</small></td><td class="val"><b>$659.60</b></td><td class="val text-red">-1.58%</td><td><span class="badge">預測:盤整</span><br><small>台積電、鴻海、大立光、廣達</small></td></tr><tr><td><b>AVGO</b><br><small>Broadcom Inc.</small></td><td class="val"><b>$333.14</b></td><td class="val text-green">+7.29%</td><td><span class="badge">預測:看漲</span><br><small>台積電、廣達、技嘉、世芯-KY</small></td></tr><tr><td><b>TSM</b><br><small>Taiwan Semiconductor Manufacturing Company Limited</small></td><td class="val"><b>$349.32</b></td><td class="val text-green">+5.62%</td><td><span class="badge">預測:看漲</span><br><small>台積電、廣達、技嘉、世芯-KY</small></td></tr><tr><td><b>ASML</b><br><small>ASML Holding N.V.</small></td><td class="val"><b>$1412.99</b></td><td class="val text-green">+4.65%</td><td><span class="badge">預測:看漲</span><br><small>台積電、廣達、技嘉、世芯-KY</small></td></tr><tr><td><b>ARM</b><br><small>Arm Holdings plc</small></td><td class="val"><b>$124.00</b></td><td class="val text-green">+11.83%</td><td><span class="badge">預測:看漲</span><br><small>台積電、廣達、技嘉、世芯-KY</small></td></tr></table></div></div>
         <div id="t2" class="tab-content">
-            
-    <div class="card" style="padding: 16px; background: #e8f0fe; border-left: 5px solid var(--blue); margin-bottom: 20px; position: relative;">
-        <div style="font-size: 12px; color: #5f6368; font-weight: 600;">今日預測準確度分析</div>
-        <div id="accuracy-main" style="display: flex; align-items: baseline; gap: 10px; margin-top: 8px;">
-            <span style="font-size: 32px; font-weight: 800; color: var(--blue);">71.4%</span>
-            <span style="font-size: 14px; color: #70757a;">(5 / 7 命中)</span>
+    <div class="card" style="padding:16px; background:#e8f0fe; border-left:5px solid #1a73e8; margin-bottom:20px; position:relative;">
+        <div style="font-size:12px; color:#5f6368; font-weight:600;">今日預測準確度分析</div>
+        <div style="display:none; align-items:baseline; gap:10px; margin-top:8px;">
+            <span style="font-size:32px; font-weight:800; color:#1a73e8;">0.0%</span>
+            <span style="font-size:14px; color:#70757a;">(0/0 命中)</span>
         </div>
-        <div id="accuracy-waiting" style="display: none; margin-top: 8px; font-size: 16px; color: #70757a; font-weight: 500;">
-            ⏳ 台股尚未開盤，等待市場驗證預測...
-        </div>
-        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 僅在台股開盤且有價格跳動時計算</div>
-        <div onclick="toggleHistory()" style="position: absolute; right: 16px; top: 16px; cursor: pointer; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #ddd;">ℹ️</div>
-        
-        <div id="history-panel" style="display:none; margin-top: 16px; border-top: 1px solid #d2e3fc; padding-top: 16px;">
-            <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
-                <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px;">累積預測對決 (PK)</div>
-                <div style="height: 24px; background: #fce8e6; border-radius: 12px; overflow: hidden; display: flex; position: relative;">
-                    <div style="width: 60.0%; background: #e6f4ea; height: 100%; display: flex; align-items: center; padding-left: 10px; color: #137333; font-size: 11px; font-weight: 700; transition: width 0.5s;">正確: 3</div>
-                    <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: #d93025; font-size: 11px; font-weight: 700;">錯誤: 2</div>
+        <div style="display:block; margin-top:8px; font-size:16px; color:#70757a;">⏳ 等待台股開盤驗證預測...</div>
+        <div onclick="toggleHistory()" style="position:absolute; right:16px; top:16px; cursor:pointer; background:white; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1px solid #ddd;">ℹ️</div>
+        <div id="history-panel" style="display:none; margin-top:16px; border-top:1px solid #d2e3fc; padding-top:16px;">
+            <div style="background:white; border-radius:8px; padding:10px; margin-bottom:10px;">
+                <div style="font-size:11px; font-weight:700;">累積 PK</div>
+                <div style="height:20px; background:#fce8e6; border-radius:10px; overflow:hidden; display:flex;">
+                    <div style="width:60.0%; background:#e6f4ea; color:#137333; font-size:10px; padding-left:8px;">正確:3</div>
                 </div>
             </div>
-            <table style="width: 100%; font-size: 12px;">
-                <thead><tr style="background: transparent;"><th style="padding: 4px 0;">日期</th><th class="val" style="padding: 4px 0;">準確率</th><th class="val" style="padding: 4px 0;">命中</th></tr></thead>
-                <tbody><tr><td>2026-02-06</td><td class='val'>60.0%</td><td class='val'>3/5</td></tr></tbody>
-            </table>
+            <table style="width:100%; font-size:12px;"><tr><td>2026-02-06</td><td class='val'>60.0%</td><td class='val'>3/5</td></tr></table>
         </div>
+    </div><div class="card"><table><tr><td><b>台積電 </b></td><td class="val"><small>昨收:$1765.00</small><br><b>現價:$1780.00</b></td><td class="val text-green">8</td><td class="val text-red">0</td><td class="val"><b>偏多</b></td></tr><tr><td><b>廣達 </b></td><td class="val"><small>昨收:$273.00</small><br><b>現價:$279.50</b></td><td class="val text-green">7</td><td class="val text-red">0</td><td class="val"><b>偏多</b></td></tr><tr><td><b>技嘉 </b></td><td class="val"><small>昨收:$226.00</small><br><b>現價:$227.50</b></td><td class="val text-green">5</td><td class="val text-red">0</td><td class="val"><b>偏多</b></td></tr><tr><td><b>世芯-KY </b></td><td class="val"><small>昨收:$3245.00</small><br><b>現價:$3115.00</b></td><td class="val text-green">5</td><td class="val text-red">0</td><td class="val"><b>偏多</b></td></tr><tr><td><b>鴻海 </b></td><td class="val"><small>昨收:$215.50</small><br><b>現價:$215.00</b></td><td class="val text-green">3</td><td class="val text-red">0</td><td class="val"><b>偏多</b></td></tr><tr><td><b>大立光 </b></td><td class="val"><small>昨收:$2300.00</small><br><b>現價:$2330.00</b></td><td class="val text-green">2</td><td class="val text-red">0</td><td class="val"><b>偏多</b></td></tr><tr><td><b>貿聯-KY </b></td><td class="val"><small>昨收:$1260.00</small><br><b>現價:$1285.00</b></td><td class="val text-green">1</td><td class="val text-red">0</td><td class="val"><b>偏多</b></td></tr></table></div></div>
     </div>
     <script>
-        function toggleHistory() {
-            const p = document.getElementById('history-panel');
-            p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        function sw(idx){
+            document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === idx));
+            document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === idx));
+            localStorage.setItem('tab', idx);
         }
+        function checkReload() {
+            const t = localStorage.getItem('tab'); if(t) sw(parseInt(t));
+            setInterval(() => { location.href = location.pathname + "?t=" + Date.now(); }, 60000);
+        }
+        function toggleHistory() { const p = document.getElementById('history-panel'); p.style.display = p.style.display === 'none' ? 'block' : 'none'; }
     </script>
-    
-            <div class="card"><table>
-                <thead><tr><th>台股標的</th><th class="val">價格對比 (昨收/現價)</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
-                <tbody>
-        <tr>
-            <td data-label="台股標的"><b>台積電 ✅</b></td>
-            <td data-label="價格歷史" class="mono val">
-                <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $1765.00</div>
-                <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $1780.00</div>
-            </td>
-            <td data-label="看漲" class="mono val text-green">8</td>
-            <td data-label="看跌" class="mono val text-red">0</td>
-            <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
-        </tr>
-        <tr>
-            <td data-label="台股標的"><b>廣達 ✅</b></td>
-            <td data-label="價格歷史" class="mono val">
-                <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $273.00</div>
-                <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $279.50</div>
-            </td>
-            <td data-label="看漲" class="mono val text-green">7</td>
-            <td data-label="看跌" class="mono val text-red">0</td>
-            <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
-        </tr>
-        <tr>
-            <td data-label="台股標的"><b>技嘉 ✅</b></td>
-            <td data-label="價格歷史" class="mono val">
-                <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $226.00</div>
-                <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $227.50</div>
-            </td>
-            <td data-label="看漲" class="mono val text-green">5</td>
-            <td data-label="看跌" class="mono val text-red">0</td>
-            <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
-        </tr>
-        <tr>
-            <td data-label="台股標的"><b>世芯-KY ❌</b></td>
-            <td data-label="價格歷史" class="mono val">
-                <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $3245.00</div>
-                <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $3115.00</div>
-            </td>
-            <td data-label="看漲" class="mono val text-green">5</td>
-            <td data-label="看跌" class="mono val text-red">0</td>
-            <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
-        </tr>
-        <tr>
-            <td data-label="台股標的"><b>鴻海 ❌</b></td>
-            <td data-label="價格歷史" class="mono val">
-                <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $215.50</div>
-                <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $215.00</div>
-            </td>
-            <td data-label="看漲" class="mono val text-green">3</td>
-            <td data-label="看跌" class="mono val text-red">0</td>
-            <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
-        </tr>
-        <tr>
-            <td data-label="台股標的"><b>大立光 ✅</b></td>
-            <td data-label="價格歷史" class="mono val">
-                <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $2300.00</div>
-                <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $2330.00</div>
-            </td>
-            <td data-label="看漲" class="mono val text-green">2</td>
-            <td data-label="看跌" class="mono val text-red">0</td>
-            <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
-        </tr>
-        <tr>
-            <td data-label="台股標的"><b>貿聯-KY ✅</b></td>
-            <td data-label="價格歷史" class="mono val">
-                <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $1260.00</div>
-                <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $1285.00</div>
-            </td>
-            <td data-label="看漲" class="mono val text-green">1</td>
-            <td data-label="看跌" class="mono val text-red">0</td>
-            <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
-        </tr></tbody>
-            </table></div>
-        </div>
-    </div>
-    <script>function sw(idx){
-        document.querySelectorAll('.tab').forEach((t, i) => {
-            t.classList.toggle('active', i === idx);
-            document.getElementById('t'+i).classList.toggle('active', i === idx);
-        });
-        localStorage.setItem('activeTab', idx);
-    }</script>
-</body>
-</html>
+</body></html>
