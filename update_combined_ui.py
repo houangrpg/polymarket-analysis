@@ -110,11 +110,8 @@ def fetch_polymarket_realtime():
                 res = future.result()
                 if res: results.append(res)
         
-        # 獲利優先排序
-        results.sort(key=lambda x: x['edge_val'], reverse=True)
-        # 過濾極端異常數據（如 Edge < -50%），只顯示具備參考價值的市場
-        results = [r for r in results if r['edge_val'] > -50]
-        return results[:20] # 取前 20 名
+        # 返回原始處理後的列表，交由 generate_dashboard 進行過濾與排序
+        return results
     except Exception as e:
         print(f"Polymarket fetch error: {e}")
         return []
@@ -125,9 +122,54 @@ def generate_dashboard():
     
     # 獲取即時數據
     stocks = fetch_stock_data()
-    poly_markets = fetch_polymarket_realtime()
+    raw_poly = fetch_polymarket_realtime()
     
-    # 計算台股預測統計
+    # 1. 篩選有套利機會的項目 (Edge > 0 且合理)
+    arbitrage_opps = [m for m in raw_poly if 0 < m['edge_val'] < 50]
+    arbitrage_opps.sort(key=lambda x: x['edge_val'], reverse=True)
+    
+    # 2. 篩選討論度最高 (成交量最高) 的熱門項目
+    # 先過濾掉明顯的極端異常數據，確保討論區呈現的是有意義的市場
+    filtered_hot = [m for m in raw_poly if m['edge_val'] > -50]
+    hot_markets = sorted(filtered_hot, key=lambda x: float(x['vol'].replace('K','')), reverse=True)
+    hot_markets = hot_markets[:10] # 取前 10 名
+
+    poly_markets = raw_poly # 兼容舊代碼引用
+    poly_html = ''
+    if not arbitrage_opps:
+        poly_html = '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
+        poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid var(--border);">🔥 熱門市場 (成交量 Top 10)</td></tr>'
+        for m in hot_markets:
+            poly_html += f'''
+            <tr>
+                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
+                <td data-label="總價" class="mono val">{m['bundle']}</td>
+                <td data-label="獲利 (Edge)" class="mono val"><b class="{'text-green' if m['edge_val']>0 else ''}">{m['edge']}</b></td>
+                <td data-label="成交量" class="val">{m['vol']}</td>
+            </tr>'''
+    else:
+        # 有套利機會時
+        for m in arbitrage_opps:
+            poly_html += f'''
+            <tr class="opp-highlight">
+                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
+                <td data-label="總價" class="mono val">{m['bundle']}</td>
+                <td data-label="獲利 (Edge)" class="mono val"><b class="text-green">{m['edge']}</b></td>
+                <td data-label="成交量" class="val">{m['vol']}</td>
+            </tr>'''
+        # 即使有套利，下方也附上熱門市場參考
+        poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">🔥 熱門市場 (成交量參考)</td></tr>'
+        for m in hot_markets[:5]: # 縮減為 5 筆避免過長
+            poly_html += f'''
+            <tr>
+                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
+                <td data-label="總價" class="mono val">{m['bundle']}</td>
+                <td data-label="獲利 (Edge)" class="mono val">{m['edge']}</td>
+                <td data-label="成交量" class="val">{m['vol']}</td>
+            </tr>'''
     tw_stats = {}
     for s in stocks:
         pred_type = s['pred'] # '看漲', '看跌', '盤整'
@@ -220,7 +262,9 @@ def generate_dashboard():
         log_file = 'prediction_history.json'
         history = []
         if os.path.exists(log_file):
-            with open(log_file, 'r') as f: history = json.load(f)
+            with open(log_file, 'r') as f:
+                content = f.read()
+                if content: history = json.loads(content)
         
         history.append({
             'date': time.strftime('%Y-%m-%d', time.localtime()),
