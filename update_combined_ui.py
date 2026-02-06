@@ -141,18 +141,19 @@ def generate_dashboard():
         except:
             return 0.0
 
-    # 過濾邏輯：總價與 1.0 的偏離度超過 0.5% (即 bundle < 0.995 或 bundle > 1.005)
-    # 這樣可以過濾掉報價太過「完美、無利可圖」的主流市場
+    # 過濾邏輯：
+    # 1. 總價與 1.0 的偏離度超過 0.5% (即 bundle < 0.995 或 bundle > 1.005)
+    # 2. 排除總價 > 1.05 的極端異常報價 (通常是流動性雜訊)
     opportunity_markets = [
         m for m in raw_poly 
-        if abs(1.0 - float(m['bundle'])) > 0.005
+        if abs(1.0 - float(m['bundle'])) > 0.005 and float(m['bundle']) <= 1.05
     ]
     
-    # 如果過濾後太少，稍微放寬偏離度到 0.2%
+    # 如果過濾後太少，稍微放寬偏離度到 0.2%，但堅持排除 > 1.05
     if len(opportunity_markets) < 5:
         opportunity_markets = [
             m for m in raw_poly 
-            if abs(1.0 - float(m['bundle'])) > 0.002
+            if abs(1.0 - float(m['bundle'])) > 0.002 and float(m['bundle']) <= 1.05
         ]
 
     # 按照成交量 (Volume) 排序，確保我們看的是有流動性的機會
@@ -168,18 +169,20 @@ def generate_dashboard():
 
     if not arbitrage_opps:
         poly_html += '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
-        poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid var(--border);">🔥 熱門市場 (成交量 Top 10)</td></tr>'
+        poly_html += '<tr><td colspan="5" style="background: #e8f0fe; color: #1a73e8; font-size: 12px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid var(--border);">📊 異常波動與潛在機會監測 (排除總價 ≈ 1.00 及 > 1.05)</td></tr>'
         if not hot_markets:
-            poly_html += '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #999;">(暫無熱門市場數據)</td></tr>'
+            poly_html += '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #999;">(目前所有主流市場報價均趨於完美，無異常機會)</td></tr>'
         else:
             for m in hot_markets:
                 link = f"https://polymarket.com/market/{m['slug']}" if m['slug'] else "#"
+                # 只有 Edge > 0 顯示綠色，否則顯示紅色 (代表總價 > 1)
+                edge_style = 'class="text-green"' if m['edge_val'] > 0 else 'style="color:#d93025; font-weight:400;"'
                 poly_html += f'''
                 <tr>
-                    <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:inherit;">{m['title']} 🔗</a></div></td>
+                    <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:#1a0dab; font-weight:500;">{m['title']} 🔗</a></div></td>
                     <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
                     <td data-label="總價" class="mono val">{m['bundle']}</td>
-                    <td data-label="獲利 (Edge)" class="mono val"><b class="{'text-green' if m['edge_val']>0 else ''}">{m['edge']}</b></td>
+                    <td data-label="獲利 (Edge)" class="mono val"><b {edge_style}>{m['edge']}</b></td>
                     <td data-label="成交量" class="val">{m['vol']}</td>
                 </tr>'''
     else:
@@ -188,23 +191,24 @@ def generate_dashboard():
             link = f"https://polymarket.com/market/{m['slug']}" if m['slug'] else "#"
             poly_html += f'''
             <tr class="opp-highlight">
-                <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:inherit; font-weight:700;">{m['title']} 🚀</a></div></td>
+                <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:#1a0dab; font-weight:700;">{m['title']} 🚀</a></div></td>
                 <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
                 <td data-label="總價" class="mono val">{m['bundle']}</td>
                 <td data-label="獲利 (Edge)" class="mono val"><b class="text-green">{m['edge']}</b></td>
                 <td data-label="成交量" class="val">{m['vol']}</td>
             </tr>'''
-        # 即使有套利，下方也附上熱門市場參考
+        # 即使有套利，下方也附上異常波動監測
         if hot_markets:
-            poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">🔥 熱門市場 (成交量參考)</td></tr>'
+            poly_html += '<tr><td colspan="5" style="background: #e8f0fe; color: #1a73e8; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">📊 異常波動與潛在機會監測 (參考)</td></tr>'
             for m in hot_markets[:5]:
                 link = f"https://polymarket.com/market/{m['slug']}" if m['slug'] else "#"
+                edge_style = 'class="text-green"' if m['edge_val'] > 0 else 'style="color:#d93025; font-weight:400;"'
                 poly_html += f'''
                 <tr>
-                    <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:inherit;">{m['title']} 🔗</a></div></td>
+                    <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:#1a0dab; font-weight:500;">{m['title']} 🔗</a></div></td>
                     <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
                     <td data-label="總價" class="mono val">{m['bundle']}</td>
-                    <td data-label="獲利 (Edge)" class="mono val">{m['edge']}</td>
+                    <td data-label="獲利 (Edge)" class="mono val"><b {edge_style}>{m['edge']}</b></td>
                     <td data-label="成交量" class="val">{m['vol']}</td>
                 </tr>'''
     tw_stats = {}
