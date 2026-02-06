@@ -14,11 +14,11 @@
       --up-green: #137333;
       --down-red: #d93025;
     }
-    body { font-family: "Google Sans", Roboto, Arial, sans-serif; margin: 0; background-color: var(--bg-gray); color: var(--text-main); }
+    body { font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background-color: var(--bg-gray); color: var(--text-main); }
     
     .header { background: white; border-bottom: 1px solid var(--border-color); padding: 0 24px; position: sticky; top: 0; z-index: 100; }
     .header-content { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; height: 64px; gap: 40px; }
-    h1 { margin: 0; font-size: 20px; font-weight: 500; color: var(--pm-blue); }
+    h1 { margin: 0; font-size: 18px; font-weight: 600; color: var(--pm-blue); }
     
     .tabs { display: flex; gap: 8px; height: 100%; }
     .tab { padding: 0 16px; display: flex; align-items: center; cursor: pointer; color: var(--text-muted); font-weight: 500; font-size: 14px; border-bottom: 3px solid transparent; transition: 0.2s; }
@@ -33,30 +33,31 @@
     .meta-bar { padding: 12px 20px; background: #fafafa; border-bottom: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted); display: flex; justify-content: space-between; }
     
     table { border-collapse: collapse; width: 100%; }
-    th { background: #f8f9fa; padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+    th { background: #f8f9fa; padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
     td { padding: 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
     
     .market-cell { display: flex; align-items: center; gap: 12px; }
     .m-img-placeholder { width: 36px; height: 36px; border-radius: 4px; background: #e8f0fe; color: #1a73e8; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; }
-    .question-link { color: var(--text-main); font-weight: 500; font-size: 15px; }
+    .question-link { color: var(--text-main); font-weight: 600; font-size: 15px; }
     .slug-text { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
     
-    .news-cell { max-width: 400px; }
-    .news-title { font-size: 14px; font-weight: 500; color: #1a1a1a; }
-    .impact-text { font-size: 12px; color: var(--pm-blue); margin-top: 4px; }
+    .news-cell { max-width: 450px; }
+    .news-title { font-size: 13px; font-weight: 500; color: #1a1a1a; line-height: 1.4; }
+    .impact-text { font-size: 12px; color: var(--pm-blue); margin-top: 4px; font-weight: 500; }
     
     .prediction-box { text-align: right; }
     .tw-stocks { font-size: 11px; color: #5f6368; margin-top: 6px; }
     
-    .badge { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+    .badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
     .badge-bull { background: #e6f4ea; color: #137333; }
     .badge-neutral { background: #f1f3f4; color: #3c4043; }
     .badge-red { background: #fce8e6; color: #d93025; }
     
-    .mono { font-family: "Roboto Mono", monospace; }
+    .mono { font-family: "Courier New", Courier, monospace; }
     .val { text-align: right; }
-    .text-green { color: var(--up-green); font-weight: 500; }
-    .text-red { color: var(--down-red); font-weight: 500; }
+    .highlight { font-weight: 600; color: #000; }
+    .text-green { color: var(--up-green); }
+    .text-red { color: var(--down-red); }
     
     tr:hover { background-color: #f8f9fa; }
   </style>
@@ -77,8 +78,8 @@
     <div id="stock-tab" class="tab-content active">
       <div class="card">
         <div class="meta-bar">
-          <span>🕒 更新時間：2026-02-06 12:43:40</span>
-          <span>智能分析：相關性預測模型已開啟</span>
+          <span>🕒 更新時間：2026-02-06 12:47:38</span>
+          <span>📊 數據源：Yahoo Finance</span>
         </div>
         <table>
           <thead>
@@ -86,21 +87,137 @@
               <th>美股標的</th>
               <th class="val">最新價</th>
               <th class="val">漲跌幅</th>
-              <th>最新新聞與影響</th>
-              <th class="val">台股聯動預測</th>
+              <th>最新動態與影響</th>
+              <th class="val">台股供應鏈聯動</th>
             </tr>
           </thead>
           <tbody>
             
+          <tr>
+            <td>
+              <div class="market-cell">
+                <div class="m-img-placeholder">T</div>
+                <div class="q-wrap">
+                  <div class="question-link">Tesla, Inc.</div>
+                  <div class="slug-text">TSLA</div>
+                </div>
+              </div>
+            </td>
+            <td class="mono val highlight">$397.21</td>
+            <td class="mono val text-red">-2.17%</td>
+            <td class="news-cell">
+                <div class="news-title">IPOs: How companies get into an index when planning to go public</div>
+                <div class="impact-text">影響分析：需求擔憂影響台廠拉貨力道</div>
+            </td>
+            <td class="val">
+                <div class="prediction-box">
+                    <span class="badge badge-red">看跌</span>
+                    <div class="tw-stocks">台積電、鴻海、貿聯-KY</div>
+                </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="market-cell">
+                <div class="m-img-placeholder">N</div>
+                <div class="q-wrap">
+                  <div class="question-link">NVIDIA Corporation</div>
+                  <div class="slug-text">NVDA</div>
+                </div>
+              </div>
+            </td>
+            <td class="mono val highlight">$171.88</td>
+            <td class="mono val text-red">-1.33%</td>
+            <td class="news-cell">
+                <div class="news-title">Big Tech CEOs seek to quell AI worries hammering software stocks</div>
+                <div class="impact-text">影響分析：市場觀望中</div>
+            </td>
+            <td class="val">
+                <div class="prediction-box">
+                    <span class="badge badge-neutral">盤整</span>
+                    <div class="tw-stocks">台積電、廣達、技嘉、緯穎</div>
+                </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="market-cell">
+                <div class="m-img-placeholder">A</div>
+                <div class="q-wrap">
+                  <div class="question-link">Apple Inc.</div>
+                  <div class="slug-text">AAPL</div>
+                </div>
+              </div>
+            </td>
+            <td class="mono val highlight">$275.91</td>
+            <td class="mono val text-red">-0.21%</td>
+            <td class="news-cell">
+                <div class="news-title">What Alphabet's earnings reveal about the decline in software stocks</div>
+                <div class="impact-text">影響分析：市場觀望中</div>
+            </td>
+            <td class="val">
+                <div class="prediction-box">
+                    <span class="badge badge-neutral">盤整</span>
+                    <div class="tw-stocks">台積電、鴻海、大立光、玉晶光</div>
+                </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="market-cell">
+                <div class="m-img-placeholder">M</div>
+                <div class="q-wrap">
+                  <div class="question-link">Microsoft Corporation</div>
+                  <div class="slug-text">MSFT</div>
+                </div>
+              </div>
+            </td>
+            <td class="mono val highlight">$393.67</td>
+            <td class="mono val text-red">-4.95%</td>
+            <td class="news-cell">
+                <div class="news-title">Amazon plans $200B AI spending surge, sinking stock</div>
+                <div class="impact-text">影響分析：軟體應用帶動雲端基礎建設</div>
+            </td>
+            <td class="val">
+                <div class="prediction-box">
+                    <span class="badge badge-neutral">盤整</span>
+                    <div class="tw-stocks">廣達、緯創</div>
+                </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div class="market-cell">
+                <div class="m-img-placeholder">A</div>
+                <div class="q-wrap">
+                  <div class="question-link">Amazon.com, Inc.</div>
+                  <div class="slug-text">AMZN</div>
+                </div>
+              </div>
+            </td>
+            <td class="mono val highlight">$222.69</td>
+            <td class="mono val text-red">-4.42%</td>
+            <td class="news-cell">
+                <div class="news-title">Stock market today: Dow, S&P 500, Nasdaq futures plummet as Amazon's earnings flop set to deepen tech rout</div>
+                <div class="impact-text">影響分析：電商與 AWS 資本支出穩定</div>
+            </td>
+            <td class="val">
+                <div class="prediction-box">
+                    <span class="badge badge-neutral">盤整</span>
+                    <div class="tw-stocks">廣達、英業達</div>
+                </div>
+            </td>
+          </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Polymarket 分頁 (佔位) -->
+    <!-- Polymarket 分頁 -->
     <div id="poly-tab" class="tab-content">
-      <div class="card">
-        <div class="meta-bar">數據載入中...</div>
+      <div class="card" style="min-height: 600px;">
+        <div class="meta-bar">載入 Polymarket 監控中...</div>
+        <iframe src="../../index.html" style="width:100%; height:800px; border:none;"></iframe>
       </div>
     </div>
   </div>
@@ -116,8 +233,6 @@
       } else {
         document.querySelector('.tab:nth-child(2)').classList.add('active');
         document.getElementById('poly-tab').classList.add('active');
-        // 這裡之後可以動態載入 Polymarket 內容
-        document.getElementById('poly-tab').innerHTML = '<iframe src="../index.html" style="width:100%; height:800px; border:none;"></iframe>';
       }
     }
   </script>
