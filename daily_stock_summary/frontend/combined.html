@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
     <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>OpenClaw 綜合面板</title>
+    <title>OpenClaw 綜合面板 Pro</title>
     <style>
         :root { --blue: #1a73e8; --bg: #f1f3f4; --border: #dadce0; --up: #137333; --down: #d93025; }
         body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: #202124; }
@@ -12,7 +12,7 @@
         .tab { flex: 1; text-align: center; padding: 14px; font-size: 14px; font-weight: 500; color: #5f6368; border-bottom: 3px solid transparent; }
         .tab.active { color: var(--blue); border-bottom-color: var(--blue); }
         
-        .container { padding: 12px; max-width: 800px; margin: 0 auto; }
+        .container { padding: 12px; max-width: 900px; margin: 0 auto; }
         .tab-content { display: none; } .tab-content.active { display: block; }
         .card { background: white; border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .meta { padding: 10px 16px; background: #fafafa; font-size: 12px; color: #70757a; border-bottom: 1px solid var(--border); }
@@ -37,8 +37,8 @@
             td { display: block; padding: 10px 16px; border: none; text-align: right; }
             td:before { content: attr(data-label); float: left; font-size: 12px; color: #70757a; font-weight: 600; }
             tr { display: block; border-bottom: 8px solid var(--bg); }
-            td[data-label="標載"], td[data-label="預測市場"], td[data-label="標的"] { text-align: left; background: #f8f9fa; }
-            td[data-label="標載"]:before, td[data-label="預測市場"]:before, td[data-label="標的"]:before { content: ""; }
+            td[data-label="標的"], td[data-label="預測市場"] { text-align: left; background: #f8f9fa; }
+            td[data-label="標的"]:before, td[data-label="預測市場"]:before { content: ""; }
             .q-text { font-weight: 600; color: #1a1a1a; }
         }
     </style>
@@ -47,7 +47,7 @@
     <div class="header">
         <div class="header-top">
             <div style="font-weight: 700; color: var(--blue);">OPENCLAW PRO</div>
-            <div style="font-size: 12px; color: #70757a;">2026-02-06 12:55:36</div>
+            <div style="font-size: 12px; color: #70757a;">2026-02-06 12:58:07</div>
         </div>
         <div class="tabs">
             <div class="tab active" onclick="sw(0)">📈 美股台股</div>
@@ -68,7 +68,7 @@
             <td data-label="聯動預測">
                 <span class="badge badge-red">看跌</span>
                 <div class="tw-text">台積電、鴻海、貿聯-KY</div>
-                <div class="imp-text">電動車需求趨勢</div>
+                <div class="imp-text">需求擔憂影響</div>
             </td>
         </tr>
         <tr>
@@ -78,7 +78,7 @@
             <td data-label="聯動預測">
                 <span class="badge badge-red">看跌</span>
                 <div class="tw-text">台積電、廣達、技嘉</div>
-                <div class="imp-text">AI 伺服器需求</div>
+                <div class="imp-text">AI 概念股回檔</div>
             </td>
         </tr>
         <tr>
@@ -87,8 +87,8 @@
             <td data-label="漲跌" class="mono val text-red">-0.21%</td>
             <td data-label="聯動預測">
                 <span class="badge badge-neutral">盤整</span>
-                <div class="tw-text">待分析</div>
-                <div class="imp-text">市場觀望</div>
+                <div class="tw-text">台積電、鴻海、大立光</div>
+                <div class="imp-text">蘋概股拉貨動能</div>
             </td>
         </tr>
         <tr>
@@ -117,37 +117,149 @@
         
         <div id="t1" class="tab-content">
             <div class="card">
-                <div class="meta">🟢 綠色標示代表潛在套利空間 (Total < 1.0)</div>
+                <div class="meta">🎯 已同步 Polymarket Top 20 熱門市場 (綠色為套利機會)</div>
                 <table>
                     <thead><tr><th>預測市場</th><th class="val">Yes</th><th class="val">No</th><th class="val">總價</th><th class="val">量</th></tr></thead>
                     <tbody>
         <tr class="">
-            <td data-label="預測市場"><div class="q-text">Who will win the 2024 Presidential Election?</div></td>
-            <td data-label="Yes 價格" class="mono val">$0.52</td>
-            <td data-label="No 價格" class="mono val">$0.48</td>
-            <td data-label="總價" class="mono val"><b>1.000</b></td>
-            <td data-label="成交量" class="val">542.1M</td>
+            <td data-label="預測市場"><div class="q-text">Will the Fed decrease interest rates by 50+ bps after the March 2026 meeting?</div></td>
+            <td data-label="Yes" class="mono val">0.016</td>
+            <td data-label="No" class="mono val">0.985</td>
+            <td data-label="總價" class="mono val"><b>1.001</b></td>
+            <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
-            <td data-label="預測市場"><div class="q-text">Fed interest rate cut in March?</div></td>
-            <td data-label="Yes 價格" class="mono val">$0.35</td>
-            <td data-label="No 價格" class="mono val">$0.65</td>
-            <td data-label="總價" class="mono val"><b>1.000</b></td>
-            <td data-label="成交量" class="val">12.4M</td>
+            <td data-label="預測市場"><div class="q-text">Will Trump nominate Judy Shelton as the next Fed chair?</div></td>
+            <td data-label="Yes" class="mono val">0.035</td>
+            <td data-label="No" class="mono val">0.966</td>
+            <td data-label="總價" class="mono val"><b>1.001</b></td>
+            <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
-            <td data-label="預測市場"><div class="q-text">Bitcoin to hit $100k in 2026?</div></td>
-            <td data-label="Yes 價格" class="mono val">$0.68</td>
-            <td data-label="No 價格" class="mono val">$0.32</td>
-            <td data-label="總價" class="mono val"><b>1.000</b></td>
-            <td data-label="成交量" class="val">45.8M</td>
+            <td data-label="預測市場"><div class="q-text">Will the Fed increase interest rates by 25+ bps after the March 2026 meeting?</div></td>
+            <td data-label="Yes" class="mono val">0.012</td>
+            <td data-label="No" class="mono val">0.989</td>
+            <td data-label="總價" class="mono val"><b>1.001</b></td>
+            <td data-label="成交量" class="val">M</td>
         </tr>
         <tr class="">
-            <td data-label="預測市場"><div class="q-text">Will TikTok be banned in the US?</div></td>
-            <td data-label="Yes 價格" class="mono val">$0.41</td>
-            <td data-label="No 價格" class="mono val">$0.59</td>
-            <td data-label="總價" class="mono val"><b>1.000</b></td>
-            <td data-label="成交量" class="val">8.2M</td>
+            <td data-label="預測市場"><div class="q-text">Will Trump nominate no one before 2027?</div></td>
+            <td data-label="Yes" class="mono val">0.001</td>
+            <td data-label="No" class="mono val">-</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Will there be no change in Fed interest rates after the March 2026 meeting?</div></td>
+            <td data-label="Yes" class="mono val">0.800</td>
+            <td data-label="No" class="mono val">0.210</td>
+            <td data-label="總價" class="mono val"><b>1.010</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">US strikes Iran by February 5, 2026?</div></td>
+            <td data-label="Yes" class="mono val">0.002</td>
+            <td data-label="No" class="mono val">0.999</td>
+            <td data-label="總價" class="mono val"><b>1.001</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Will the Fed decrease interest rates by 25 bps after the March 2026 meeting?</div></td>
+            <td data-label="Yes" class="mono val">0.170</td>
+            <td data-label="No" class="mono val">0.840</td>
+            <td data-label="總價" class="mono val"><b>1.010</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Hornets vs. Rockets</div></td>
+            <td data-label="Yes" class="mono val">-</td>
+            <td data-label="No" class="mono val">0.001</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Wizards vs. Pistons</div></td>
+            <td data-label="Yes" class="mono val">-</td>
+            <td data-label="No" class="mono val">0.001</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Kings vs. Golden Knights</div></td>
+            <td data-label="Yes" class="mono val">0.059</td>
+            <td data-label="No" class="mono val">0.956</td>
+            <td data-label="總價" class="mono val"><b>1.015</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Panthers vs. Lightning</div></td>
+            <td data-label="Yes" class="mono val">0.001</td>
+            <td data-label="No" class="mono val">-</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Will Trump nominate Kevin Warsh as the next Fed chair?</div></td>
+            <td data-label="Yes" class="mono val">0.951</td>
+            <td data-label="No" class="mono val">0.051</td>
+            <td data-label="總價" class="mono val"><b>1.002</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Islanders vs. Devils</div></td>
+            <td data-label="Yes" class="mono val">-</td>
+            <td data-label="No" class="mono val">0.001</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Predators vs. Capitals</div></td>
+            <td data-label="Yes" class="mono val">0.001</td>
+            <td data-label="No" class="mono val">-</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Will Athletic Bilbao win the 2025–26 La Liga?</div></td>
+            <td data-label="Yes" class="mono val">0.002</td>
+            <td data-label="No" class="mono val">-</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Will Bitcoin dip to $60,000 in February?</div></td>
+            <td data-label="Yes" class="mono val">-</td>
+            <td data-label="No" class="mono val">0.001</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Bulls vs. Raptors: O/U 225.5</div></td>
+            <td data-label="Yes" class="mono val">-</td>
+            <td data-label="No" class="mono val">0.001</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">M</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Spurs vs. Mavericks</div></td>
+            <td data-label="Yes" class="mono val">-</td>
+            <td data-label="No" class="mono val">0.001</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">K</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Jazz vs. Hawks</div></td>
+            <td data-label="Yes" class="mono val">0.001</td>
+            <td data-label="No" class="mono val">-</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">K</td>
+        </tr>
+        <tr class="">
+            <td data-label="預測市場"><div class="q-text">Bulls vs. Raptors</div></td>
+            <td data-label="Yes" class="mono val">0.001</td>
+            <td data-label="No" class="mono val">-</td>
+            <td data-label="總價" class="mono val"><b>-</b></td>
+            <td data-label="成交量" class="val">K</td>
         </tr></tbody>
                 </table>
             </div>
