@@ -208,8 +208,16 @@ def generate_dashboard():
 </head>
 <body onload="checkReload()">
     <script>
+        function sw(idx){{
+            document.querySelectorAll('.tab').forEach((t, i) => {{
+                t.classList.toggle('active', i === idx);
+                document.getElementById('t'+i).classList.toggle('active', i === idx);
+            }});
+            localStorage.setItem('activeTab', idx);
+        }}
         function checkReload() {{
-            // 每 60 秒刷新一次
+            const savedTab = localStorage.getItem('activeTab');
+            if (savedTab !== null) sw(parseInt(savedTab));
             setInterval(() => {{ location.reload(); }}, 60000);
         }}
     </script>
@@ -240,7 +248,13 @@ def generate_dashboard():
             <tbody>{tw_html}</tbody>
         </table></div></div>
     </div>
-    <script>function sw(idx){{document.querySelectorAll('.tab').forEach((t, i) => {{t.classList.toggle('active', i === idx);document.getElementById('t'+i).classList.toggle('active', i === idx);}});}}</script>
+    <script>function sw(idx){{
+        document.querySelectorAll('.tab').forEach((t, i) => {{
+            t.classList.toggle('active', i === idx);
+            document.getElementById('t'+i).classList.toggle('active', i === idx);
+        }});
+        localStorage.setItem('activeTab', idx);
+    }}</script>
 </body>
 </html>'''
     with open('daily_stock_summary/frontend/combined.html', 'w') as f: f.write(html)
