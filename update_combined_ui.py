@@ -261,7 +261,11 @@ def generate_dashboard():
         elif counts['bear'] > counts['bull']: sentiment = '偏空'
         
         accuracy_icon = ""
-        if price_now_val > 0 and price_prev_val > 0 and sentiment != '中性':
+        # 修正準確度計算邏輯：只有當「現價」與「昨收」有實質差異時（代表台股已開盤且有跳動），才進行命中判定
+        # 這樣可以避免在凌晨時段（台股未開盤）出現虛假的準確率
+        price_moved_substantially = abs(price_now_val - price_prev_val) > 0.001
+        
+        if price_now_val > 0 and price_prev_val > 0 and sentiment != '中性' and price_moved_substantially:
             total_forecasts += 1
             is_correct = False
             if sentiment == '偏多' and price_now_val > price_prev_val: is_correct = True
@@ -272,6 +276,9 @@ def generate_dashboard():
                 accuracy_icon = "✅"
             else:
                 accuracy_icon = "❌"
+        else:
+            # 台股尚未開盤或無價格變動，不計入準確率統計
+            accuracy_icon = ""
 
         score_cls = 'text-green' if counts['bull'] > counts['bear'] else ('text-red' if counts['bear'] > counts['bull'] else '')
         tw_html += f'''
@@ -352,11 +359,14 @@ def generate_dashboard():
     accuracy_html = f'''
     <div class="card" style="padding: 16px; background: #e8f0fe; border-left: 5px solid var(--blue); margin-bottom: 20px; position: relative;">
         <div style="font-size: 12px; color: #5f6368; font-weight: 600;">今日預測準確度分析</div>
-        <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 8px;">
+        <div id="accuracy-main" style="display: { 'flex' if total_forecasts > 0 else 'none' }; align-items: baseline; gap: 10px; margin-top: 8px;">
             <span style="font-size: 32px; font-weight: 800; color: var(--blue);">{acc_rate:.1f}%</span>
             <span style="font-size: 14px; color: #70757a;">({correct_forecasts} / {total_forecasts} 命中)</span>
         </div>
-        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 隨股價變動實時計算</div>
+        <div id="accuracy-waiting" style="display: { 'none' if total_forecasts > 0 else 'block' }; margin-top: 8px; font-size: 16px; color: #70757a; font-weight: 500;">
+            ⏳ 台股尚未開盤，等待市場驗證預測...
+        </div>
+        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 僅在台股開盤且有價格跳動時計算</div>
         <div onclick="toggleHistory()" style="position: absolute; right: 16px; top: 16px; cursor: pointer; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #ddd;">ℹ️</div>
         
         <div id="history-panel" style="display:none; margin-top: 16px; border-top: 1px solid #d2e3fc; padding-top: 16px;">
