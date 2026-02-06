@@ -71,53 +71,52 @@ def get_clob_price(token_id):
     return None
 
 def fetch_polymarket_realtime():
-    print("Fetching Polymarket Gamma API...")
+    print("Fetching Polymarket Gamma API (Events Mode)...")
     try:
-        # 使用更寬鬆的條件確保一定能抓到資料
-        url = "https://gamma-api.polymarket.com/markets?closed=false&limit=40&order=volume24hrClob&ascending=false"
+        # 使用 Events 接口，這最接近官網首頁的顯示邏輯
+        url = "https://gamma-api.polymarket.com/events?closed=false&limit=30&order=volume24hr&ascending=false"
         resp = requests.get(url, timeout=10)
-        markets = resp.json()
-        print(f"Gamma API returned {len(markets)} markets")
+        events = resp.json()
+        print(f"Gamma API returned {len(events)} events")
         
         results = []
         
-        def process_market(m):
+        # 從每個熱門 Event 中找出代表性的 Market
+        for e in events:
+            markets = e.get('markets', [])
+            if not markets: continue
+            
+            # 挑選該事件中成交量最大的標的
+            m = max(markets, key=lambda x: float(x.get('volume24hr', 0)), default=None)
+            if not m: continue
+
             try:
-                # 兼容不同格式的 token IDs
                 token_ids_raw = m.get('clobTokenIds')
-                if not token_ids_raw: return None
+                if not token_ids_raw: continue
                 
                 clob_ids = json.loads(token_ids_raw)
-                if len(clob_ids) < 2: return None
+                if len(clob_ids) < 2: continue
                 
-                # 同時獲取 Yes 和 No 的即時 Ask
+                # 獲取 Yes 和 No 的即時 Ask
                 yes_ask = get_clob_price(clob_ids[0])
                 no_ask = get_clob_price(clob_ids[1])
                 
                 if yes_ask and no_ask:
                     bundle = yes_ask + no_ask
                     edge = (1.0 - bundle) * 100
-                    return {
-                        'title': m.get('question', m.get('title', 'Unknown')),
+                    results.append({
+                        'title': e.get('title', m.get('question', 'Unknown')),
                         'slug': m.get('slug', ''),
                         'yes': f"{yes_ask:.3f}",
                         'no': f"{no_ask:.3f}",
                         'bundle': f"{bundle:.3f}",
                         'edge_val': edge,
                         'edge': f"{edge:.2f}%",
-                        'vol': f"{float(m.get('volume24hrClob', 0))/1000:.1f}K"
-                    }
-            except Exception as e:
-                pass
-            return None
-
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-            future_to_market = {executor.submit(process_market, m): m for m in markets}
-            for future in concurrent.futures.as_completed(future_to_market):
-                res = future.result()
-                if res: results.append(res)
+                        'vol': f"{float(e.get('volume24hr', 0))/1000:.1f}K"
+                    })
+            except: pass
         
-        print(f"Processed {len(results)} valid markets")
+        print(f"Processed {len(results)} valid markets from events")
         return results
     except Exception as e:
         print(f"Polymarket fetch error: {e}")
