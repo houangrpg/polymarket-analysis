@@ -99,6 +99,7 @@ def fetch_polymarket_realtime():
                     edge = (1.0 - bundle) * 100
                     return {
                         'title': m.get('question', m.get('title', 'Unknown')),
+                        'slug': m.get('slug', ''),
                         'yes': f"{yes_ask:.3f}",
                         'no': f"{no_ask:.3f}",
                         'bundle': f"{bundle:.3f}",
@@ -164,9 +165,10 @@ def generate_dashboard():
             poly_html += '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #999;">(暫無熱門市場數據)</td></tr>'
         else:
             for m in hot_markets:
+                link = f"https://polymarket.com/market/{m['slug']}" if m['slug'] else "#"
                 poly_html += f'''
                 <tr>
-                    <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                    <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:inherit;">{m['title']} 🔗</a></div></td>
                     <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
                     <td data-label="總價" class="mono val">{m['bundle']}</td>
                     <td data-label="獲利 (Edge)" class="mono val"><b class="{'text-green' if m['edge_val']>0 else ''}">{m['edge']}</b></td>
@@ -175,9 +177,10 @@ def generate_dashboard():
     else:
         # 有套利機會時
         for m in arbitrage_opps:
+            link = f"https://polymarket.com/market/{m['slug']}" if m['slug'] else "#"
             poly_html += f'''
             <tr class="opp-highlight">
-                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:inherit; font-weight:700;">{m['title']} 🚀</a></div></td>
                 <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
                 <td data-label="總價" class="mono val">{m['bundle']}</td>
                 <td data-label="獲利 (Edge)" class="mono val"><b class="text-green">{m['edge']}</b></td>
@@ -187,9 +190,10 @@ def generate_dashboard():
         if hot_markets:
             poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">🔥 熱門市場 (成交量參考)</td></tr>'
             for m in hot_markets[:5]:
+                link = f"https://polymarket.com/market/{m['slug']}" if m['slug'] else "#"
                 poly_html += f'''
                 <tr>
-                    <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                    <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:inherit;">{m['title']} 🔗</a></div></td>
                     <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
                     <td data-label="總價" class="mono val">{m['bundle']}</td>
                     <td data-label="獲利 (Edge)" class="mono val">{m['edge']}</td>
