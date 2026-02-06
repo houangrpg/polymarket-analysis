@@ -271,36 +271,71 @@ def generate_dashboard():
         </tr>'''
 
     acc_rate = (correct_forecasts / total_forecasts * 100) if total_forecasts > 0 else 0
-    accuracy_html = f'''
-    <div class="card" style="padding: 16px; background: #e8f0fe; border-left: 5px solid var(--blue); margin-bottom: 20px;">
-        <div style="font-size: 12px; color: #5f6368; font-weight: 600;">今日預測準確度分析</div>
-        <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 8px;">
-            <span style="font-size: 32px; font-weight: 800; color: var(--blue);">{acc_rate:.1f}%</span>
-            <span style="font-size: 14px; color: #70757a;">({correct_forecasts} / {total_forecasts} 命中)</span>
-        </div>
-        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 基於「綜合情緒」與「昨收 vs 現價」漲跌比對得出</div>
-    </div>
-    '''
-
+    
     # 保存歷史紀錄
+    history = []
     try:
         log_file = 'prediction_history.json'
-        history = []
         if os.path.exists(log_file):
             with open(log_file, 'r') as f:
                 content = f.read()
                 if content: history = json.loads(content)
         
+        # 避免同日重複紀錄（以日期為 key，更新當日最新的準確率）
+        today_str = time.strftime('%Y-%m-%d', time.localtime())
+        history = [h for h in history if h.get('date') != today_str]
+        
         history.append({
-            'date': time.strftime('%Y-%m-%d', time.localtime()),
+            'date': today_str,
             'time': updated_at,
-            'accuracy': acc_rate,
+            'accuracy': round(acc_rate, 1),
             'correct': correct_forecasts,
             'total': total_forecasts
         })
-        # 只保留最近 30 筆
-        with open(log_file, 'w') as f: json.dump(history[-30:], f, indent=2)
+        # 保留最近 60 筆
+        history = history[-60:]
+        with open(log_file, 'w') as f: json.dump(history, f, indent=2)
     except: pass
+
+    # 生成歷史記錄 HTML
+    history_rows = ""
+    total_correct_all = sum(h['correct'] for h in history)
+    total_forecasts_all = sum(h['total'] for h in history)
+    
+    for h in reversed(history):
+        history_rows += f"<tr><td>{h['date']}</td><td class='val'>{h['accuracy']}%</td><td class='val'>{h['correct']}/{h['total']}</td></tr>"
+
+    accuracy_html = f'''
+    <div class="card" style="padding: 16px; background: #e8f0fe; border-left: 5px solid var(--blue); margin-bottom: 20px; position: relative;">
+        <div style="font-size: 12px; color: #5f6368; font-weight: 600;">今日預測準確度分析</div>
+        <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 8px;">
+            <span style="font-size: 32px; font-weight: 800; color: var(--blue);">{acc_rate:.1f}%</span>
+            <span style="font-size: 14px; color: #70757a;">({correct_forecasts} / {total_forecasts} 命中)</span>
+        </div>
+        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 隨股價變動實時計算</div>
+        <div onclick="toggleHistory()" style="position: absolute; right: 16px; top: 16px; cursor: pointer; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #ddd;">ℹ️</div>
+        
+        <div id="history-panel" style="display:none; margin-top: 16px; border-top: 1px solid #d2e3fc; padding-top: 16px;">
+            <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px;">累積預測對決 (PK)</div>
+                <div style="height: 24px; background: #fce8e6; border-radius: 12px; overflow: hidden; display: flex; position: relative;">
+                    <div style="width: {(total_correct_all/total_forecasts_all*100) if total_forecasts_all>0 else 0}%; background: #e6f4ea; height: 100%; display: flex; align-items: center; padding-left: 10px; color: #137333; font-size: 11px; font-weight: 700; transition: width 0.5s;">正確: {total_correct_all}</div>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: #d93025; font-size: 11px; font-weight: 700;">錯誤: {total_forecasts_all - total_correct_all}</div>
+                </div>
+            </div>
+            <table style="width: 100%; font-size: 12px;">
+                <thead><tr style="background: transparent;"><th style="padding: 4px 0;">日期</th><th class="val" style="padding: 4px 0;">準確率</th><th class="val" style="padding: 4px 0;">命中</th></tr></thead>
+                <tbody>{history_rows}</tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        function toggleHistory() {{
+            const p = document.getElementById('history-panel');
+            p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        }}
+    </script>
+    '''
 
     stock_html = ''
     for s in stocks:

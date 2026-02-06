@@ -53,7 +53,7 @@
         }
     </script>
     <div class="header">
-        <div class="header-top"><div style="font-weight:700; color:var(--blue);">OPENCLAW PRO</div><div style="font-size:12px; color:#70757a;">更新時間: 2026-02-06 19:00:07</div></div>
+        <div class="header-top"><div style="font-weight:700; color:var(--blue);">OPENCLAW PRO</div><div style="font-size:12px; color:#70757a;">更新時間: 2026-02-06 19:00:48</div></div>
         <div class="tabs">
             <div class="tab" onclick="sw(0)">🔮 套利</div>
             <div class="tab" onclick="sw(1)">📈 美股</div>
@@ -256,14 +256,35 @@
         <!-- Tab 2: TW Forecast -->
         <div id="t2" class="tab-content">
             
-    <div class="card" style="padding: 16px; background: #e8f0fe; border-left: 5px solid var(--blue); margin-bottom: 20px;">
+    <div class="card" style="padding: 16px; background: #e8f0fe; border-left: 5px solid var(--blue); margin-bottom: 20px; position: relative;">
         <div style="font-size: 12px; color: #5f6368; font-weight: 600;">今日預測準確度分析</div>
         <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 8px;">
             <span style="font-size: 32px; font-weight: 800; color: var(--blue);">60.0%</span>
             <span style="font-size: 14px; color: #70757a;">(3 / 5 命中)</span>
         </div>
-        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 基於「綜合情緒」與「昨收 vs 現價」漲跌比對得出</div>
+        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 隨股價變動實時計算</div>
+        <div onclick="toggleHistory()" style="position: absolute; right: 16px; top: 16px; cursor: pointer; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #ddd;">ℹ️</div>
+        
+        <div id="history-panel" style="display:none; margin-top: 16px; border-top: 1px solid #d2e3fc; padding-top: 16px;">
+            <div style="background: white; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+                <div style="font-size: 12px; font-weight: 700; margin-bottom: 8px;">累積預測對決 (PK)</div>
+                <div style="height: 24px; background: #fce8e6; border-radius: 12px; overflow: hidden; display: flex; position: relative;">
+                    <div style="width: 60.0%; background: #e6f4ea; height: 100%; display: flex; align-items: center; padding-left: 10px; color: #137333; font-size: 11px; font-weight: 700; transition: width 0.5s;">正確: 3</div>
+                    <div style="flex: 1; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; color: #d93025; font-size: 11px; font-weight: 700;">錯誤: 2</div>
+                </div>
+            </div>
+            <table style="width: 100%; font-size: 12px;">
+                <thead><tr style="background: transparent;"><th style="padding: 4px 0;">日期</th><th class="val" style="padding: 4px 0;">準確率</th><th class="val" style="padding: 4px 0;">命中</th></tr></thead>
+                <tbody><tr><td>2026-02-06</td><td class='val'>60.0%</td><td class='val'>3/5</td></tr></tbody>
+            </table>
+        </div>
     </div>
+    <script>
+        function toggleHistory() {
+            const p = document.getElementById('history-panel');
+            p.style.display = p.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
     
             <div class="card"><table>
                 <thead><tr><th>台股標的</th><th class="val">價格對比 (昨收/現價)</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
