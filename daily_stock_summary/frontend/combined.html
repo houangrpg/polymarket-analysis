@@ -53,7 +53,7 @@
         }
     </script>
     <div class="header">
-        <div class="header-top"><div style="font-weight:700; color:var(--blue);">OPENCLAW PRO</div><div style="font-size:12px; color:#70757a;">更新時間: 2026-02-06 18:20:07</div></div>
+        <div class="header-top"><div style="font-weight:700; color:var(--blue);">OPENCLAW PRO</div><div style="font-size:12px; color:#70757a;">更新時間: 2026-02-06 18:21:13</div></div>
         <div class="tabs">
             <div class="tab" onclick="sw(0)">🔮 套利</div>
             <div class="tab" onclick="sw(1)">📈 美股</div>
@@ -184,11 +184,22 @@
         </table></div></div>
 
         <!-- Tab 2: TW Forecast -->
-        <div id="t2" class="tab-content"><div class="card"><table>
-            <thead><tr><th>台股標的</th><th class="val">價格對比 (昨收/現價)</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
-            <tbody>
+        <div id="t2" class="tab-content">
+            
+    <div class="card" style="padding: 16px; background: #e8f0fe; border-left: 5px solid var(--blue); margin-bottom: 20px;">
+        <div style="font-size: 12px; color: #5f6368; font-weight: 600;">今日預測準確度分析</div>
+        <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 8px;">
+            <span style="font-size: 32px; font-weight: 800; color: var(--blue);">60.0%</span>
+            <span style="font-size: 14px; color: #70757a;">(3 / 5 命中)</span>
+        </div>
+        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 基於「綜合情緒」與「昨收 vs 現價」漲跌比對得出</div>
+    </div>
+    
+            <div class="card"><table>
+                <thead><tr><th>台股標的</th><th class="val">價格對比 (昨收/現價)</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
+                <tbody>
         <tr>
-            <td data-label="台股標的"><b>廣達</b></td>
+            <td data-label="台股標的"><b>廣達 ✅</b></td>
             <td data-label="價格歷史" class="mono val">
                 <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $273.00</div>
                 <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $279.50</div>
@@ -198,7 +209,7 @@
             <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
         </tr>
         <tr>
-            <td data-label="台股標的"><b>技嘉</b></td>
+            <td data-label="台股標的"><b>技嘉 ✅</b></td>
             <td data-label="價格歷史" class="mono val">
                 <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $226.00</div>
                 <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $227.50</div>
@@ -208,7 +219,7 @@
             <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
         </tr>
         <tr>
-            <td data-label="台股標的"><b>世芯-KY</b></td>
+            <td data-label="台股標的"><b>世芯-KY ❌</b></td>
             <td data-label="價格歷史" class="mono val">
                 <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $3245.00</div>
                 <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $3115.00</div>
@@ -218,7 +229,7 @@
             <td data-label="綜合情緒" class="val"><b class="text-green">偏多</b></td>
         </tr>
         <tr>
-            <td data-label="台股標的"><b>台積電</b></td>
+            <td data-label="台股標的"><b>台積電 </b></td>
             <td data-label="價格歷史" class="mono val">
                 <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $1765.00</div>
                 <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $1780.00</div>
@@ -228,7 +239,7 @@
             <td data-label="綜合情緒" class="val"><b class="">中性</b></td>
         </tr>
         <tr>
-            <td data-label="台股標的"><b>大立光</b></td>
+            <td data-label="台股標的"><b>大立光 </b></td>
             <td data-label="價格歷史" class="mono val">
                 <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $2300.00</div>
                 <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $2330.00</div>
@@ -238,7 +249,7 @@
             <td data-label="綜合情緒" class="val"><b class="">中性</b></td>
         </tr>
         <tr>
-            <td data-label="台股標的"><b>鴻海</b></td>
+            <td data-label="台股標的"><b>鴻海 ✅</b></td>
             <td data-label="價格歷史" class="mono val">
                 <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $215.50</div>
                 <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $215.00</div>
@@ -248,7 +259,7 @@
             <td data-label="綜合情緒" class="val"><b class="text-red">偏空</b></td>
         </tr>
         <tr>
-            <td data-label="台股標的"><b>貿聯-KY</b></td>
+            <td data-label="台股標的"><b>貿聯-KY ❌</b></td>
             <td data-label="價格歷史" class="mono val">
                 <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: $1260.00</div>
                 <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: $1285.00</div>
@@ -257,7 +268,8 @@
             <td data-label="看跌" class="mono val text-red">1</td>
             <td data-label="綜合情緒" class="val"><b class="text-red">偏空</b></td>
         </tr></tbody>
-        </table></div></div>
+            </table></div>
+        </div>
     </div>
     <script>function sw(idx){
         document.querySelectorAll('.tab').forEach((t, i) => {

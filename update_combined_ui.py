@@ -151,33 +151,87 @@ def generate_dashboard():
     
     tw_ticker_map = dict(zip(names, ticker_results))
 
+    # 統計準確度
+    total_forecasts = 0
+    correct_forecasts = 0
+
     for ts, counts in sorted_tw:
         price_now = "-"
         price_prev = "-"
+        price_now_val = 0
+        price_prev_val = 0
         ticker = tw_ticker_map.get(ts)
         if ticker:
             try:
                 t_data = yf.Ticker(ticker)
-                # 獲取歷史數據以確保昨收穩定
                 hist = t_data.history(period="5d")
                 if len(hist) >= 2:
-                    # 最後一筆是「現在/今天」，倒數第二筆是「昨收」
-                    price_prev = f"${hist['Close'].iloc[-2]:.2f}"
-                    price_now = f"${hist['Close'].iloc[-1]:.2f}"
+                    price_prev_val = hist['Close'].iloc[-2]
+                    price_now_val = hist['Close'].iloc[-1]
+                    price_prev = f"${price_prev_val:.2f}"
+                    price_now = f"${price_now_val:.2f}"
             except: pass
+
+        # 判斷情緒與準確度
+        sentiment = '中性'
+        if counts['bull'] > counts['bear']: sentiment = '偏多'
+        elif counts['bear'] > counts['bull']: sentiment = '偏空'
+        
+        accuracy_icon = ""
+        if price_now_val > 0 and price_prev_val > 0 and sentiment != '中性':
+            total_forecasts += 1
+            is_correct = False
+            if sentiment == '偏多' and price_now_val > price_prev_val: is_correct = True
+            elif sentiment == '偏空' and price_now_val < price_prev_val: is_correct = True
+            
+            if is_correct:
+                correct_forecasts += 1
+                accuracy_icon = "✅"
+            else:
+                accuracy_icon = "❌"
 
         score_cls = 'text-green' if counts['bull'] > counts['bear'] else ('text-red' if counts['bear'] > counts['bull'] else '')
         tw_html += f'''
         <tr>
-            <td data-label="台股標的"><b>{ts}</b></td>
+            <td data-label="台股標的"><b>{ts} {accuracy_icon}</b></td>
             <td data-label="價格歷史" class="mono val">
                 <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: {price_prev}</div>
                 <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: {price_now}</div>
             </td>
             <td data-label="看漲" class="mono val text-green">{counts['bull']}</td>
             <td data-label="看跌" class="mono val text-red">{counts['bear']}</td>
-            <td data-label="綜合情緒" class="val"><b class="{score_cls}">{'偏多' if counts['bull']>counts['bear'] else ('偏空' if counts['bear']>counts['bull'] else '中性')}</b></td>
+            <td data-label="綜合情緒" class="val"><b class="{score_cls}">{sentiment}</b></td>
         </tr>'''
+
+    acc_rate = (correct_forecasts / total_forecasts * 100) if total_forecasts > 0 else 0
+    accuracy_html = f'''
+    <div class="card" style="padding: 16px; background: #e8f0fe; border-left: 5px solid var(--blue); margin-bottom: 20px;">
+        <div style="font-size: 12px; color: #5f6368; font-weight: 600;">今日預測準確度分析</div>
+        <div style="display: flex; align-items: baseline; gap: 10px; margin-top: 8px;">
+            <span style="font-size: 32px; font-weight: 800; color: var(--blue);">{acc_rate:.1f}%</span>
+            <span style="font-size: 14px; color: #70757a;">({correct_forecasts} / {total_forecasts} 命中)</span>
+        </div>
+        <div style="font-size: 11px; color: #70757a; margin-top: 4px;">* 基於「綜合情緒」與「昨收 vs 現價」漲跌比對得出</div>
+    </div>
+    '''
+
+    # 保存歷史紀錄
+    try:
+        log_file = 'prediction_history.json'
+        history = []
+        if os.path.exists(log_file):
+            with open(log_file, 'r') as f: history = json.load(f)
+        
+        history.append({
+            'date': time.strftime('%Y-%m-%d', time.localtime()),
+            'time': updated_at,
+            'accuracy': acc_rate,
+            'correct': correct_forecasts,
+            'total': total_forecasts
+        })
+        # 只保留最近 30 筆
+        with open(log_file, 'w') as f: json.dump(history[-30:], f, indent=2)
+    except: pass
 
     stock_html = ''
     for s in stocks:
@@ -294,10 +348,13 @@ def generate_dashboard():
         </table></div></div>
 
         <!-- Tab 2: TW Forecast -->
-        <div id="t2" class="tab-content"><div class="card"><table>
-            <thead><tr><th>台股標的</th><th class="val">價格對比 (昨收/現價)</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
-            <tbody>{tw_html}</tbody>
-        </table></div></div>
+        <div id="t2" class="tab-content">
+            {accuracy_html}
+            <div class="card"><table>
+                <thead><tr><th>台股標的</th><th class="val">價格對比 (昨收/現價)</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
+                <tbody>{tw_html}</tbody>
+            </table></div>
+        </div>
     </div>
     <script>function sw(idx){{
         document.querySelectorAll('.tab').forEach((t, i) => {{
