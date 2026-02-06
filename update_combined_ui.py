@@ -448,7 +448,7 @@ def generate_dashboard():
         }}
     </script>
     <div class="header">
-        <div class="header-top"><div style="font-weight:700; color:var(--blue);">OPENCLAW PRO</div><div style="font-size:12px; color:#70757a;">更新時間: {updated_at}</div></div>
+        <div class="header-top"><div style="font-weight:700; color:var(--blue);">JoeClowAI</div><div style="font-size:12px; color:#70757a;">更新時間: {updated_at}</div></div>
         <div class="tabs">
             <div class="tab" onclick="sw(0)">🔮 套利</div>
             <div class="tab" onclick="sw(1)">📈 美股</div>
