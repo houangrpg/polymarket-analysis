@@ -1,61 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Polymarket Analysis</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            line-height: 1.6;
-        }
-        h1 {
-            color: #4CAF50;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        table th, table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        table th {
-            background-color: #f4f4f4;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Polymarket Top20 Monitor</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial; margin: 16px; }
+    .meta { color: #555; font-size: 14px; margin-bottom: 10px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border-bottom: 1px solid #eee; padding: 8px 6px; font-size: 14px; vertical-align: top; }
+    th { text-align: left; position: sticky; top: 0; background: white; }
+    .q { max-width: 520px; }
+    .good { background: #f1fff4; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  </style>
 </head>
 <body>
-    <h1>Polymarket Daily Analysis</h1>
-    <p>This page shows the latest analysis from Polymarket monitoring, updated with calculated arbitrage opportunities and key findings.</p>
-
-    <h2>Summary of Analysis</h2>
-    <p>No arbitrage opportunities were detected below the threshold (0.995) in the latest analysis.</p>
-
-    <h2>Monitored Markets</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Market Question</th>
-                <th>Best Ask (Yes)</th>
-                <th>Best Ask (No)</th>
-                <th>Bundle Cost</th>
-                <th>Arbitrage</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Will the Fed decrease interest rates by 50+ bps?</td>
-                <td>0.999</td>
-                <td>0.999</td>
-                <td>1.998</td>
-                <td>No</td>
-            </tr>
-        </tbody>
-    </table>
-    <p>For more details, please contact the administrator.</p>
+  <h2>Polymarket Top20 Bundle Monitor</h2>
+  <div class="meta">Updated: 2026-02-06 12:00:30 CST · Top 20 · Automating hourly</div>
+  <table>
+    <thead>
+      <tr>
+        <th>Market</th>
+        <th>Yes ask</th>
+        <th>No ask</th>
+        <th>Bundle cost</th>
+        <th>Edge</th>
+        <th>Vol(24h)</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+    </tbody>
+  </table>
 </body>
 </html>
