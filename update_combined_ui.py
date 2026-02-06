@@ -117,14 +117,35 @@ def generate_dashboard():
     tw_html = ''
     # 依看漲次數排序
     sorted_tw = sorted(tw_stats.items(), key=lambda x: (x[1]['bull'], -x[1]['bear']), reverse=True)
+    
+    # 獲取台股價格 (這部分使用 yfinance, 台灣股票代碼後綴為 .TW 或 .TWO)
+    # 由於台股個股名稱目前是中文 (如台積電), 我們需要一個對照表
+    # 或者暫時顯示連動強度, 但 Joe 想要前日收盤價。
+    # 為了準確性, 我先建立一個常用連動個股的代碼映射
+    tw_mapping = {
+        '台積電': '2330.TW', '鴻海': '2317.TW', '廣達': '2382.TW', '技嘉': '2376.TW',
+        '世芯-KY': '3661.TW', '大立光': '3008.TW', '貿聯-KY': '3665.TW'
+    }
+
     for ts, counts in sorted_tw:
+        price_str = "-"
+        ticker = tw_mapping.get(ts)
+        if ticker:
+            try:
+                t_data = yf.Ticker(ticker)
+                # 獲取前日收盤價
+                hist = t_data.history(period="2d")
+                if len(hist) >= 1:
+                    price_str = f"${hist['Close'].iloc[-1]:.2f}"
+            except: pass
+
         score_cls = 'text-green' if counts['bull'] > counts['bear'] else ('text-red' if counts['bear'] > counts['bull'] else '')
         tw_html += f'''
         <tr>
             <td data-label="台股標的"><b>{ts}</b></td>
+            <td data-label="昨收價" class="mono val">{price_str}</td>
             <td data-label="看漲次數" class="mono val text-green">{counts['bull']}</td>
             <td data-label="看跌次數" class="mono val text-red">{counts['bear']}</td>
-            <td data-label="盤整次數" class="mono val">{counts['neutral']}</td>
             <td data-label="綜合情緒" class="val"><b class="{score_cls}">{'偏多' if counts['bull']>counts['bear'] else ('偏空' if counts['bear']>counts['bull'] else '中性')}</b></td>
         </tr>'''
 
@@ -244,7 +265,7 @@ def generate_dashboard():
 
         <!-- Tab 2: TW Forecast -->
         <div id="t2" class="tab-content"><div class="card"><table>
-            <thead><tr><th>台股標的</th><th class="val">看漲次數</th><th class="val">看跌次數</th><th class="val">盤整次數</th><th class="val">綜合情緒</th></tr></thead>
+            <thead><tr><th>台股標的</th><th class="val">昨收價</th><th class="val">看漲次數</th><th class="val">看跌次數</th><th class="val">綜合情緒</th></tr></thead>
             <tbody>{tw_html}</tbody>
         </table></div></div>
     </div>
