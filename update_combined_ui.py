@@ -294,25 +294,38 @@ def generate_dashboard():
         </tr>'''
 
     poly_html = ''
-    if not poly_markets:
-        poly_html = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #70757a;">目前無符合條件的市場數據</td></tr>'
-    else:
-        active_opps = [m for m in poly_markets if m['edge_val'] > 0]
-        if not active_opps:
-            # 如果有數據但沒有獲利機會，在最上方顯示提醒，但仍保留數據供參考
-            poly_html += '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
-        
-        for m in poly_markets:
-            # 只有真正有獲利空間的才高亮（Edge > 0）
-            opp_cls = 'opp-highlight' if m['edge_val'] > 0 else ''
-            edge_cls = 'text-green' if m['edge_val'] > 0 else ('text-red' if m['edge_val'] < -0.5 else '')
-            
+    if not arbitrage_opps:
+        poly_html = '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
+        poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid var(--border);">🔥 熱門市場 (成交量 Top 10)</td></tr>'
+        for m in hot_markets:
             poly_html += f'''
-            <tr class="{opp_cls}">
+            <tr>
                 <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
                 <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
                 <td data-label="總價" class="mono val">{m['bundle']}</td>
-                <td data-label="獲利 (Edge)" class="mono val"><b class="{edge_cls}">{m['edge']}</b></td>
+                <td data-label="獲利 (Edge)" class="mono val"><b class="{'text-green' if m['edge_val']>0 else ''}">{m['edge']}</b></td>
+                <td data-label="成交量" class="val">{m['vol']}</td>
+            </tr>'''
+    else:
+        # 有套利機會時
+        for m in arbitrage_opps:
+            poly_html += f'''
+            <tr class="opp-highlight">
+                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
+                <td data-label="總價" class="mono val">{m['bundle']}</td>
+                <td data-label="獲利 (Edge)" class="mono val"><b class="text-green">{m['edge']}</b></td>
+                <td data-label="成交量" class="val">{m['vol']}</td>
+            </tr>'''
+        # 即使有套利，下方也附上熱門市場參考
+        poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">🔥 熱門市場 (成交量參考)</td></tr>'
+        for m in hot_markets[:5]: # 縮減為 5 筆避免過長
+            poly_html += f'''
+            <tr>
+                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
+                <td data-label="總價" class="mono val">{m['bundle']}</td>
+                <td data-label="獲利 (Edge)" class="mono val">{m['edge']}</td>
                 <td data-label="成交量" class="val">{m['vol']}</td>
             </tr>'''
 
