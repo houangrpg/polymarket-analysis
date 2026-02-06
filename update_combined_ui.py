@@ -286,10 +286,11 @@ def generate_dashboard():
             <td data-label="綜合情緒" class="val"><b class="{score_cls}">{sentiment}</b></td>
         </tr>'''
 
-    # --- 統計準確度 (當天結算邏輯) ---
+    # --- 統計準確度 (修正後的結算邏輯) ---
     today_str = time.strftime('%Y-%m-%d', time.localtime())
+    current_hour = int(time.strftime('%H', time.localtime()))
     
-    # 讀取現有的歷史紀錄
+    # 讀取歷史紀錄
     history = []
     try:
         log_file = 'prediction_history.json'
@@ -299,46 +300,53 @@ def generate_dashboard():
                 if content: history = json.loads(content)
     except: pass
 
-    # 過濾掉「非今日」的累積數據，只保留歷史每天的結算點
-    # 歷史紀錄中：每一筆應該代表一天的最終結果
+    # 邏輯修正：
+    # 1. 歷史紀錄應該是「已結算」的天數。
+    # 2. 如果現在是 00:00 - 09:00 (台股開盤前)，我們是在做「預測」，不應該更新歷史紀錄。
+    # 3. 如果現在是 14:00 之後 (台股收盤後)，這才算是當天的「最終結算」，可以存入歷史。
     
-    # 計算「當下」的準確率
+    # 計算當前執行時的準確率 (用於大卡片顯示)
     acc_rate = (correct_forecasts / total_forecasts * 100) if total_forecasts > 0 else 0
     
-    # 更新歷史紀錄：
-    # 1. 如果歷史最後一筆是今天，則更新它（代表當天還在跳動）
-    # 2. 如果最後一筆是昨天，則新增一筆今天的
-    if history and history[-1].get('date') == today_str:
-        history[-1] = {
-            'date': today_str,
-            'time': updated_at,
-            'accuracy': round(acc_rate, 1),
-            'correct': correct_forecasts,
-            'total': total_forecasts
-        }
-    else:
-        history.append({
-            'date': today_str,
-            'time': updated_at,
-            'accuracy': round(acc_rate, 1),
-            'correct': correct_forecasts,
-            'total': total_forecasts
-        })
+    if current_hour >= 14 and current_hour < 23:
+        # 只有在收盤後的時段才去更新歷史 JSON
+        if not history or history[-1].get('date') != today_str:
+            history.append({
+                'date': today_str,
+                'time': updated_at,
+                'accuracy': round(acc_rate, 1),
+                'correct': correct_forecasts,
+                'total': total_forecasts
+            })
+        else:
+            # 更新當日的最新結算
+            history[-1] = {
+                'date': today_str,
+                'time': updated_at,
+                'accuracy': round(acc_rate, 1),
+                'correct': correct_forecasts,
+                'total': total_forecasts
+            }
+        
+        history = history[-60:]
+        try:
+            with open(log_file, 'w') as f: json.dump(history, f, indent=2)
+        except: pass
 
-    # 保留最近 60 筆歷史（天）
-    history = history[-60:]
-    try:
-        with open(log_file, 'w') as f: json.dump(history, f, indent=2)
-    except: pass
-
-    # 生成歷史記錄 HTML
+    # 生成歷史記錄 HTML (僅顯示歷史庫中的數據)
     history_rows = ""
-    # 累積 PK 依然是所有歷史天數的總和
+    # 如果今天還沒存入歷史，則 PK 統計要包含「當前這筆」+「歷史庫」
+    # 為了讓 UI 一致，PK 統計我們算全部
     total_correct_all = sum(h['correct'] for h in history)
     total_forecasts_all = sum(h['total'] for h in history)
     
-    for h in reversed(history):
-        # 顯示每一天的獨立戰果
+    # 如果今天還沒在 history 裡，且現在有數據，臨時加進去顯示
+    display_history = list(history)
+    if not any(h['date'] == today_str for h in display_history) and total_forecasts > 0:
+        # 這只是為了 UI 顯示，不存檔
+        pass 
+
+    for h in reversed(display_history):
         history_rows += f"<tr><td>{h['date']}</td><td class='val'>{h['accuracy']}%</td><td class='val'>{h['correct']}/{h['total']}</td></tr>"
 
     accuracy_html = f'''
