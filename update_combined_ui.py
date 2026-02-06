@@ -142,23 +142,28 @@ def generate_dashboard():
         except:
             return 0.0
 
-    # 初始過濾：排除總價 > 1 且 Edge 不要太離譜的 (-30% 以內)
-    filtered_hot = [m for m in raw_poly if -30.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
+    # 初始過濾：排除總價 > 1 且 Edge 不要太離譜的 (-50% 以內)
+    filtered_hot = [m for m in raw_poly if -50.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
     
-    # 如果過濾後太少，就乾脆只過濾 bundle <= 1.0 (不管 Edge 多負，只要合理就顯示)
+    # 如果過濾後太少，就直接使用所有合理 bundle 的項目 (保底)
     if len(filtered_hot) < 5:
         filtered_hot = [m for m in raw_poly if float(m['bundle']) <= 1.0]
     
+    # 如果還是空的 (API 暫時沒數據)，則使用全部數據
+    if not filtered_hot:
+        filtered_hot = raw_poly
+
     # 按照成交量排序
     hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
     hot_markets = hot_markets[:10]
-
+    
     poly_html = ''
     
     # 打印調試資訊
     print(f"Total Raw Markets: {len(raw_poly)}")
     print(f"Arbitrage Opps: {len(arbitrage_opps)}")
-    print(f"Hot Markets Count: {len(hot_markets)}")
+    print(f"Filtered Hot Count: {len(filtered_hot)}")
+    print(f"Final Hot Markets Count: {len(hot_markets)}")
 
     if not arbitrage_opps:
         poly_html += '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
