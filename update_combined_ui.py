@@ -452,7 +452,12 @@ def generate_dashboard():
         function checkReload() {{
             const savedTab = localStorage.getItem('activeTab');
             if (savedTab !== null) sw(parseInt(savedTab));
-            setInterval(() => {{ location.reload(); }}, 60000);
+            // 每 60 秒刷新一次，並加上隨機參數繞過快取
+            setInterval(() => {{ 
+                const url = new URL(window.location.href);
+                url.searchParams.set('t', Date.now());
+                window.location.href = url.href;
+            }}, 60000);
         }}
     </script>
     <div class="header">
