@@ -101,6 +101,33 @@ def generate_dashboard():
     stocks = fetch_stock_data()
     poly_markets = fetch_polymarket_realtime()
     
+    # 計算台股預測統計
+    tw_stats = {}
+    for s in stocks:
+        pred_type = s['pred'] # '看漲', '看跌', '盤整'
+        tw_stocks = [x.strip() for x in s['tw'].replace('、', ',').split(',')]
+        for ts in tw_stocks:
+            if not ts: continue
+            if ts not in tw_stats:
+                tw_stats[ts] = {'bull': 0, 'bear': 0, 'neutral': 0}
+            if pred_type == '看漲': tw_stats[ts]['bull'] += 1
+            elif pred_type == '看跌': tw_stats[ts]['bear'] += 1
+            else: tw_stats[ts]['neutral'] += 1
+    
+    tw_html = ''
+    # 依看漲次數排序
+    sorted_tw = sorted(tw_stats.items(), key=lambda x: (x[1]['bull'], -x[1]['bear']), reverse=True)
+    for ts, counts in sorted_tw:
+        score_cls = 'text-green' if counts['bull'] > counts['bear'] else ('text-red' if counts['bear'] > counts['bull'] else '')
+        tw_html += f'''
+        <tr>
+            <td data-label="台股標的"><b>{ts}</b></td>
+            <td data-label="看漲次數" class="mono val text-green">{counts['bull']}</td>
+            <td data-label="看跌次數" class="mono val text-red">{counts['bear']}</td>
+            <td data-label="盤整次數" class="mono val">{counts['neutral']}</td>
+            <td data-label="綜合情緒" class="val"><b class="{score_cls}">{'偏多' if counts['bull']>counts['bear'] else ('偏空' if counts['bear']>counts['bull'] else '中性')}</b></td>
+        </tr>'''
+
     stock_html = ''
     for s in stocks:
         c_cls = 'text-green' if s['cv'] >= 0 else 'text-red'
@@ -118,19 +145,27 @@ def generate_dashboard():
         </tr>'''
 
     poly_html = ''
-    for m in poly_markets:
-        # 只有真正有獲利空間的才高亮（Edge > 0）
-        opp_cls = 'opp-highlight' if m['edge_val'] > 0 else ''
-        edge_cls = 'text-green' if m['edge_val'] > 0 else ('text-red' if m['edge_val'] < -0.5 else '')
+    if not poly_markets:
+        poly_html = '<tr><td colspan="5" style="text-align:center; padding: 40px; color: #70757a;">目前無符合條件的市場數據</td></tr>'
+    else:
+        active_opps = [m for m in poly_markets if m['edge_val'] > 0]
+        if not active_opps:
+            # 如果有數據但沒有獲利機會，在最上方顯示提醒，但仍保留數據供參考
+            poly_html += '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
         
-        poly_html += f'''
-        <tr class="{opp_cls}">
-            <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
-            <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
-            <td data-label="總價" class="mono val">{m['bundle']}</td>
-            <td data-label="獲利 (Edge)" class="mono val"><b class="{edge_cls}">{m['edge']}</b></td>
-            <td data-label="成交量" class="val">{m['vol']}</td>
-        </tr>'''
+        for m in poly_markets:
+            # 只有真正有獲利空間的才高亮（Edge > 0）
+            opp_cls = 'opp-highlight' if m['edge_val'] > 0 else ''
+            edge_cls = 'text-green' if m['edge_val'] > 0 else ('text-red' if m['edge_val'] < -0.5 else '')
+            
+            poly_html += f'''
+            <tr class="{opp_cls}">
+                <td data-label="預測市場"><div class="q-text">{m['title']}</div></td>
+                <td data-label="Yes / No" class="mono val">{m['yes']} / {m['no']}</td>
+                <td data-label="總價" class="mono val">{m['bundle']}</td>
+                <td data-label="獲利 (Edge)" class="mono val"><b class="{edge_cls}">{m['edge']}</b></td>
+                <td data-label="成交量" class="val">{m['vol']}</td>
+            </tr>'''
 
     html = f'''<!doctype html>
 <html lang="zh-TW">
@@ -171,19 +206,38 @@ def generate_dashboard():
         }}
     </style>
 </head>
-<body>
+<body onload="checkReload()">
+    <script>
+        function checkReload() {{
+            // 每 60 秒刷新一次
+            setInterval(() => {{ location.reload(); }}, 60000);
+        }}
+    </script>
     <div class="header">
         <div class="header-top"><div style="font-weight:700; color:var(--blue);">OPENCLAW PRO</div><div style="font-size:12px; color:#70757a;">更新時間: {updated_at}</div></div>
-        <div class="tabs"><div class="tab" onclick="sw(0)">📈 美股台股</div><div class="tab active" onclick="sw(1)">🔮 POLYMARKET 套利</div></div>
+        <div class="tabs">
+            <div class="tab" onclick="sw(0)">🔮 套利</div>
+            <div class="tab" onclick="sw(1)">📈 美股</div>
+            <div class="tab" onclick="sw(2)">🇹🇼 台股預測</div>
+        </div>
     </div>
     <div class="container">
-        <div id="t0" class="tab-content"><div class="card"><table>
+        <!-- Tab 0: Polymarket -->
+        <div id="t0" class="tab-content active"><div class="card"><table>
+            <thead><tr><th>預測市場</th><th class="val">Yes / No Ask</th><th class="val">總價</th><th class="val">獲利 (Edge)</th><th class="val">成交量</th></tr></thead>
+            <tbody>{poly_html}</tbody>
+        </table></div></div>
+        
+        <!-- Tab 1: US Stocks -->
+        <div id="t1" class="tab-content"><div class="card"><table>
             <thead><tr><th>標的</th><th class="val">價格</th><th class="val">漲跌</th><th>聯動預測</th></tr></thead>
             <tbody>{stock_html}</tbody>
         </table></div></div>
-        <div id="t1" class="tab-content active"><div class="card"><table>
-            <thead><tr><th>預測市場</th><th class="val">Yes / No Ask</th><th class="val">總價</th><th class="val">獲利 (Edge)</th><th class="val">成交量</th></tr></thead>
-            <tbody>{poly_html}</tbody>
+
+        <!-- Tab 2: TW Forecast -->
+        <div id="t2" class="tab-content"><div class="card"><table>
+            <thead><tr><th>台股標的</th><th class="val">看漲次數</th><th class="val">看跌次數</th><th class="val">盤整次數</th><th class="val">綜合情緒</th></tr></thead>
+            <tbody>{tw_html}</tbody>
         </table></div></div>
     </div>
     <script>function sw(idx){{document.querySelectorAll('.tab').forEach((t, i) => {{t.classList.toggle('active', i === idx);document.getElementById('t'+i).classList.toggle('active', i === idx);}});}}</script>
