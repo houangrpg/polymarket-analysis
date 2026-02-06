@@ -132,24 +132,25 @@ def generate_dashboard():
     raw_poly = fetch_polymarket_realtime()
     
     # 1. 篩選有套利機會的項目 (Edge > 0 且合理，排除總價 > 1 的異常情況)
-    # 總價 > 1 代表兩邊買起來成本超過 1 元，不可能套利
     arbitrage_opps = [m for m in raw_poly if 0 < m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
     arbitrage_opps.sort(key=lambda x: x['edge_val'], reverse=True)
     
     # 2. 篩選討論度最高 (成交量最高) 的熱門項目
-    # 同樣排除總價 > 1 的不合理數據，避免誤導
+    # 嚴格排除 Edge 過於極端的異常項目 (例如低於 -10% 通常就是流動性極差的數據雜訊)
     def get_vol_val(v_str):
         try:
             return float(v_str.replace('K',''))
         except:
             return 0.0
 
-    filtered_hot = [m for m in raw_poly if m['edge_val'] > -50 and float(m['bundle']) <= 1.0]
+    filtered_hot = [m for m in raw_poly if -10.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
     hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
-    # 確保 hot_markets 有值，如果篩選後是空的，就直接用 raw_poly
-    if not hot_markets and raw_poly:
-        hot_markets = sorted(raw_poly, key=lambda x: get_vol_val(x['vol']), reverse=True)
     
+    # 如果過濾後太少，稍微放寬一點到 -20%
+    if len(hot_markets) < 5:
+        filtered_hot = [m for m in raw_poly if -20.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
+        hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
+
     hot_markets = hot_markets[:10]
 
     poly_html = ''
