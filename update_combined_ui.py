@@ -4,6 +4,28 @@ import os
 import requests
 import json
 import concurrent.futures
+import functools
+
+# 全域快取，避免重複查詢相同的名稱
+@functools.lru_cache(maxsize=200)
+def search_tw_ticker(name):
+    """透過 Yahoo Finance API 搜尋台股代碼"""
+    try:
+        # 優先處理已知的特殊案例
+        overrides = {'世芯-KY': '3661.TW', '貿聯-KY': '3665.TW'}
+        if name in overrides: return overrides[name]
+        
+        url = f"https://query2.finance.yahoo.com/v1/finance/search?q={name}&quotesCount=5"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        r = requests.get(url, headers=headers, timeout=5)
+        data = r.json()
+        for q in data.get('quotes', []):
+            symbol = q.get('symbol', '')
+            # 匹配台灣交易所代碼 (.TW 或 .TWO)
+            if symbol.endswith('.TW') or symbol.endswith('.TWO'):
+                return symbol
+    except: pass
+    return None
 
 def fetch_stock_data():
     tickers = ['TSLA', 'NVDA', 'AAPL', 'MSFT', 'AMZN', 'GOOGL', 'META', 'AVGO', 'TSM', 'ASML', 'ARM']
@@ -118,25 +140,24 @@ def generate_dashboard():
     # 依看漲次數排序
     sorted_tw = sorted(tw_stats.items(), key=lambda x: (x[1]['bull'], -x[1]['bear']), reverse=True)
     
-    # 獲取台股價格 (這部分使用 yfinance, 台灣股票代碼後綴為 .TW 或 .TWO)
-    # 由於台股個股名稱目前是中文 (如台積電), 我們需要一個對照表
-    # 或者暫時顯示連動強度, 但 Joe 想要前日收盤價。
-    # 為了準確性, 我先建立一個常用連動個股的代碼映射
-    tw_mapping = {
-        '台積電': '2330.TW', '鴻海': '2317.TW', '廣達': '2382.TW', '技嘉': '2376.TW',
-        '世芯-KY': '3661.TW', '大立光': '3008.TW', '貿聯-KY': '3665.TW'
-    }
+    # 建立搜尋任務
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        names = [ts for ts, _ in sorted_tw]
+        ticker_results = list(executor.map(search_tw_ticker, names))
+    
+    tw_ticker_map = dict(zip(names, ticker_results))
 
     for ts, counts in sorted_tw:
         price_str = "-"
-        ticker = tw_mapping.get(ts)
+        ticker = tw_ticker_map.get(ts)
         if ticker:
             try:
                 t_data = yf.Ticker(ticker)
-                # 獲取前日收盤價
-                hist = t_data.history(period="2d")
-                if len(hist) >= 1:
-                    price_str = f"${hist['Close'].iloc[-1]:.2f}"
+                # 獲取最新收盤價 (如果盤中則為即時價)
+                info = t_data.info
+                p = info.get('regularMarketPrice') or info.get('currentPrice')
+                if p:
+                    price_str = f"${p:.2f}"
             except: pass
 
         score_cls = 'text-green' if counts['bull'] > counts['bear'] else ('text-red' if counts['bear'] > counts['bull'] else '')
