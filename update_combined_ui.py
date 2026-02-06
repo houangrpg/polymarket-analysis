@@ -136,21 +136,21 @@ def generate_dashboard():
     arbitrage_opps.sort(key=lambda x: x['edge_val'], reverse=True)
     
     # 2. 篩選討論度最高 (成交量最高) 的熱門項目
-    # 嚴格排除 Edge 過於極端的異常項目 (例如低於 -10% 通常就是流動性極差的數據雜訊)
     def get_vol_val(v_str):
         try:
             return float(v_str.replace('K',''))
         except:
             return 0.0
 
-    filtered_hot = [m for m in raw_poly if -10.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
-    hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
+    # 初始過濾：排除總價 > 1 且 Edge 不要太離譜的 (-30% 以內)
+    filtered_hot = [m for m in raw_poly if -30.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
     
-    # 如果過濾後太少，稍微放寬一點到 -20%
-    if len(hot_markets) < 5:
-        filtered_hot = [m for m in raw_poly if -20.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
-        hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
-
+    # 如果過濾後太少，就乾脆只過濾 bundle <= 1.0 (不管 Edge 多負，只要合理就顯示)
+    if len(filtered_hot) < 5:
+        filtered_hot = [m for m in raw_poly if float(m['bundle']) <= 1.0]
+    
+    # 按照成交量排序
+    hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
     hot_markets = hot_markets[:10]
 
     poly_html = ''
