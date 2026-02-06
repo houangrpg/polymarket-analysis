@@ -11,17 +11,21 @@ import functools
 def search_tw_ticker(name):
     """透過 Yahoo Finance API 搜尋台股代碼"""
     try:
-        # 優先處理已知的特殊案例
-        overrides = {'世芯-KY': '3661.TW', '貿聯-KY': '3665.TW'}
+        # 手動映射與修正（針對搜尋不穩定的重要個股）
+        overrides = {
+            '台積電': '2330.TW', '鴻海': '2317.TW', '廣達': '2382.TW', 
+            '技嘉': '2376.TW', '世芯-KY': '3661.TW', '大立光': '3008.TW', 
+            '貿聯-KY': '3665.TW', '廣達電腦': '2382.TW'
+        }
         if name in overrides: return overrides[name]
         
-        url = f"https://query2.finance.yahoo.com/v1/finance/search?q={name}&quotesCount=5"
+        # 嘗試搜尋代碼
+        url = f"https://query2.finance.yahoo.com/v1/finance/search?q={name}&quotesCount=10"
         headers = {'User-Agent': 'Mozilla/5.0'}
         r = requests.get(url, headers=headers, timeout=5)
         data = r.json()
         for q in data.get('quotes', []):
             symbol = q.get('symbol', '')
-            # 匹配台灣交易所代碼 (.TW 或 .TWO)
             if symbol.endswith('.TW') or symbol.endswith('.TWO'):
                 return symbol
     except: pass
@@ -154,11 +158,11 @@ def generate_dashboard():
         if ticker:
             try:
                 t_data = yf.Ticker(ticker)
-                # 獲取最新與昨日價格
-                # 為了穩定獲取昨日收盤，使用 history
-                hist = t_data.history(period="2d")
-                if len(hist) >= 1:
-                    price_prev = f"${hist['Close'].iloc[0]:.2f}"
+                # 獲取歷史數據以確保昨收穩定
+                hist = t_data.history(period="5d")
+                if len(hist) >= 2:
+                    # 最後一筆是「現在/今天」，倒數第二筆是「昨收」
+                    price_prev = f"${hist['Close'].iloc[-2]:.2f}"
                     price_now = f"${hist['Close'].iloc[-1]:.2f}"
             except: pass
 
@@ -166,10 +170,12 @@ def generate_dashboard():
         tw_html += f'''
         <tr>
             <td data-label="台股標的"><b>{ts}</b></td>
-            <td data-label="現價" class="mono val"><b>{price_now}</b></td>
-            <td data-label="昨收" class="mono val">{price_prev}</td>
-            <td data-label="看漲次數" class="mono val text-green">{counts['bull']}</td>
-            <td data-label="看跌次數" class="mono val text-red">{counts['bear']}</td>
+            <td data-label="價格歷史" class="mono val">
+                <div style="font-size: 11px; color: #70757a; border-bottom: 1px solid #eee; padding-bottom: 2px;">昨收: {price_prev}</div>
+                <div style="font-size: 14px; font-weight: 700; padding-top: 2px;">現價: {price_now}</div>
+            </td>
+            <td data-label="看漲" class="mono val text-green">{counts['bull']}</td>
+            <td data-label="看跌" class="mono val text-red">{counts['bear']}</td>
             <td data-label="綜合情緒" class="val"><b class="{score_cls}">{'偏多' if counts['bull']>counts['bear'] else ('偏空' if counts['bear']>counts['bull'] else '中性')}</b></td>
         </tr>'''
 
@@ -289,7 +295,7 @@ def generate_dashboard():
 
         <!-- Tab 2: TW Forecast -->
         <div id="t2" class="tab-content"><div class="card"><table>
-            <thead><tr><th>台股標的</th><th class="val">現價</th><th class="val">昨收</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
+            <thead><tr><th>台股標的</th><th class="val">價格對比 (昨收/現價)</th><th class="val">看漲</th><th class="val">看跌</th><th class="val">綜合情緒</th></tr></thead>
             <tbody>{tw_html}</tbody>
         </table></div></div>
     </div>
