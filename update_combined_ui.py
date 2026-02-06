@@ -135,26 +135,15 @@ def generate_dashboard():
     arbitrage_opps = [m for m in raw_poly if 0 < m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
     arbitrage_opps.sort(key=lambda x: x['edge_val'], reverse=True)
     
-    # 2. 篩選討論度最高 (成交量最高) 的熱門項目
+    # 2. 篩選成交量最高的熱門項目 (Top 10 Volume)
     def get_vol_val(v_str):
         try:
             return float(v_str.replace('K',''))
         except:
             return 0.0
 
-    # 初始過濾：排除總價 > 1 且 Edge 不要太離譜的 (-50% 以內)
-    filtered_hot = [m for m in raw_poly if -50.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
-    
-    # 如果過濾後太少，就直接使用所有合理 bundle 的項目 (保底)
-    if len(filtered_hot) < 5:
-        filtered_hot = [m for m in raw_poly if float(m['bundle']) <= 1.0]
-    
-    # 如果還是空的 (API 暫時沒數據)，則使用全部數據
-    if not filtered_hot:
-        filtered_hot = raw_poly
-
-    # 按照成交量排序
-    hot_markets = sorted(filtered_hot, key=lambda x: get_vol_val(x['vol']), reverse=True)
+    # 按照成交量 (Volume) 排序，不再受 Edge 影響
+    hot_markets = sorted(raw_poly, key=lambda x: get_vol_val(x['vol']), reverse=True)
     hot_markets = hot_markets[:10]
     
     poly_html = ''
@@ -162,7 +151,6 @@ def generate_dashboard():
     # 打印調試資訊
     print(f"Total Raw Markets: {len(raw_poly)}")
     print(f"Arbitrage Opps: {len(arbitrage_opps)}")
-    print(f"Filtered Hot Count: {len(filtered_hot)}")
     print(f"Final Hot Markets Count: {len(hot_markets)}")
 
     if not arbitrage_opps:
