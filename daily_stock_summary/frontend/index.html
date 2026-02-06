@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>美股每日分析面板</title>
+  <title>美股即時分析儀表板</title>
   <style>
     :root {
       --pm-blue: #1a73e8;
@@ -43,6 +43,7 @@
     .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
     .badge-bull { background: #e6f4ea; color: #137333; }
     .badge-neutral { background: #f1f3f4; color: #3c4043; }
+    .badge-red { background: #fce8e6; color: #d93025; }
     
     tr:hover { background-color: #f8f9fa; }
   </style>
@@ -50,44 +51,29 @@
 <body>
   <div class="header">
     <div class="header-content">
-      <h1>📈 美股每日分析儀表板</h1>
-      <div style="font-size: 14px; color: var(--text-muted);">Daily Insights</div>
+      <h1>📈 美股即時分析儀表板</h1>
+      <div style="font-size: 14px; color: var(--text-muted);">Real-time Insights</div>
     </div>
   </div>
 
   <div class="container">
     <div class="card">
       <div class="meta-bar">
-        <span>🕒 最後分析時間: 2026-02-06 12:23:07</span>
-        <span style="margin-left: 20px;">📊 市場範圍: S&P 500 / NASDAQ</span>
+        <span>🕒 最後抓取時間: 2026-02-06 12:36:31</span>
+        <span style="margin-left: 20px;">📊 數據來源: Yahoo Finance API</span>
       </div>
       <table>
         <thead>
           <tr>
             <th>個股名稱</th>
-            <th class="val">現價</th>
+            <th class="val">最新成交價</th>
             <th class="val">漲跌幅</th>
-            <th class="val">AI 情緒</th>
+            <th class="val">自動情緒</th>
             <th class="val">成交量</th>
           </tr>
         </thead>
         <tbody>
           
-      <tr>
-        <td>
-          <div class="market-cell">
-            <div class="m-img-placeholder">A</div>
-            <div class="q-wrap">
-              <div class="question-link">Apple Inc.</div>
-              <div class="slug-text">AAPL</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val highlight">$190.24</td>
-        <td class="mono val text-green">+1.2%</td>
-        <td class="val"><span class="badge badge-bull">Bullish</span></td>
-        <td class="mono val">52M</td>
-      </tr>
       <tr>
         <td>
           <div class="market-cell">
@@ -98,55 +84,100 @@
             </div>
           </div>
         </td>
-        <td class="mono val highlight">$185.10</td>
-        <td class="mono val text-red">-2.4%</td>
-        <td class="val"><span class="badge badge-neutral">Neutral</span></td>
-        <td class="mono val">102M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <div class="m-img-placeholder">N</div>
-            <div class="q-wrap">
-              <div class="question-link">NVIDIA Corp.</div>
-              <div class="slug-text">NVDA</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val highlight">$721.33</td>
-        <td class="mono val text-green">+4.5%</td>
-        <td class="val"><span class="badge badge-bull">Strong Bullish</span></td>
-        <td class="mono val">45M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <div class="m-img-placeholder">M</div>
-            <div class="q-wrap">
-              <div class="question-link">Microsoft</div>
-              <div class="slug-text">MSFT</div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val highlight">$405.12</td>
-        <td class="mono val text-green">+0.8%</td>
-        <td class="val"><span class="badge badge-bull">Bullish</span></td>
-        <td class="mono val">22M</td>
+        <td class="mono val highlight">$397.21</td>
+        <td class="mono val text-red">-2.17%</td>
+        <td class="val"><span class="badge badge-red">Bearish</span></td>
+        <td class="mono val">70.2M</td>
       </tr>
       <tr>
         <td>
           <div class="market-cell">
             <div class="m-img-placeholder">A</div>
             <div class="q-wrap">
-              <div class="question-link">Amazon.com</div>
+              <div class="question-link">Apple Inc.</div>
+              <div class="slug-text">AAPL</div>
+            </div>
+          </div>
+        </td>
+        <td class="mono val highlight">$275.91</td>
+        <td class="mono val text-red">-0.21%</td>
+        <td class="val"><span class="badge badge-neutral">Neutral</span></td>
+        <td class="mono val">52.2M</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="market-cell">
+            <div class="m-img-placeholder">N</div>
+            <div class="q-wrap">
+              <div class="question-link">NVIDIA Corporation</div>
+              <div class="slug-text">NVDA</div>
+            </div>
+          </div>
+        </td>
+        <td class="mono val highlight">$171.88</td>
+        <td class="mono val text-red">-1.33%</td>
+        <td class="val"><span class="badge badge-neutral">Neutral</span></td>
+        <td class="mono val">201.8M</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="market-cell">
+            <div class="m-img-placeholder">M</div>
+            <div class="q-wrap">
+              <div class="question-link">Microsoft Corporation</div>
+              <div class="slug-text">MSFT</div>
+            </div>
+          </div>
+        </td>
+        <td class="mono val highlight">$393.67</td>
+        <td class="mono val text-red">-4.95%</td>
+        <td class="val"><span class="badge badge-red">Bearish</span></td>
+        <td class="mono val">65.0M</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="market-cell">
+            <div class="m-img-placeholder">A</div>
+            <div class="q-wrap">
+              <div class="question-link">Amazon.com, Inc.</div>
               <div class="slug-text">AMZN</div>
             </div>
           </div>
         </td>
-        <td class="mono val highlight">$170.15</td>
-        <td class="mono val text-red">-0.3%</td>
+        <td class="mono val highlight">$222.69</td>
+        <td class="mono val text-red">-4.42%</td>
+        <td class="val"><span class="badge badge-red">Bearish</span></td>
+        <td class="mono val">95.7M</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="market-cell">
+            <div class="m-img-placeholder">G</div>
+            <div class="q-wrap">
+              <div class="question-link">Alphabet Inc.</div>
+              <div class="slug-text">GOOGL</div>
+            </div>
+          </div>
+        </td>
+        <td class="mono val highlight">$331.25</td>
+        <td class="mono val text-red">-0.54%</td>
         <td class="val"><span class="badge badge-neutral">Neutral</span></td>
-        <td class="mono val">31M</td>
+        <td class="mono val">87.1M</td>
+      </tr>
+      <tr>
+        <td>
+          <div class="market-cell">
+            <div class="m-img-placeholder">M</div>
+            <div class="q-wrap">
+              <div class="question-link">Meta Platforms, Inc.</div>
+              <div class="slug-text">META</div>
+            </div>
+          </div>
+        </td>
+        <td class="mono val highlight">$670.21</td>
+        <td class="mono val text-green">+0.18%</td>
+        <td class="val"><span class="badge badge-bull">Bullish</span></td>
+        <td class="mono val">16.6M</td>
       </tr>
         </tbody>
       </table>
