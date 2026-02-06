@@ -131,9 +131,9 @@ def generate_dashboard():
     stocks = fetch_stock_data()
     raw_poly = fetch_polymarket_realtime()
     
-    # 1. 篩選有套利機會的項目 (Edge >= 1.0 且合理，排除總價 > 1 的異常情況)
-    # 總價 > 1 代表兩邊買起來成本超過 1 元，不可能套利；小於 1% 的微小套利空間也排除以減少雜訊
-    arbitrage_opps = [m for m in raw_poly if 1.0 <= m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
+    # 1. 篩選有套利機會的項目 (Edge > 0 且合理，排除總價 > 1 的異常情況)
+    # 總價 > 1 代表兩邊買起來成本超過 1 元，不可能套利
+    arbitrage_opps = [m for m in raw_poly if 0 < m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
     arbitrage_opps.sort(key=lambda x: x['edge_val'], reverse=True)
     
     # 2. 篩選討論度最高 (成交量最高) 的熱門項目
@@ -360,15 +360,15 @@ def generate_dashboard():
 
     poly_html = ''
     if not arbitrage_opps:
-        poly_html += '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge >= 1%)</td></tr>'
+        poly_html += '<tr><td colspan="5" style="text-align:center; background: #fff3e0; color: #e65100; font-size: 13px; font-weight: 600; padding: 10px;">⚠️ 目前監測中：暫無即時套利空間 (Edge > 0)</td></tr>'
         poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid var(--border);">🔥 熱門市場 (成交量 Top 10)</td></tr>'
         if not hot_markets:
             poly_html += '<tr><td colspan="5" style="text-align:center; padding: 20px; color: #999;">(暫無熱門市場數據)</td></tr>'
         else:
             for m in hot_markets:
                 link = f"https://polymarket.com/market/{m['slug']}" if m['slug'] else "#"
-                # 只有 Edge >= 1% 才顯示綠色，否則顯示灰色
-                edge_style = 'class="text-green"' if m['edge_val'] >= 1.0 else 'style="color:#999; font-weight:400;"'
+                # 恢復為 Edge > 0 顯示綠色
+                edge_style = 'class="text-green"' if m['edge_val'] > 0 else 'style="color:#999; font-weight:400;"'
                 poly_html += f'''
                 <tr>
                     <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:#1a0dab; font-weight:500;">{m['title']} 🔗</a></div></td>
@@ -394,7 +394,7 @@ def generate_dashboard():
             poly_html += '<tr><td colspan="5" style="background: #f8f9fa; font-size: 12px; font-weight: 700; padding: 8px 12px; border-top: 2px solid var(--border);">🔥 熱門市場 (成交量參考)</td></tr>'
             for m in hot_markets[:5]:
                 link = f"https://polymarket.com/market/{m['slug']}" if m['slug'] else "#"
-                edge_style = 'class="text-green"' if m['edge_val'] >= 1.0 else 'style="color:#999; font-weight:400;"'
+                edge_style = 'class="text-green"' if m['edge_val'] > 0 else 'style="color:#999; font-weight:400;"'
                 poly_html += f'''
                 <tr>
                     <td data-label="預測市場"><div class="q-text"><a href="{link}" target="_blank" style="text-decoration:none; color:#1a0dab; font-weight:500;">{m['title']} 🔗</a></div></td>
