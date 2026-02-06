@@ -86,6 +86,8 @@ def fetch_polymarket_realtime():
         
         # 獲利優先排序
         results.sort(key=lambda x: x['edge_val'], reverse=True)
+        # 過濾極端異常數據（如 Edge < -50%），只顯示具備參考價值的市場
+        results = [r for r in results if r['edge_val'] > -50]
         return results[:20] # 取前 20 名
     except Exception as e:
         print(f"Polymarket fetch error: {e}")
