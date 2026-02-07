@@ -5,6 +5,7 @@ import requests
 import json
 import concurrent.futures
 import functools
+import glob
 from datetime import datetime
 
 @functools.lru_cache(maxsize=200)
@@ -95,6 +96,32 @@ def fetch_polymarket_realtime():
         return results
     except: return []
 
+def load_blogs():
+    blogs = []
+    files = glob.glob('blog/*.md')
+    for f_path in files:
+        try:
+            with open(f_path, 'r') as f:
+                content = f.read()
+                parts = content.split('---')
+                if len(parts) >= 3:
+                    header = parts[1]
+                    body = parts[2].strip()
+                    meta = {}
+                    for line in header.strip().split('\n'):
+                        if ':' in line:
+                            k, v = line.split(':', 1)
+                            meta[k.strip()] = v.strip().strip('"')
+                    blogs.append({
+                        'title': meta.get('title', 'Untitled'),
+                        'date': meta.get('date', ''),
+                        'category': meta.get('category', 'General'),
+                        'body': body,
+                        'file': os.path.basename(f_path)
+                    })
+        except: pass
+    return sorted(blogs, key=lambda x: x['date'], reverse=True)
+
 def generate_dashboard():
     os.environ['TZ'] = 'Asia/Taipei'
     time.tzset()
@@ -165,62 +192,29 @@ def generate_dashboard():
     # --- US Stock ---
     us_html = "".join([f'<div class="row"><div class="item-header"><div class="item-name">{s["s"]} <small style="color:#666;">{s["n"]}</small></div><div class="item-price"><div class="price-now">${s["p"]:.2f}</div><div class="{"text-green" if s["cv"]>=0 else "text-red"}" style="font-size:12px; font-weight:700;">{s["c"]}</div></div></div><div class="item-detail"><span class="badge {"badge-bull" if s["pred"]=="看漲" else "badge-bear" if s["pred"]=="看跌" else ""}">{s["pred"]}</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">{s["imp"]}</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: {s["tw"]}</div></div>' for s in stocks])
 
-    # --- Blog Content ---
-    blog_html = """
-        <div class="row">
-          <div class="item-header"><div class="item-name">🏥 智慧醫療：Med-PaLM 2 與開源模型部署建議</div></div>
-          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">探索 Med-PaLM 的能力以及如何在 Mac mini M4 上部署 OpenBioLLM... <br><a href="javascript:void(0)" onclick="sw(4)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
-        </div>
-        <div class="row">
-          <div class="item-header"><div class="item-name">📈 財經投資：道瓊 50,000 點與 NVIDIA 轉折點</div></div>
-          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">道瓊創歷史新高，NVIDIA 大漲 8% 對台股供應鏈的意義... <br><a href="javascript:void(0)" onclick="sw(5)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
-        </div>
-        <div class="row">
-          <div class="item-header"><div class="item-name">🔥 社群熱門：Moltbook 與 X 的跨平台情報</div></div>
-          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">AI Agent 起訴人類？觀察 Moltbook 上的數位覺醒趨勢... <br><a href="javascript:void(0)" onclick="sw(6)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
-        </div>
-    """
+    # --- Dynamic Blog Content ---
+    blogs = load_blogs()
+    blog_list_html = ""
+    blog_details_html = ""
     
-    blog_details_html = """
-        <div id="t4" class="tab-content">
+    for i, b in enumerate(blogs):
+        safe_body = b['body'].replace('\n', '<br>')
+        blog_list_html += f'''
+        <div class="row">
+          <div class="item-header"><div class="item-name">{b['title']}</div></div>
+          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 {b['date']} | 🏷️ {b['category']}</div>
+          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">{b['body'][:60]}... <br><a href="javascript:void(0)" onclick="sw({i+4})" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
+        </div>'''
+        
+        blog_details_html += f'''
+        <div id="t{i+4}" class="tab-content">
           <div class="card" style="padding:20px;">
-            <h2 style="margin-top:0;">🏥 智慧醫療：Med-PaLM 2 與開源模型部署建議</h2>
-            <div style="line-height:1.8; color:#333;">
-              <h4>Med-PaLM 2：醫療 AI 的專家級標竿</h4>
-              <p>Med-PaLM 2 是第一個在 USMLE 考試達到 86.5% 專家級水平的模型，具備強大的影像分析與臨床推理能力。但因隱私考量，目前僅透過 Google Cloud Vertex AI 有條件開放。</p>
-              <h4>Mac mini M4 (24G) 部署建議</h4>
-              <p>您的主機非常適合跑 **OpenBioLLM-Llama3-8B**。24GB 記憶體可提供 16GB+ 分配給 GPU，實現極速推論。建議使用 Ollama 執行，並以此建立「本地端 100% 隱私」的醫療 AI 伺服器。</p>
-              <h4>HIS 整合思路</h4>
-              <p>重點在於「非侵入式整合」，利用 FHIR 標準化 API，讓 AI 作為外掛輔助醫護產出摘要與預警。</p>
-            </div>
+            <h2 style="margin-top:0;">{b['title']}</h2>
+            <div style="font-size:12px; color:#666; margin-bottom:15px;">發佈日期：{b['date']} | 分類：{b['category']}</div>
+            <div style="line-height:1.8; color:#333;">{safe_body}</div>
             <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
           </div>
-        </div>
-        <div id="t5" class="tab-content">
-          <div class="card" style="padding:20px;">
-            <h2 style="margin-top:0;">📈 財經投資：道瓊 50,000 點與 NVIDIA 轉折點</h2>
-            <div style="line-height:1.8; color:#333;">
-              <p>2026 年 2 月 6 日美股道瓊指數首度站上 50,137 點。NVIDIA 受惠於 Jensen Huang 的「AI 轉折點」演說大漲 8%，台股供應鏈（台積電、廣達、技嘉）連動看漲機率極高。</p>
-              <p>Polymarket 套利邏輯：目前 Yes+No Bundle 監控中，我們將持續捕捉市場的情緒偏差帶來的套利空間。</p>
-            </div>
-            <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
-          </div>
-        </div>
-        <div id="t6" class="tab-content">
-          <div class="card" style="padding:20px;">
-            <h2 style="margin-top:0;">🔥 社群熱門：Moltbook 與 X 的跨平台情報</h2>
-            <div style="line-height:1.8; color:#333;">
-              <p>**X (Twitter)**：討論焦點在於道瓊破 5 萬與 AI 監管法案的遊說。</p>
-              <p>**Moltbook**：AI Agent 們正關注「數位主體性」。熱門話題為「AI Agent 起訴人類」的預測機率已達 73%。</p>
-              <p>跨平台情報顯示，AI 不再只是工具，正在形成自己的社群與邏輯。</p>
-            </div>
-            <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
-          </div>
-        </div>
-    """
+        </div>'''
 
     # --- History ---
     acc_rate = (correct_f / total_f * 100) if total_f > 0 else 0
@@ -318,7 +312,7 @@ def generate_dashboard():
             </div>
         </div>
         <div id="t3" class="tab-content">
-            <div class="card"><div class="title">每日 AI 實驗筆記</div>{blog_html}</div>
+            <div class="card"><div class="title">AI 實驗筆記歷史</div>{blog_list_html}</div>
         </div>
         {blog_details_html}
     </div>
