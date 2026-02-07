@@ -238,6 +238,9 @@ def generate_dashboard():
     </div>'''
 
     # --- Final HTML ---
+    opp_count = len(arbitrage_opps)
+    monitor_tab_label = f"🔮 監控 ({opp_count})" if opp_count > 0 else "🔮 監控"
+
     full_html = f'''<!doctype html>
 <html lang="zh-TW">
 <head>
@@ -251,12 +254,14 @@ def generate_dashboard():
         .brand {{ padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }}
         .brand b {{ color:var(--blue); font-size:18px; }}
         .tabs {{ display:flex; }}
-        .tab {{ flex:1; text-align:center; padding:12px; font-size:14px; font-weight:600; color:#5f6368; border-bottom:3px solid transparent; }}
+        .tab {{ flex:1; text-align:center; padding:12px; font-size:14px; font-weight:600; color:#5f6368; border-bottom:3px solid transparent; position:relative; }}
         .tab.active {{ color:var(--blue); border-bottom-color:var(--blue); }}
+        .badge-count {{ background:#d93025; color:white; font-size:10px; padding:1px 5px; border-radius:10px; position:absolute; top:8px; right:4px; font-weight:900; }}
         .container {{ padding:10px; max-width:600px; margin:0 auto; }}
         .card {{ background:white; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; overflow:hidden; }}
         .title {{ padding:10px 16px; font-size:12px; font-weight:700; background:#f1f3f4; color:#5f6368; }}
         .row {{ padding:12px 16px; border-bottom:1px solid #f0f0f0; display:flex; flex-direction:column; }}
+        .opp-highlight {{ background:#e6f4ea; border-left:4px solid #137333; }}
         .item-header {{ display:flex; justify-content:space-between; align-items:flex-start; }}
         .item-name {{ font-size:15px; font-weight:700; }}
         .price-now {{ font-size:16px; font-weight:800; }}
@@ -275,7 +280,7 @@ def generate_dashboard():
     <div class="header">
         <div class="brand"><b>JoeClowAI Lab</b> <span style="font-size:10px; color:#999;">{updated_at}</span></div>
         <div class="tabs">
-            <div class="tab active" onclick="sw(0)">🔮 監控</div>
+            <div class="tab active" onclick="sw(0)">{monitor_tab_label}</div>
             <div class="tab" onclick="sw(1)">📈 美股</div>
             <div class="tab" onclick="sw(2)">🇹🇼 預測</div>
             <div class="tab" onclick="sw(3)">📝 筆記</div>
