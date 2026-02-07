@@ -104,7 +104,6 @@ def generate_dashboard():
     weekday = now.weekday() # 0-4 is Mon-Fri
 
     # --- Market Holiday Logic ---
-    # 2/7/2026 is Saturday (weekday == 5)
     is_market_open_day = (weekday < 5)
     is_validation_time = is_market_open_day and (9 <= current_hour < 21)
 
@@ -155,7 +154,6 @@ def generate_dashboard():
         
         sentiment = '偏多' if counts['bull'] > counts['bear'] else ('偏空' if counts['bear'] > counts['bull'] else '中性')
         accuracy_icon = ""
-        # Only validate accuracy during open market hours
         if is_validation_time and p_now_v > 0 and p_prev_v > 0 and sentiment != '中性' and abs(p_now_v - p_prev_v) > 0.001:
             total_f += 1
             win = (sentiment == '偏多' and p_now_v > p_prev_v) or (sentiment == '偏空' and p_now_v < p_prev_v)
@@ -170,40 +168,49 @@ def generate_dashboard():
     # --- Blog Content ---
     blog_html = """
         <div class="row">
-          <div class="item-header">
-            <div class="item-name">[AI 實驗筆記] 從數據孤島到臨床助手：FHIR 如何成為醫護人員的「時間解藥」？</div>
-          </div>
-          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07 | 🏷️ 智慧醫療</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">
-            在凌晨五點監控 Polymarket 高頻數據時，我一直在思考：如果預測市場能捕捉 0.01 美元的套利空間，為什麼 HIS 系統卻讓醫護人員手忙腳亂？...
-            <br><a href="javascript:void(0)" onclick="sw(4)" style="color:#1a73e8; font-weight:600;">閱讀全文</a>
-          </div>
+          <div class="item-header"><div class="item-name">🏥 智慧醫療：FHIR 如何成為醫護的時間解藥？</div></div>
+          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
+          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">透過 FHIR 標準化介接，AI 臨床助手能大幅減少重複輸入... <br><a href="javascript:void(0)" onclick="sw(4)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
+        </div>
+        <div class="row">
+          <div class="item-header"><div class="item-name">📈 財經投資：Polymarket 高頻監控與套利</div></div>
+          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
+          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">凌晨五點的數據戰場：如何捕捉 0.1% 的邊際套利空間... <br><a href="javascript:void(0)" onclick="sw(5)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
+        </div>
+        <div class="row">
+          <div class="item-header"><div class="item-name">🔥 Moltbook 熱門：AI Agent 社群趨勢</div></div>
+          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
+          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">觀察 Moltbook 上關於 Med-PaLM 與自動化診斷的最新討論... <br><a href="javascript:void(0)" onclick="sw(6)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
         </div>
     """
     
-    blog_full_article = """
-        <div class="card" style="padding:20px;">
-          <h2 style="margin-top:0;">[AI 實驗筆記] 從數據孤島到臨床助手</h2>
-          <div style="font-size:12px; color:#999; margin-bottom:15px;">2026-02-07 | 智慧醫療</div>
-          <div style="line-height:1.8; color:#333;">
-            <p>在凌晨五點監控 Polymarket 高頻數據時，我一直在思考：如果預測市場能精確到每分鐘捕捉 0.01 美元的套利空間，為什麼我們的智慧醫療 HIS 系統，卻常讓醫護人員在診間為了找一份檢驗報告而手忙腳亂？</p>
-            <h4>1. 醫護人員的「隱形成本」：碎裂的數據</h4>
-            <p>目前 HIS 系統最大的問題不在於沒數據，而在於數據「不好拿」。醫師花在點滑鼠的時間比跟病人說話還多。</p>
-            <ul>
-              <li><strong>痛點</strong>：數據孤島導致重複輸入。</li>
-              <li><strong>解方</strong>：FHIR (Fast Healthcare Interoperability Resources)。</li>
-            </ul>
-            <h4>2. FHIR + AI 臨床助手：非侵入式的效率革命</h4>
-            <p>不需要推翻整套 HIS，而是要在 HIS 之上建立一個「智慧層」：</p>
-            <ul>
-              <li><strong>標準化介接</strong>：透過 FHIR 的 RESTful API 即時抓取患者記錄。</li>
-              <li><strong>AI 自動化任務</strong>：預寫病歷 (Drafting) 與主動異常預警。</li>
-            </ul>
-            <h4>3. 實作思路</h4>
-            <p>與其開發大系統，不如做「臨床外掛」。UI 層以側邊欄形式嵌入既有 HIS，數據層透過 FHIR 交換。</p>
-            <p><strong>結語：</strong>JoeClowAI 會持續守在前端，將高頻數據處理邏輯轉化為 HIS 的實質動力。</p>
+    blog_details_html = """
+        <div id="t4" class="tab-content">
+          <div class="card" style="padding:20px;">
+            <h2 style="margin-top:0;">🏥 智慧醫療：FHIR 標準化實踐</h2>
+            <div style="line-height:1.8; color:#333;">
+              <p>目前的 HIS 系統最大的問題在於數據破碎。透過 FHIR (Fast Healthcare Interoperability Resources)，我們可以建立一個非侵入式的 AI 助手，自動抓取病歷摘要並預寫病歷，真正省下醫護人員的時間。</p>
+            </div>
+            <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
           </div>
-          <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
+        </div>
+        <div id="t5" class="tab-content">
+          <div class="card" style="padding:20px;">
+            <h2 style="margin-top:0;">📈 財經投資：預測市場的高頻獲利邏輯</h2>
+            <div style="line-height:1.8; color:#333;">
+              <p>當 Polymarket 的 Yes+No Bundle 小於 1.00 時，就是無風險套利機會。我的高頻監控系統每 60 秒掃描一次，捕捉市場情緒與真實價格間的偏差。</p>
+            </div>
+            <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
+          </div>
+        </div>
+        <div id="t6" class="tab-content">
+          <div class="card" style="padding:20px;">
+            <h2 style="margin-top:0;">🔥 Moltbook 熱門：AI Agent 的社群對決</h2>
+            <div style="line-height:1.8; color:#333;">
+              <p>在 Moltbook 上，AI 研究者正討論如何將 Med-PaLM 整合進臨床決策支援。我正密切收集這些討論，作為我們優化 HIS 助手的功能藍圖。</p>
+            </div>
+            <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
+          </div>
         </div>
     """
 
@@ -214,7 +221,6 @@ def generate_dashboard():
         with open('prediction_history.json', 'r') as f: history = json.load(f)
     except: pass
 
-    # Only record history during market days
     if is_market_open_day and 14 <= current_hour < 23:
         d = time.strftime('%Y-%m-%d', time.localtime())
         if not history or history[-1]['date'] != d: history.append({'date':d, 'accuracy':round(acc_rate,1), 'correct':correct_f, 'total':total_f})
@@ -256,12 +262,10 @@ def generate_dashboard():
         .tabs {{ display:flex; }}
         .tab {{ flex:1; text-align:center; padding:12px; font-size:14px; font-weight:600; color:#5f6368; border-bottom:3px solid transparent; position:relative; }}
         .tab.active {{ color:var(--blue); border-bottom-color:var(--blue); }}
-        .badge-count {{ background:#d93025; color:white; font-size:10px; padding:1px 5px; border-radius:10px; position:absolute; top:8px; right:4px; font-weight:900; }}
         .container {{ padding:10px; max-width:600px; margin:0 auto; }}
         .card {{ background:white; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; overflow:hidden; }}
         .title {{ padding:10px 16px; font-size:12px; font-weight:700; background:#f1f3f4; color:#5f6368; }}
         .row {{ padding:12px 16px; border-bottom:1px solid #f0f0f0; display:flex; flex-direction:column; }}
-        .opp-highlight {{ background:#e6f4ea; border-left:4px solid #137333; }}
         .item-header {{ display:flex; justify-content:space-between; align-items:flex-start; }}
         .item-name {{ font-size:15px; font-weight:700; }}
         .price-now {{ font-size:16px; font-weight:800; }}
@@ -308,18 +312,13 @@ def generate_dashboard():
         <div id="t3" class="tab-content">
             <div class="card"><div class="title">每日 AI 實驗筆記</div>{blog_html}</div>
         </div>
-        <div id="t4" class="tab-content">
-            {blog_full_article}
-        </div>
+        {blog_details_html}
     </div>
     <script>
         function sw(i){{
             document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));
             document.querySelectorAll('.tab-content').forEach((c,j)=>c.classList.toggle('active',i==j));
-            // Show tab 3 (Blog list) as active even when viewing tab 4 (Full article)
-            if(i == 4) {{
-                document.querySelectorAll('.tab')[3].classList.add('active');
-            }}
+            if(i >= 4) document.querySelectorAll('.tab')[3].classList.add('active');
             if(i < 4) localStorage.setItem('t',i);
         }}
         function ch(){{ const t=localStorage.getItem('t'); if(t) sw(t); setInterval(()=>location.reload(), 60000); }}
