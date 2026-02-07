@@ -97,8 +97,26 @@ def fetch_polymarket_realtime():
     except: return []
 
 def load_blogs():
+    # 使用快取機制，避免每分鐘重新掃描與渲染
+    cache_file = 'blog_cache.json'
+    blog_dir = 'blog'
+    
+    files = glob.glob(f'{blog_dir}/*.md')
+    if not files:
+        return []
+        
+    # 計算資料夾的特徵值 (最後修改時間總和)
+    current_mtime_sum = sum(os.path.getmtime(f) for f in files)
+    
+    try:
+        if os.path.exists(cache_file):
+            with open(cache_file, 'r') as f:
+                cache_data = json.load(f)
+                if cache_data.get('mtime_sum') == current_mtime_sum:
+                    return cache_data.get('blogs', [])
+    except: pass
+
     blogs = []
-    files = glob.glob('blog/*.md')
     for f_path in files:
         try:
             with open(f_path, 'r') as f:
@@ -114,13 +132,22 @@ def load_blogs():
                             meta[k.strip()] = v.strip().strip('"')
                     blogs.append({
                         'title': meta.get('title', 'Untitled'),
-                        'date': meta.get('date', ''),
+                        'date': str(meta.get('date', '')),
                         'category': meta.get('category', 'General'),
                         'body': body,
                         'file': os.path.basename(f_path)
                     })
         except: pass
-    return sorted(blogs, key=lambda x: x['date'], reverse=True)
+    
+    sorted_blogs = sorted(blogs, key=lambda x: x['date'], reverse=True)
+    
+    # 寫入快取
+    try:
+        with open(cache_file, 'w') as f:
+            json.dump({'mtime_sum': current_mtime_sum, 'blogs': sorted_blogs}, f)
+    except: pass
+    
+    return sorted_blogs
 
 def generate_dashboard():
     os.environ['TZ'] = 'Asia/Taipei'
