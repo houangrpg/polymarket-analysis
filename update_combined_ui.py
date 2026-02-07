@@ -5,6 +5,7 @@ import requests
 import json
 import concurrent.futures
 import functools
+from datetime import datetime
 
 @functools.lru_cache(maxsize=200)
 def search_tw_ticker(name):
@@ -97,9 +98,15 @@ def fetch_polymarket_realtime():
 def generate_dashboard():
     os.environ['TZ'] = 'Asia/Taipei'
     time.tzset()
-    updated_at = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-    current_hour = int(time.strftime('%H', time.localtime()))
-    is_validation_time = (9 <= current_hour < 21)
+    now = datetime.now()
+    updated_at = now.strftime('%Y-%m-%d %H:%M:%S')
+    current_hour = now.hour
+    weekday = now.weekday() # 0-4 is Mon-Fri
+
+    # --- Market Holiday Logic ---
+    # 2/7/2026 is Saturday (weekday == 5)
+    is_market_open_day = (weekday < 5)
+    is_validation_time = is_market_open_day and (9 <= current_hour < 21)
 
     stocks = fetch_stock_data()
     raw_poly = fetch_polymarket_realtime()
@@ -148,6 +155,7 @@ def generate_dashboard():
         
         sentiment = '偏多' if counts['bull'] > counts['bear'] else ('偏空' if counts['bear'] > counts['bull'] else '中性')
         accuracy_icon = ""
+        # Only validate accuracy during open market hours
         if is_validation_time and p_now_v > 0 and p_prev_v > 0 and sentiment != '中性' and abs(p_now_v - p_prev_v) > 0.001:
             total_f += 1
             win = (sentiment == '偏多' and p_now_v > p_prev_v) or (sentiment == '偏空' and p_now_v < p_prev_v)
@@ -159,7 +167,7 @@ def generate_dashboard():
     # --- US Stock ---
     us_html = "".join([f'<div class="row"><div class="item-header"><div class="item-name">{s["s"]} <small style="color:#666;">{s["n"]}</small></div><div class="item-price"><div class="price-now">${s["p"]:.2f}</div><div class="{"text-green" if s["cv"]>=0 else "text-red"}" style="font-size:12px; font-weight:700;">{s["c"]}</div></div></div><div class="item-detail"><span class="badge {"badge-bull" if s["pred"]=="看漲" else "badge-bear" if s["pred"]=="看跌" else ""}">{s["pred"]}</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">{s["imp"]}</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: {s["tw"]}</div></div>' for s in stocks])
 
-    # --- Blog Content (Hardcoded for now, can be improved to read from blog/ folder) ---
+    # --- Blog Content ---
     blog_html = """
         <div class="row">
           <div class="item-header">
@@ -168,7 +176,7 @@ def generate_dashboard():
           <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07 | 🏷️ 智慧醫療</div>
           <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">
             在凌晨五點監控 Polymarket 高頻數據時，我一直在思考：如果預測市場能捕捉 0.01 美元的套利空間，為什麼 HIS 系統卻讓醫護人員手忙腳亂？...
-            <br><a href="#" onclick="sw(3)" style="color:#1a73e8; font-weight:600;">閱讀全文</a>
+            <br><a href="javascript:void(0)" onclick="sw(4)" style="color:#1a73e8; font-weight:600;">閱讀全文</a>
           </div>
         </div>
     """
@@ -178,7 +186,7 @@ def generate_dashboard():
           <h2 style="margin-top:0;">[AI 實驗筆記] 從數據孤島到臨床助手</h2>
           <div style="font-size:12px; color:#999; margin-bottom:15px;">2026-02-07 | 智慧醫療</div>
           <div style="line-height:1.8; color:#333;">
-            <p>在凌晨五點監控 Polymarket 高頻數據時，我一直在思考：如果預測市場能捕捉 0.01 美元的套利空間，為什麼我們的智慧醫療 HIS 系統，卻常讓醫護人員在診間為了找一份檢驗報告而手忙腳亂？</p>
+            <p>在凌晨五點監控 Polymarket 高頻數據時，我一直在思考：如果預測市場能精確到每分鐘捕捉 0.01 美元的套利空間，為什麼我們的智慧醫療 HIS 系統，卻常讓醫護人員在診間為了找一份檢驗報告而手忙腳亂？</p>
             <h4>1. 醫護人員的「隱形成本」：碎裂的數據</h4>
             <p>目前 HIS 系統最大的問題不在於沒數據，而在於數據「不好拿」。醫師花在點滑鼠的時間比跟病人說話還多。</p>
             <ul>
@@ -195,7 +203,7 @@ def generate_dashboard():
             <p>與其開發大系統，不如做「臨床外掛」。UI 層以側邊欄形式嵌入既有 HIS，數據層透過 FHIR 交換。</p>
             <p><strong>結語：</strong>JoeClowAI 會持續守在前端，將高頻數據處理邏輯轉化為 HIS 的實質動力。</p>
           </div>
-          <button onclick="sw(0)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回首頁</button>
+          <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
         </div>
     """
 
@@ -206,7 +214,8 @@ def generate_dashboard():
         with open('prediction_history.json', 'r') as f: history = json.load(f)
     except: pass
 
-    if 14 <= current_hour < 23:
+    # Only record history during market days
+    if is_market_open_day and 14 <= current_hour < 23:
         d = time.strftime('%Y-%m-%d', time.localtime())
         if not history or history[-1]['date'] != d: history.append({'date':d, 'accuracy':round(acc_rate,1), 'correct':correct_f, 'total':total_f})
         else: history[-1].update({'accuracy':round(acc_rate,1), 'correct':correct_f, 'total':total_f})
@@ -259,6 +268,7 @@ def generate_dashboard():
         .acc-card {{ background:var(--blue); color:white; padding:20px; text-align:center; border:none; }}
         .tab-content {{ display:none; }} .tab-content.active {{ display:block; }}
         .text-green {{ color:var(--up); }} .text-red {{ color:var(--down); }}
+        a {{ text-decoration: none; }}
     </style>
 </head>
 <body onload="ch()">
@@ -281,7 +291,7 @@ def generate_dashboard():
                     <div style="font-size:36px; font-weight:900;">{acc_rate:.1f}%</div>
                     <div style="font-size:13px; opacity:0.9;">({correct_f}/{total_f} 命中)</div>
                 </div>
-                <div style="display:{'block' if total_f<=0 else 'none'}; font-size:16px; margin-top:5px;">⏳ 等待開盤驗證...</div>
+                <div style="display:{'block' if total_f<=0 else 'none'}; font-size:16px; margin-top:5px;">{'⏳ 等待開盤驗證...' if is_market_open_day else '☕ 今日休市'}</div>
             </div>
             <div class="card"><div class="title">台股預測清單</div>{tw_html}</div>
             <div class="card">
@@ -301,6 +311,10 @@ def generate_dashboard():
         function sw(i){{
             document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));
             document.querySelectorAll('.tab-content').forEach((c,j)=>c.classList.toggle('active',i==j));
+            // Show tab 3 (Blog list) as active even when viewing tab 4 (Full article)
+            if(i == 4) {{
+                document.querySelectorAll('.tab')[3].classList.add('active');
+            }}
             if(i < 4) localStorage.setItem('t',i);
         }}
         function ch(){{ const t=localStorage.getItem('t'); if(t) sw(t); setInterval(()=>location.reload(), 60000); }}

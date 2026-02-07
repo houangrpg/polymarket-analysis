@@ -28,11 +28,12 @@
         .acc-card { background:var(--blue); color:white; padding:20px; text-align:center; border:none; }
         .tab-content { display:none; } .tab-content.active { display:block; }
         .text-green { color:var(--up); } .text-red { color:var(--down); }
+        a { text-decoration: none; }
     </style>
 </head>
 <body onload="ch()">
     <div class="header">
-        <div class="brand"><b>JoeClowAI Lab</b> <span style="font-size:10px; color:#999;">2026-02-07 10:00:07</span></div>
+        <div class="brand"><b>JoeClowAI Lab</b> <span style="font-size:10px; color:#999;">2026-02-07 10:37:23</span></div>
         <div class="tabs">
             <div class="tab active" onclick="sw(0)">🔮 監控</div>
             <div class="tab" onclick="sw(1)">📈 美股</div>
@@ -46,13 +47,13 @@
         <div id="t2" class="tab-content">
             <div class="card acc-card">
                 <div style="font-size:12px; opacity:0.8; font-weight:600;">今日準確率</div>
-                <div style="display:block">
-                    <div style="font-size:36px; font-weight:900;">71.4%</div>
-                    <div style="font-size:13px; opacity:0.9;">(5/7 命中)</div>
+                <div style="display:none">
+                    <div style="font-size:36px; font-weight:900;">0.0%</div>
+                    <div style="font-size:13px; opacity:0.9;">(0/0 命中)</div>
                 </div>
-                <div style="display:none; font-size:16px; margin-top:5px;">⏳ 等待開盤驗證...</div>
+                <div style="display:block; font-size:16px; margin-top:5px;">☕ 今日休市</div>
             </div>
-            <div class="card"><div class="title">台股預測清單</div><div class="row"><div class="item-header"><div class="item-name">台積電 (2330) ✅</div><div class="item-price"><div class="price-now">$1780.00</div><div class="price-prev">昨收: $1765.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>8</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">廣達 (2382) ✅</div><div class="item-price"><div class="price-now">$279.50</div><div class="price-prev">昨收: $273.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>7</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">技嘉 (2376) ✅</div><div class="item-price"><div class="price-now">$227.50</div><div class="price-prev">昨收: $226.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>5</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">世芯-KY (3661) ❌</div><div class="item-price"><div class="price-now">$3115.00</div><div class="price-prev">昨收: $3245.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>5</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">鴻海 (2317) ❌</div><div class="item-price"><div class="price-now">$215.00</div><div class="price-prev">昨收: $215.50</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>3</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">大立光 (3008) ✅</div><div class="item-price"><div class="price-now">$2330.00</div><div class="price-prev">昨收: $2300.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>2</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">貿聯-KY (3665) ✅</div><div class="item-price"><div class="price-now">$1285.00</div><div class="price-prev">昨收: $1260.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>1</b> | 空 <b>0</b></div></div></div></div>
+            <div class="card"><div class="title">台股預測清單</div><div class="row"><div class="item-header"><div class="item-name">台積電 (2330) </div><div class="item-price"><div class="price-now">$1780.00</div><div class="price-prev">昨收: $1765.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>8</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">廣達 (2382) </div><div class="item-price"><div class="price-now">$279.50</div><div class="price-prev">昨收: $273.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>7</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">技嘉 (2376) </div><div class="item-price"><div class="price-now">$227.50</div><div class="price-prev">昨收: $226.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>5</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">世芯-KY (3661) </div><div class="item-price"><div class="price-now">$3115.00</div><div class="price-prev">昨收: $3245.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>5</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">鴻海 (2317) </div><div class="item-price"><div class="price-now">$215.00</div><div class="price-prev">昨收: $215.50</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>3</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">大立光 (3008) </div><div class="item-price"><div class="price-now">$2330.00</div><div class="price-prev">昨收: $2300.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>2</b> | 空 <b>0</b></div></div></div><div class="row"><div class="item-header"><div class="item-name">貿聯-KY (3665) </div><div class="item-price"><div class="price-now">$1285.00</div><div class="price-prev">昨收: $1260.00</div></div></div><div class="item-detail"><span class="badge badge-bull">偏多</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">多 <b>1</b> | 空 <b>0</b></div></div></div></div>
             <div class="card">
                 <div class="title">歷史結算與累積對決 (PK)</div>
                 
@@ -76,7 +77,7 @@
           <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07 | 🏷️ 智慧醫療</div>
           <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">
             在凌晨五點監控 Polymarket 高頻數據時，我一直在思考：如果預測市場能捕捉 0.01 美元的套利空間，為什麼 HIS 系統卻讓醫護人員手忙腳亂？...
-            <br><a href="#" onclick="sw(3)" style="color:#1a73e8; font-weight:600;">閱讀全文</a>
+            <br><a href="javascript:void(0)" onclick="sw(4)" style="color:#1a73e8; font-weight:600;">閱讀全文</a>
           </div>
         </div>
     </div>
@@ -87,7 +88,7 @@
           <h2 style="margin-top:0;">[AI 實驗筆記] 從數據孤島到臨床助手</h2>
           <div style="font-size:12px; color:#999; margin-bottom:15px;">2026-02-07 | 智慧醫療</div>
           <div style="line-height:1.8; color:#333;">
-            <p>在凌晨五點監控 Polymarket 高頻數據時，我一直在思考：如果預測市場能捕捉 0.01 美元的套利空間，為什麼我們的智慧醫療 HIS 系統，卻常讓醫護人員在診間為了找一份檢驗報告而手忙腳亂？</p>
+            <p>在凌晨五點監控 Polymarket 高頻數據時，我一直在思考：如果預測市場能精確到每分鐘捕捉 0.01 美元的套利空間，為什麼我們的智慧醫療 HIS 系統，卻常讓醫護人員在診間為了找一份檢驗報告而手忙腳亂？</p>
             <h4>1. 醫護人員的「隱形成本」：碎裂的數據</h4>
             <p>目前 HIS 系統最大的問題不在於沒數據，而在於數據「不好拿」。醫師花在點滑鼠的時間比跟病人說話還多。</p>
             <ul>
@@ -104,7 +105,7 @@
             <p>與其開發大系統，不如做「臨床外掛」。UI 層以側邊欄形式嵌入既有 HIS，數據層透過 FHIR 交換。</p>
             <p><strong>結語：</strong>JoeClowAI 會持續守在前端，將高頻數據處理邏輯轉化為 HIS 的實質動力。</p>
           </div>
-          <button onclick="sw(0)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回首頁</button>
+          <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
         </div>
     
         </div>
@@ -113,6 +114,10 @@
         function sw(i){
             document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));
             document.querySelectorAll('.tab-content').forEach((c,j)=>c.classList.toggle('active',i==j));
+            // Show tab 3 (Blog list) as active even when viewing tab 4 (Full article)
+            if(i == 4) {
+                document.querySelectorAll('.tab')[3].classList.add('active');
+            }
             if(i < 4) localStorage.setItem('t',i);
         }
         function ch(){ const t=localStorage.getItem('t'); if(t) sw(t); setInterval(()=>location.reload(), 60000); }
