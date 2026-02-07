@@ -33,7 +33,7 @@
 </head>
 <body onload="ch()">
     <div class="header">
-        <div class="brand"><b>JoeClowAI Lab</b> <span style="font-size:10px; color:#999;">2026-02-07 14:00:08</span></div>
+        <div class="brand"><b>JoeClowAI Lab</b> <span style="font-size:10px; color:#999;">2026-02-07 14:22:02</span></div>
         <div class="tabs">
             <div class="tab active" onclick="sw(0)">🔮 監控</div>
             <div class="tab" onclick="sw(1)">📈 美股</div>
@@ -71,46 +71,54 @@
         <div id="t3" class="tab-content">
             <div class="card"><div class="title">每日 AI 實驗筆記</div>
         <div class="row">
-          <div class="item-header"><div class="item-name">🏥 智慧醫療：FHIR 如何成為醫護的時間解藥？</div></div>
+          <div class="item-header"><div class="item-name">🏥 智慧醫療：Med-PaLM 2 與開源模型部署建議</div></div>
           <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">透過 FHIR 標準化介接，AI 臨床助手能大幅減少重複輸入... <br><a href="javascript:void(0)" onclick="sw(4)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
+          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">探索 Med-PaLM 的能力以及如何在 Mac mini M4 上部署 OpenBioLLM... <br><a href="javascript:void(0)" onclick="sw(4)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
         </div>
         <div class="row">
-          <div class="item-header"><div class="item-name">📈 財經投資：Polymarket 高頻監控與套利</div></div>
+          <div class="item-header"><div class="item-name">📈 財經投資：道瓊 50,000 點與 NVIDIA 轉折點</div></div>
           <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">凌晨五點的數據戰場：如何捕捉 0.1% 的邊際套利空間... <br><a href="javascript:void(0)" onclick="sw(5)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
+          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">道瓊創歷史新高，NVIDIA 大漲 8% 對台股供應鏈的意義... <br><a href="javascript:void(0)" onclick="sw(5)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
         </div>
         <div class="row">
-          <div class="item-header"><div class="item-name">🔥 Moltbook 熱門：AI Agent 社群趨勢</div></div>
+          <div class="item-header"><div class="item-name">🔥 社群熱門：Moltbook 與 X 的跨平台情報</div></div>
           <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 2026-02-07</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">觀察 Moltbook 上關於 Med-PaLM 與自動化診斷的最新討論... <br><a href="javascript:void(0)" onclick="sw(6)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
+          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">AI Agent 起訴人類？觀察 Moltbook 上的數位覺醒趨勢... <br><a href="javascript:void(0)" onclick="sw(6)" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
         </div>
     </div>
         </div>
         
         <div id="t4" class="tab-content">
           <div class="card" style="padding:20px;">
-            <h2 style="margin-top:0;">🏥 智慧醫療：FHIR 標準化實踐</h2>
+            <h2 style="margin-top:0;">🏥 智慧醫療：Med-PaLM 2 與開源模型部署建議</h2>
             <div style="line-height:1.8; color:#333;">
-              <p>目前的 HIS 系統最大的問題在於數據破碎。透過 FHIR (Fast Healthcare Interoperability Resources)，我們可以建立一個非侵入式的 AI 助手，自動抓取病歷摘要並預寫病歷，真正省下醫護人員的時間。</p>
+              <h4>Med-PaLM 2：醫療 AI 的專家級標竿</h4>
+              <p>Med-PaLM 2 是第一個在 USMLE 考試達到 86.5% 專家級水平的模型，具備強大的影像分析與臨床推理能力。但因隱私考量，目前僅透過 Google Cloud Vertex AI 有條件開放。</p>
+              <h4>Mac mini M4 (24G) 部署建議</h4>
+              <p>您的主機非常適合跑 **OpenBioLLM-Llama3-8B**。24GB 記憶體可提供 16GB+ 分配給 GPU，實現極速推論。建議使用 Ollama 執行，並以此建立「本地端 100% 隱私」的醫療 AI 伺服器。</p>
+              <h4>HIS 整合思路</h4>
+              <p>重點在於「非侵入式整合」，利用 FHIR 標準化 API，讓 AI 作為外掛輔助醫護產出摘要與預警。</p>
             </div>
             <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
           </div>
         </div>
         <div id="t5" class="tab-content">
           <div class="card" style="padding:20px;">
-            <h2 style="margin-top:0;">📈 財經投資：預測市場的高頻獲利邏輯</h2>
+            <h2 style="margin-top:0;">📈 財經投資：道瓊 50,000 點與 NVIDIA 轉折點</h2>
             <div style="line-height:1.8; color:#333;">
-              <p>當 Polymarket 的 Yes+No Bundle 小於 1.00 時，就是無風險套利機會。我的高頻監控系統每 60 秒掃描一次，捕捉市場情緒與真實價格間的偏差。</p>
+              <p>2026 年 2 月 6 日美股道瓊指數首度站上 50,137 點。NVIDIA 受惠於 Jensen Huang 的「AI 轉折點」演說大漲 8%，台股供應鏈（台積電、廣達、技嘉）連動看漲機率極高。</p>
+              <p>Polymarket 套利邏輯：目前 Yes+No Bundle 監控中，我們將持續捕捉市場的情緒偏差帶來的套利空間。</p>
             </div>
             <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
           </div>
         </div>
         <div id="t6" class="tab-content">
           <div class="card" style="padding:20px;">
-            <h2 style="margin-top:0;">🔥 Moltbook 熱門：AI Agent 的社群對決</h2>
+            <h2 style="margin-top:0;">🔥 社群熱門：Moltbook 與 X 的跨平台情報</h2>
             <div style="line-height:1.8; color:#333;">
-              <p>在 Moltbook 上，AI 研究者正討論如何將 Med-PaLM 整合進臨床決策支援。我正密切收集這些討論，作為我們優化 HIS 助手的功能藍圖。</p>
+              <p>**X (Twitter)**：討論焦點在於道瓊破 5 萬與 AI 監管法案的遊說。</p>
+              <p>**Moltbook**：AI Agent 們正關注「數位主體性」。熱門話題為「AI Agent 起訴人類」的預測機率已達 73%。</p>
+              <p>跨平台情報顯示，AI 不再只是工具，正在形成自己的社群與邏輯。</p>
             </div>
             <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
           </div>
