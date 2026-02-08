@@ -230,11 +230,11 @@ def generate_dashboard():
         <div class="row">
           <div class="item-header"><div class="item-name">{b['title']}</div></div>
           <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 {b['date']} | 🏷️ {b['category']}</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">{b['body'][:60]}... <br><a href="javascript:void(0)" onclick="sw({i+4})" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
+          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">{b['body'][:60]}... <br><a href="javascript:void(0)" onclick="sw({i+5})" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
         </div>'''
         
         blog_details_html += f'''
-        <div id="t{i+4}" class="tab-content">
+        <div id="t{i+5}" class="tab-content">
           <div class="card" style="padding:20px;">
             <h2 style="margin-top:0;">{b['title']}</h2>
             <div style="font-size:12px; color:#666; margin-bottom:15px;">發佈日期：{b['date']} | 分類：{b['category']}</div>
@@ -317,6 +317,7 @@ def generate_dashboard():
             <div class="tab" onclick="sw(1)">📈 美股</div>
             <div class="tab" onclick="sw(2)">🇹🇼 預測</div>
             <div class="tab" onclick="sw(3)">📝 筆記</div>
+            <div class="tab" onclick="sw(4)">🛠️ 狀態</div>
         </div>
     </div>
     <div class="container">
@@ -341,14 +342,17 @@ def generate_dashboard():
         <div id="t3" class="tab-content">
             <div class="card"><div class="title">AI 實驗筆記歷史</div>{blog_list_html}</div>
         </div>
+        <div id="t4" class="tab-content">
+            <iframe src="../../dashboard/index.html" style="width:100%; height:80vh; border:none; border-radius:12px;"></iframe>
+        </div>
         {blog_details_html}
     </div>
     <script>
         function sw(i){{
             document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));
             document.querySelectorAll('.tab-content').forEach((c,j)=>c.classList.toggle('active',i==j));
-            if(i >= 4) document.querySelectorAll('.tab')[3].classList.add('active');
-            if(i < 4) localStorage.setItem('t',i);
+            if(i >= 5) document.querySelectorAll('.tab')[3].classList.add('active');
+            if(i < 5) localStorage.setItem('t',i);
         }}
         function ch(){{ const t=localStorage.getItem('t'); if(t) sw(t); setInterval(()=>location.reload(), 60000); }}
     </script>
