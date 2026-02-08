@@ -97,92 +97,56 @@ def fetch_polymarket_realtime():
     except: return []
 
 def load_blogs():
-    # 使用快取機制，避免每分鐘重新掃描與渲染
     cache_file = 'blog_cache.json'
     blog_dir = 'blog'
-    
     files = glob.glob(f'{blog_dir}/*.md')
-    if not files:
-        return []
-        
-    # 計算資料夾的特徵值 (最後修改時間總和)
+    if not files: return []
     current_mtime_sum = sum(os.path.getmtime(f) for f in files)
-    
     try:
         if os.path.exists(cache_file):
             with open(cache_file, 'r') as f:
                 cache_data = json.load(f)
-                if cache_data.get('mtime_sum') == current_mtime_sum:
-                    return cache_data.get('blogs', [])
+                if cache_data.get('mtime_sum') == current_mtime_sum: return cache_data.get('blogs', [])
     except: pass
-
     blogs = []
     for f_path in files:
         try:
             with open(f_path, 'r') as f:
-                content = f.read()
-                parts = content.split('---')
+                content = f.read(); parts = content.split('---')
                 if len(parts) >= 3:
-                    header = parts[1]
-                    body = parts[2].strip()
-                    meta = {}
+                    header = parts[1]; body = parts[2].strip(); meta = {}
                     for line in header.strip().split('\n'):
-                        if ':' in line:
-                            k, v = line.split(':', 1)
-                            meta[k.strip()] = v.strip().strip('"')
-                    blogs.append({
-                        'title': meta.get('title', 'Untitled'),
-                        'date': str(meta.get('date', '')),
-                        'category': meta.get('category', 'General'),
-                        'body': body,
-                        'file': os.path.basename(f_path)
-                    })
+                        if ':' in line: k, v = line.split(':', 1); meta[k.strip()] = v.strip().strip('"')
+                    blogs.append({'title': meta.get('title', 'Untitled'), 'date': str(meta.get('date', '')), 'category': meta.get('category', 'General'), 'body': body, 'file': os.path.basename(f_path)})
         except: pass
-    
     sorted_blogs = sorted(blogs, key=lambda x: x['date'], reverse=True)
-    
-    # 寫入快取
     try:
-        with open(cache_file, 'w') as f:
-            json.dump({'mtime_sum': current_mtime_sum, 'blogs': sorted_blogs}, f)
+        with open(cache_file, 'w') as f: json.dump({'mtime_sum': current_mtime_sum, 'blogs': sorted_blogs}, f)
     except: pass
-    
     return sorted_blogs
 
 def generate_dashboard():
-    os.environ['TZ'] = 'Asia/Taipei'
-    time.tzset()
-    now = datetime.now()
-    updated_at = now.strftime('%Y-%m-%d %H:%M:%S')
-    current_hour = now.hour
-    weekday = now.weekday() # 0-4 is Mon-Fri
-
-    # --- Market Holiday Logic ---
+    os.environ['TZ'] = 'Asia/Taipei'; time.tzset()
+    now = datetime.now(); updated_at = now.strftime('%Y-%m-%d %H:%M:%S')
+    current_hour = now.hour; weekday = now.weekday()
     is_market_open_day = (weekday < 5)
     is_validation_time = is_market_open_day and (9 <= current_hour < 21)
 
-    stocks = fetch_stock_data()
-    raw_poly = fetch_polymarket_realtime()
-    
-    # --- Polymarket ---
+    stocks = fetch_stock_data(); raw_poly = fetch_polymarket_realtime()
     arbitrage_opps = [m for m in raw_poly if 0 < m['edge_val'] < 50 and float(m['bundle']) <= 1.0]
     arbitrage_opps.sort(key=lambda x: x['edge_val'], reverse=True)
-    opportunity_markets = [m for m in raw_poly if abs(1.0 - float(m['bundle'])) > 0.005 and float(m['bundle']) <= 1.05]
     def get_v(v): 
         try: return float(v.replace('K',''))
         except: return 0.0
-    hot_markets = sorted(opportunity_markets, key=lambda x: get_v(x['vol']), reverse=True)[:10]
+    hot_markets = sorted([m for m in raw_poly if float(m['bundle']) <= 1.05], key=lambda x: get_v(x['vol']), reverse=True)[:10]
 
     poly_html = ""
     if arbitrage_opps:
-        for m in arbitrage_opps:
-            poly_html += f'<div class="row opp-highlight"><div class="item-header"><div class="item-name">{m["title"]} 🚀</div><div class="edge-val text-green">{m["edge"]}</div></div><div class="item-detail"><span class="badge">Bundle: {m["bundle"]}</span><span class="badge">Vol: {m["vol"]}</span></div></div>'
+        for m in arbitrage_opps: poly_html += f'<div class="row opp-highlight"><div class="item-header"><div class="item-name">{m["title"]} 🚀</div><div class="edge-val text-green">{m["edge"]}</div></div><div class="item-detail"><span class="badge">Bundle: {m["bundle"]}</span><span class="badge">Vol: {m["vol"]}</span></div></div>'
     else:
         poly_html += '<div style="text-align:center; padding:20px; color:#999; font-size:13px;">⚠️ 暫無套利空間</div>'
-        for m in hot_markets:
-            poly_html += f'<div class="row"><div class="item-header"><div class="item-name" style="font-size:14px;">{m["title"]}</div><div class="price-now" style="font-size:14px;">{m["bundle"]}</div></div><div class="item-detail"><span class="badge">Y:{m["yes"]} N:{m["no"]}</span><span style="margin-left:auto; font-weight:700;" class="{"text-green" if m["edge_val"]>0 else "text-red"}">{m["edge"]}</span></div></div>'
+        for m in hot_markets: poly_html += f'<div class="row"><div class="item-header"><div class="item-name" style="font-size:14px;">{m["title"]}</div><div class="price-now" style="font-size:14px;">{m["bundle"]}</div></div><div class="item-detail"><span class="badge">Y:{m["yes"]} N:{m["no"]}</span><span style="margin-left:auto; font-weight:700;" class="{"text-green" if m["edge_val"]>0 else "text-red"}">{m["edge"]}</span></div></div>'
 
-    # --- TW Stock ---
     tw_stats = {}
     for s in stocks:
         for ts in [x.strip() for x in s['tw'].replace('、', ',').split(',') if x.strip()]:
@@ -201,162 +165,49 @@ def generate_dashboard():
         if ticker:
             try:
                 h = yf.Ticker(ticker).history(period="5d")
-                if len(h) >= 2:
-                    p_prev_v, p_now_v = h['Close'].iloc[-2], h['Close'].iloc[-1]
-                    p_prev, p_now = f"${p_prev_v:.2f}", f"${p_now_v:.2f}"
+                if len(h) >= 2: p_prev_v, p_now_v = h['Close'].iloc[-2], h['Close'].iloc[-1]; p_prev, p_now = f"${p_prev_v:.2f}", f"${p_now_v:.2f}"
             except: pass
-        
         sentiment = '偏多' if counts['bull'] > counts['bear'] else ('偏空' if counts['bear'] > counts['bull'] else '中性')
         accuracy_icon = ""
         if is_validation_time and p_now_v > 0 and p_prev_v > 0 and sentiment != '中性' and abs(p_now_v - p_prev_v) > 0.001:
-            total_f += 1
-            win = (sentiment == '偏多' and p_now_v > p_prev_v) or (sentiment == '偏空' and p_now_v < p_prev_v)
+            total_f += 1; win = (sentiment == '偏多' and p_now_v > p_prev_v) or (sentiment == '偏空' and p_now_v < p_prev_v)
             if win: correct_f += 1; accuracy_icon = "✅"
             else: accuracy_icon = "❌"
-
         tw_html += f'<div class="row"><div class="item-header"><div class="item-name">{ts}{symbol_text} {accuracy_icon}</div><div class="item-price"><div class="price-now">{p_now}</div><div class="price-prev">昨收: {p_prev}</div></div></div><div class="item-detail"><span class="badge {"badge-bull" if sentiment=="偏多" else "badge-bear" if sentiment=="偏空" else ""}">{sentiment}</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">↗️ <b>{counts["bull"]}</b> | ↘️ <b>{counts["bear"]}</b></div></div></div>'
 
-    # --- US Stock ---
     us_html = "".join([f'<div class="row"><div class="item-header"><div class="item-name">{s["s"]} <small style="color:#666;">{s["n"]}</small></div><div class="item-price"><div class="price-now">${s["p"]:.2f}</div><div class="{"text-green" if s["cv"]>=0 else "text-red"}" style="font-size:12px; font-weight:700;">{s["c"]}</div></div></div><div class="item-detail"><span class="badge {"badge-bull" if s["pred"]=="看漲" else "badge-bear" if s["pred"]=="看跌" else ""}">{s["pred"]}</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">{s["imp"]}</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: {s["tw"]}</div></div>' for s in stocks])
 
-    # --- Dynamic Blog Content ---
-    blogs = load_blogs()
-    blog_list_html = ""
-    blog_details_html = ""
-    
+    blogs = load_blogs(); blog_list_html = ""; blog_details_html = ""
     for i, b in enumerate(blogs):
         safe_body = b['body'].replace('\n', '<br>')
-        blog_list_html += f'''
-        <div class="row">
-          <div class="item-header"><div class="item-name">{b['title']}</div></div>
-          <div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 {b['date']} | 🏷️ {b['category']}</div>
-          <div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">{b['body'][:60]}... <br><a href="javascript:void(0)" onclick="sw({i+5})" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div>
-        </div>'''
-        
-        blog_details_html += f'''
-        <div id="t{i+5}" class="tab-content">
-          <div class="card" style="padding:20px;">
-            <h2 style="margin-top:0;">{b['title']}</h2>
-            <div style="font-size:12px; color:#666; margin-bottom:15px;">發佈日期：{b['date']} | 分類：{b['category']}</div>
-            <div style="line-height:1.8; color:#333;">{safe_body}</div>
-            <button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button>
-          </div>
-        </div>'''
+        blog_list_html += f'<div class="row"><div class="item-header"><div class="item-name">{b["title"]}</div></div><div style="font-size:11px; color:#5f6368; margin-top:4px;">📅 {b["date"]} | 🏷️ {b["category"]}</div><div style="font-size:13px; color:#444; margin-top:8px; line-height:1.6;">{b["body"][:60]}... <br><a href="javascript:void(0)" onclick="sw({i+5})" style="color:#1a73e8; font-weight:600;">閱讀全文</a></div></div>'
+        blog_details_html += f'<div id="t{i+5}" class="tab-content"><div class="card" style="padding:20px;"><h2 style="margin-top:0;">{b["title"]}</h2><div style="font-size:12px; color:#666; margin-bottom:15px;">發佈日期：{b["date"]} | 分類：{b["category"]}</div><div style="line-height:1.8; color:#333;">{safe_body}</div><button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button></div></div>'
 
-    # --- History ---
-    acc_rate = (correct_f / total_f * 100) if total_f > 0 else 0
     history = []
     try:
         with open('prediction_history.json', 'r') as f: history = json.load(f)
     except: pass
-
-    if is_market_open_day and 14 <= current_hour < 23:
+    if is_market_open_day and 14 <= datetime.now().hour < 23:
         d = time.strftime('%Y-%m-%d', time.localtime())
-        if not history or history[-1]['date'] != d: history.append({'date':d, 'accuracy':round(acc_rate,1), 'correct':correct_f, 'total':total_f})
-        else: history[-1].update({'accuracy':round(acc_rate,1), 'correct':correct_f, 'total':total_f})
+        if not history or history[-1]['date'] != d: history.append({'date':d, 'accuracy':round((correct_f/total_f*100) if total_f>0 else 0,1), 'correct':correct_f, 'total':total_f})
+        else: history[-1].update({'accuracy':round((correct_f/total_f*100) if total_f>0 else 0,1), 'correct':correct_f, 'total':total_f})
         with open('prediction_history.json', 'w') as f: json.dump(history[-60:], f, indent=2)
-
-    total_c_all = sum(h['correct'] for h in history)
-    total_f_all = sum(h['total'] for h in history)
     hist_rows = "".join([f"<tr><td>{h['date']}</td><td>{h['accuracy']}%</td><td style='text-align:right;'>{h['correct']}/{h['total']}</td></tr>" for h in reversed(history)])
 
-    # --- PK Bar Logic ---
-    pk_ratio = (total_c_all / total_f_all * 100) if total_f_all > 0 else 0
-    pk_html = f'''
-    <div style="padding:16px 16px 0 16px;">
-        <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:5px; font-weight:700;">
-            <span class="text-green">正確: {total_c_all}</span><span class="text-red">錯誤: {total_f_all - total_c_all}</span>
-        </div>
-        <div style="height:12px; background:#fce8e6; border-radius:6px; overflow:hidden; display:flex;">
-            <div style="width:{pk_ratio}%; background:#e6f4ea; transition:width 0.5s;"></div>
-        </div>
-    </div>'''
+    status_data = {}
+    try:
+        with open('dashboard/status.json', 'r') as f: status_data = json.load(f)
+    except: status_data = {"system_status": "Online", "last_updated": updated_at, "todos": [], "in_progress": [], "done": [], "scheduled_tasks": []}
 
-    # --- Final HTML ---
-    opp_count = len(arbitrage_opps)
-    monitor_tab_label = f"🔮 監控 ({opp_count})" if opp_count > 0 else "🔮 監控"
+    status_html = f'''
+        <div class="card"><div class="title">系統狀態</div><div style="padding:16px;"><span class="status-badge status-online">系統正常運作中 ({status_data.get("system_status", "Online")})</span><p style="font-size:12px; color:#666;">最後更新：{status_data.get("last_updated", updated_at)}</p></div></div>
+        <div class="card"><div class="title">執行進度 (In Progress)</div><ul style="padding:0 16px;">{"".join([f"<li>{x}</li>" for x in status_data.get("in_progress", [])])}</ul></div>
+        <div class="card"><div class="title">待辦事項 (To-Do)</div><ul style="padding:0 16px;">{"".join([f"<li>{x}</li>" for x in status_data.get("todos", [])])}</ul></div>
+        <div class="card"><div class="title">已完成事項 (Done)</div><ul style="padding:0 16px;">{"".join([f"<li>{x}</li>" for x in status_data.get("done", [])])}</ul></div>
+        <div class="card"><div class="title">自動排程 (Scheduled)</div><ul style="padding:0 16px;">{"".join([f"<li>{x['task']} <small style='color:#888;'>({x['time']})</small></li>" for x in status_data.get("scheduled_tasks", [])])}</ul></div>
+    '''
 
-    full_html = f'''<!doctype html>
-<html lang="zh-TW">
-<head>
-    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-    <title>JoeClowAI Lab</title>
-    <style>
-        :root {{ --blue:#1a73e8; --bg:#f8f9fa; --up:#137333; --down:#d93025; --border:#e0e0e0; }}
-        * {{ box-sizing:border-box; }}
-        body {{ font-family:-apple-system,sans-serif; margin:0; background:var(--bg); color:#202124; }}
-        .header {{ background:white; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:1000; }}
-        .brand {{ padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }}
-        .brand b {{ color:var(--blue); font-size:18px; }}
-        .tabs {{ display:flex; }}
-        .tab {{ flex:1; text-align:center; padding:12px; font-size:14px; font-weight:600; color:#5f6368; border-bottom:3px solid transparent; position:relative; }}
-        .tab.active {{ color:var(--blue); border-bottom-color:var(--blue); }}
-        .container {{ padding:10px; max-width:600px; margin:0 auto; }}
-        .card {{ background:white; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; overflow:hidden; }}
-        .title {{ padding:10px 16px; font-size:12px; font-weight:700; background:#f1f3f4; color:#5f6368; }}
-        .row {{ padding:12px 16px; border-bottom:1px solid #f0f0f0; display:flex; flex-direction:column; }}
-        .item-header {{ display:flex; justify-content:space-between; align-items:flex-start; }}
-        .item-name {{ font-size:15px; font-weight:700; }}
-        .price-now {{ font-size:16px; font-weight:800; }}
-        .price-prev {{ font-size:11px; color:#5f6368; text-align:right; }}
-        .item-detail {{ display:flex; align-items:center; margin-top:6px; gap:8px; }}
-        .badge {{ padding:3px 8px; border-radius:6px; font-size:12px; font-weight:700; background:#f1f3f4; }}
-        .badge-bull {{ background:#e6f4ea; color:#137333; }}
-        .badge-bear {{ background:#fce8e6; color:#d93025; }}
-        .acc-card {{ background:var(--blue); color:white; padding:20px; text-align:center; border:none; }}
-        .tab-content {{ display:none; }} .tab-content.active {{ display:block; }}
-        .text-green {{ color:var(--up); }} .text-red {{ color:var(--down); }}
-        a {{ text-decoration: none; }}
-    </style>
-</head>
-<body onload="ch()">
-    <div class="header">
-        <div class="brand"><b>JoeClowAI Lab</b> <span style="font-size:10px; color:#999;">{updated_at}</span></div>
-        <div class="tabs">
-            <div class="tab active" onclick="sw(0)">{monitor_tab_label}</div>
-            <div class="tab" onclick="sw(1)">📈 美股</div>
-            <div class="tab" onclick="sw(2)">🇹🇼 預測</div>
-            <div class="tab" onclick="sw(3)">📝 筆記</div>
-            <div class="tab" onclick="sw(4)">🛠️ 狀態</div>
-        </div>
-    </div>
-    <div class="container">
-        <div id="t0" class="tab-content active"><div class="card"><div class="title">套利與異常監測</div>{poly_html}</div></div>
-        <div id="t1" class="tab-content"><div class="card"><div class="title">美股聯動分析</div>{us_html}</div></div>
-        <div id="t2" class="tab-content">
-            <div class="card acc-card">
-                <div style="font-size:12px; opacity:0.8; font-weight:600;">今日準確率</div>
-                <div style="display:{'block' if total_f>0 else 'none'}">
-                    <div style="font-size:36px; font-weight:900;">{acc_rate:.1f}%</div>
-                    <div style="font-size:13px; opacity:0.9;">({correct_f}/{total_f} 命中)</div>
-                </div>
-                <div style="display:{'block' if total_f<=0 else 'none'}; font-size:16px; margin-top:5px;">{'⏳ 等待開盤驗證...' if is_market_open_day else '☕ 今日休市'}</div>
-            </div>
-            <div class="card"><div class="title">台股預測清單</div>{tw_html}</div>
-            <div class="card">
-                <div class="title">歷史結算與累積對決 (PK)</div>
-                {pk_html}
-                <table style="width:100%; padding:10px 16px; border-spacing:0 8px; font-size:13px;">{hist_rows}</table>
-            </div>
-        </div>
-        <div id="t3" class="tab-content">
-            <div class="card"><div class="title">AI 實驗筆記歷史</div>{blog_list_html}</div>
-        </div>
-        <div id="t4" class="tab-content">
-            <iframe src="../../dashboard/index.html" style="width:100%; height:80vh; border:none; border-radius:12px;"></iframe>
-        </div>
-        {blog_details_html}
-    </div>
-    <script>
-        function sw(i){{
-            document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));
-            document.querySelectorAll('.tab-content').forEach((c,j)=>c.classList.toggle('active',i==j));
-            if(i >= 5) document.querySelectorAll('.tab')[3].classList.add('active');
-            if(i < 5) localStorage.setItem('t',i);
-        }}
-        function ch(){{ const t=localStorage.getItem('t'); if(t) sw(t); setInterval(()=>location.reload(), 60000); }}
-    </script>
-</body></html>'''
+    full_html = f'''<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"><title>JoeClowAI Lab</title><style>:root {{ --blue:#1a73e8; --bg:#f8f9fa; --up:#137333; --down:#d93025; --border:#e0e0e0; }} * {{ box-sizing:border-box; }} body {{ font-family:-apple-system,sans-serif; margin:0; background:var(--bg); color:#202124; }} .header {{ background:white; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:1000; }} .brand {{ padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }} .brand b {{ color:var(--blue); font-size:18px; }} .tabs {{ display:flex; }} .tab {{ flex:1; text-align:center; padding:12px; font-size:14px; font-weight:600; color:#5f6368; border-bottom:3px solid transparent; position:relative; }} .tab.active {{ color:var(--blue); border-bottom-color:var(--blue); }} .container {{ padding:10px; max-width:600px; margin:0 auto; }} .card {{ background:white; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; overflow:hidden; }} .title {{ padding:10px 16px; font-size:12px; font-weight:700; background:#f1f3f4; color:#5f6368; }} .row {{ padding:12px 16px; border-bottom:1px solid #f0f0f0; display:flex; flex-direction:column; }} .item-header {{ display:flex; justify-content:space-between; align-items:flex-start; }} .item-name {{ font-size:15px; font-weight:700; }} .price-now {{ font-size:16px; font-weight:800; }} .price-prev {{ font-size:11px; color:#5f6368; text-align:right; }} .item-detail {{ display:flex; align-items:center; margin-top:6px; gap:8px; }} .badge {{ padding:3px 8px; border-radius:6px; font-size:12px; font-weight:700; background:#f1f3f4; }} .badge-bull {{ background:#e6f4ea; color:#137333; }} .badge-bear {{ background:#fce8e6; color:#d93025; }} .acc-card {{ background:var(--blue); color:white; padding:20px; text-align:center; border:none; }} .tab-content {{ display:none; }} .tab-content.active {{ display:block; }} .text-green {{ color:var(--up); }} .text-red {{ color:var(--down); }} .status-badge {{ display:inline-block; padding:5px 12px; border-radius:20px; font-weight:bold; font-size:14px; }} .status-online {{ background:#e6f4ea; color:#137333; }} ul {{ list-style:none; padding:0; }} li {{ padding:8px 0; border-bottom:1px solid #f9f9f9; display:flex; align-items:center; font-size:14px; }} li::before {{ content:"•"; color:#1a73e8; font-weight:bold; margin-right:10px; }}</style></head><body onload="ch()"><div class="header"><div class="brand"><b>JoeClowAI Lab</b> <span style="font-size:10px; color:#999;">{updated_at}</span></div><div class="tabs"><div class="tab active" onclick="sw(0)">🔮 監控</div><div class="tab" onclick="sw(1)">📈 美股</div><div class="tab" onclick="sw(2)">🇹🇼 預測</div><div class="tab" onclick="sw(3)">📝 筆記</div><div class="tab" onclick="sw(4)">🛠️ 狀態</div></div></div><div class="container"><div id="t0" class="tab-content active"><div class="card"><div class="title">套利與異常監測</div>{poly_html}</div></div><div id="t1" class="tab-content"><div class="card"><div class="title">美股聯動分析</div>{us_html}</div></div><div id="t2" class="tab-content"><div class="card acc-card"><div style="font-size:12px; opacity:0.8; font-weight:600;">今日準確率</div><div style="display:{'block' if total_f>0 else 'none'}"><div style="font-size:36px; font-weight:900;">{(correct_f/total_f*100) if total_f>0 else 0:.1f}%</div><div style="font-size:13px; opacity:0.9;">({correct_f}/{total_f} 命中)</div></div><div style="display:{'block' if total_f<=0 else 'none'}; font-size:16px; margin-top:5px;">{'⏳ 等待開盤驗證...' if is_market_open_day else '☕ 今日休市'}</div></div><div class="card"><div class="title">台股預測清單</div>{tw_html}</div><div class="card"><div class="title">歷史結算與累積對決 (PK)</div><table style="width:100%; padding:10px 16px; border-spacing:0 8px; font-size:13px;">{hist_rows}</table></div></div><div id="t3" class="tab-content"><div class="card"><div class="title">AI 實驗筆記歷史</div>{blog_list_html}</div></div><div id="t4" class="tab-content">{status_html}</div>{blog_details_html}</div><script>function sw(i){{document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));document.querySelectorAll('.tab-content').forEach((c,j)=>c.classList.toggle('active',i==j));if(i>=5)document.querySelectorAll('.tab')[3].classList.add('active');if(i<5)localStorage.setItem('t',i);}}function ch(){{const t=localStorage.getItem('t');if(t)sw(t);setInterval(()=>location.reload(),60000);}}</script></body></html>'''
     with open('daily_stock_summary/frontend/combined.html', 'w') as f: f.write(full_html)
 
 if __name__ == "__main__": generate_dashboard()
