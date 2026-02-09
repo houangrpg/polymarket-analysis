@@ -35,25 +35,29 @@ def generate_dashboard():
     except: status_data = {"in_progress": ["維持系統穩定"]}
     current_work = status_data.get("in_progress", ["環境維護中"])[0]
 
-    # --- Kindle Persona UI (v3.8 - Video Wake Lock) ---
-    # 使用 Base64 編碼的一秒靜音 MP4 影片片段來維持喚醒
-    kindle_html = f'''<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta http-equiv="refresh" content="60"><meta name="viewport" content="width=1072, user-scalable=no"><title>JoeClow Soul v3.8</title><style>
-        body {{ background:white; color:black; margin:0; padding:0; width:1072px; height:1448px; overflow:hidden; position: absolute; font-family:serif; }} 
-        .rotate {{ -webkit-transform: rotate(90deg); transform: rotate(90deg); width: 1448px; height: 1072px; position: absolute; top: 50%; left: 50%; margin-top: -536px; margin-left: -724px; display: flex; flex-direction: column; align-items: center; padding-top: 40px; }}
-        .time-box {{ font-size: 140px; font-weight: 900; border-bottom: 6px solid black; }}
-        .face-box {{ font-size: 150px; margin: 30px 0; }}
-        .status-box {{ font-size: 44px; font-weight: 900; text-align: center; border: 6px solid black; padding: 20px; }}
-        .task-hint {{ font-size: 34px; margin-top: 40px; border-left: 12px solid black; padding-left: 20px; align-self: flex-start; margin-left: 100px; }}
-        #wakevideo {{ position: absolute; top:0; left:0; width:1px; height:1px; opacity: 0.01; }}
+    # --- Kindle PW4 規格：1072x1448 ---
+    # 橫屏可用區域扣除側邊欄後約為 1250x1072
+    kindle_html = f'''<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta http-equiv="refresh" content="60"><meta name="viewport" content="width=1448, user-scalable=no"><title>JoeClow Soul Final</title><style>
+        body {{ background:white; color:black; margin:0; padding:0; width:1448px; height:1072px; overflow:hidden; font-family:serif; }} 
+        .main-container {{ 
+            width: 1448px; height: 1072px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding-left: 280px; /* 避開側邊欄 */
+            box-sizing: border-box;
+            background: white;
+        }}
+        .time-box {{ font-size: 150px; font-weight: 900; border-bottom: 8px solid black; line-height: 1.1; margin-bottom: 20px; }}
+        .face-box {{ font-size: 100px; margin: 30px 0; font-family: "Courier New", monospace; }}
+        .status-box {{ font-size: 44px; font-weight: 900; text-align: center; border: 8px solid black; padding: 25px; width: 850px; line-height: 1.2; }}
+        .task-hint {{ font-size: 30px; margin-top: 50px; border-left: 10px solid black; padding-left: 25px; align-self: flex-start; margin-left: 220px; max-width: 850px; }}
     </style></head><body>
-    <div class="rotate">
+    <div class="main-container">
         <div class="time-box">{now.strftime('%H:%M')}</div>
         <div class="face-box">{soul['face']}</div>
         <div class="status-box">{soul['status']}</div>
         <div class="task-hint"><b>📍 實際任務：</b>{current_work[:55]}</div>
-        <div style="font-size:28px; margin-top:20px; color:#666;">v3.8 Video Wake Lock Active</div>
     </div>
-    <video id="wakevideo" autoplay loop muted playsinline>
+    <video autoplay loop muted playsinline style="position:absolute; top:0; left:0; width:1px; height:1px; opacity:0.01;">
         <source src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQAAAA5tZGF0AAAAAAAAAAUAbW9vdgAAAGxtdmhkAAAAAM89u9DPPbvQAAACWAAAAu4AAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAzB0cmFrAAAAXHRraGQAAAADzz270M89u9QAAAABAAAAAAAAAu4AAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAUAAAAEAAAAAAGVkaXRzAAAALGVsc3QAAAAAAAAAAQAAAu4AAAB4AAEAAAAAAAEAAAAAAWJtZGlhAAAAIG1kaGQAAAAAM89u9DPPbvQAAACWAAAAu4UAAAAAAC1oZGxyAAAAAAAAAAB2aWRlAAAAAAAAAAAAAAAAVmlkZW9IYW5kbGVyAAAAAQFtaW5mAAAAFHZtaGQAAAABAAAAAAAAAAAAAAAkZGluZgAAABxkcmVmAAAAAAAAAAEAAAAMdXJsIAAAAAEAAADbbXN0YmwAAACWc3RzZAAAAAAAAAABAAAAbmF2YzEAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAUABQAFAAAABIAEgAAAAAAAAAAGp4MjY0IC0gY29yZSAxNjQgci0gKGMpIDIwMDMtMjAyMSAtIGh0dHA6Ly93d3cudmlkZW9sYW4ub3JnL3gyNjQuaHRtbAAAAAAfYXZjQf/+AAsAWf/gAEVAbv4AswCAAAADAAAAAwA8SAAeAAAFX3N0dHMAAAAAAAAAAQAAAAEAAACWAAAAFHN0c3oAAAAAAAAAAAAAAAEAAAAUc3RzYwAAAAAAAAABAAAAAQAAAAEAAAABAAAAFHN0Y28AAAAAAAAAAQAAADQ=" type="video/mp4">
     </video>
     </body></html>'''
