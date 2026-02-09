@@ -1,9 +1,9 @@
 <!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta http-equiv="refresh" content="60"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Kindle Dash</title><style>
-        body { font-family:serif; background:white; color:black; margin:0; padding:0; overflow: hidden; width: 100%; height: 100%; } 
+        body { font-family:serif; background:white; color:black; margin:0; padding:0; overflow: hidden; width: 100%; height: 100%; position: absolute; } 
         .rotate { 
-            -webkit-transform: rotate(90deg); 
+            -webkit-transform: rotate(-90deg); 
             -webkit-transform-origin: center center;
-            transform: rotate(90deg); 
+            transform: rotate(-90deg); 
             transform-origin: center center; 
             width: 100vh; 
             height: 100vw; 
@@ -13,26 +13,27 @@
             margin-top: -50vw; 
             margin-left: -50vh; 
             background: white;
+            display: block;
         }
-        .header-section { height: 30%; border-bottom: 3px solid black; text-align: center; padding: 20px; box-sizing: border-box; }
-        .data-section { height: 70%; width: 100%; }
+        .header-section { height: 28%; border-bottom: 3px solid black; text-align: center; padding: 15px; box-sizing: border-box; }
+        .data-section { height: 72%; width: 100%; }
         table { width: 100%; height: 100%; border-collapse: collapse; table-layout: fixed; }
-        td { vertical-align: top; border-right: 2px solid black; padding: 10px; box-sizing: border-box; }
+        td { vertical-align: top; border-right: 2px solid black; padding: 8px; box-sizing: border-box; overflow: hidden; }
         td:last-child { border-right: none; }
-        .k-time { font-size: 90px; font-weight: 900; margin: 0; line-height: 1; }
-        .k-date { font-size: 32px; margin-top: 10px; font-weight: bold; }
-        .k-title { font-size: 26px; font-weight: bold; background: black; color: white; padding: 6px; margin-bottom: 12px; text-align: center; }
-        .k-item { font-size: 20px; margin-bottom: 10px; border-bottom: 1px solid black; padding-bottom: 4px; }
-        .k-item b { float: right; }
-        .k-status-box { font-size: 19px; line-height: 1.5; }
+        .k-time { font-size: 85px; font-weight: 900; margin: 0; line-height: 1; }
+        .k-date { font-size: 30px; margin-top: 5px; font-weight: bold; }
+        .k-title { font-size: 24px; font-weight: bold; background: black; color: white; padding: 5px; margin-bottom: 10px; text-align: center; }
+        .k-item { font-size: 19px; margin-bottom: 8px; border-bottom: 1px solid black; padding-bottom: 3px; overflow: hidden; white-space: nowrap; }
+        .k-item b { float: right; margin-left: 5px; }
+        .k-status-box { font-size: 18px; line-height: 1.4; }
     </style></head><body><div class="rotate">
         <div class="header-section">
-            <div class="k-time">14:05</div>
+            <div class="k-time">14:07</div>
             <div class="k-date">2026-02-09</div>
-            <div style="font-size: 18px; margin-top: 10px; font-weight: bold;">JoeClowAI Lab | 系統狀態: Online | v1.5</div>
+            <div style="font-size: 16px; margin-top: 8px; font-weight: bold;">JoeClowAI Lab | 系統狀態: Online | v1.6</div>
         </div>
         <div class="data-section">
-            <table cellspacing="0" cellpadding="0">
+            <table cellspacing="0" cellpadding="0" border="0">
                 <tr>
                     <td>
                         <div class="k-title">💰 套利警報</div>
@@ -40,13 +41,13 @@
                     </td>
                     <td>
                         <div class="k-title">📈 美股聯動</div>
-                        <div class="k-item">TSLA <b>+3.50%</b></div><div class="k-item">NVDA <b>+7.92%</b></div><div class="k-item">AAPL <b>+0.80%</b></div><div class="k-item">MSFT <b>+1.90%</b></div><div class="k-item">AMZN <b>-5.55%</b></div><div class="k-item">GOOGL <b>-2.53%</b></div>
+                        <div class="k-item">TSLA<b>+3.50%</b></div><div class="k-item">NVDA<b>+7.92%</b></div><div class="k-item">AAPL<b>+0.80%</b></div><div class="k-item">MSFT<b>+1.90%</b></div><div class="k-item">AMZN<b>-5.55%</b></div><div class="k-item">GOOGL<b>-2.53%</b></div>
                     </td>
                     <td>
                         <div class="k-title">🛠️ 執行進度</div>
                         <div class="k-status-box">
                             • Nothing Watch 通話對話<br>• Kindle 專用高對比度顯示模式 <br>• 每日自動進化作業：自我代碼優化與快取<br>
-                            <hr style="border:1px solid black; margin:10px 0;">
+                            <hr style="border:1px solid black; margin:8px 0;">
                             • Kindle 串接：明日有線連接後確<br>• 研究 Nothing Watch P<br>• 建立自動化 QA 測試腳本<br>
                         </div>
                     </td>
