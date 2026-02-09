@@ -4,8 +4,8 @@
   "description": "Fix for missing website files",
   "main": "index.js",
   "scripts": {
-    "build": "echo 'No build script implemented'; exit 1",
-    "deploy": "echo 'No deploy script implemented'; exit 1"
+    "build": "echo 'Building website assets...' && mkdir -p dist && cp -r dashboard/* dist/",
+    "deploy": "echo 'Deploying website...' && cp -r dist/* /var/www/html/"
   },
   "author": "Joe Huang",
   "license": "ISC"
