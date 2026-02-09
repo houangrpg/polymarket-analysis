@@ -5,5 +5,11 @@
     "accuracy": 60.0,
     "correct": 3,
     "total": 5
+  },
+  {
+    "date": "2026-02-09",
+    "accuracy": 57.1,
+    "correct": 4,
+    "total": 7
   }
 ]

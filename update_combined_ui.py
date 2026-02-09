@@ -208,7 +208,58 @@ def generate_dashboard():
     '''
 
     # --- Kindle Auto Page (Force Refresh & Landscape) ---
-    kindle_auto_html = f'''<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta http-equiv="refresh" content="60"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Kindle Dash</title><style>body {{ font-family:serif; background:white; color:black; margin:0; padding:0; width:100vh; height:100vw; transform: rotate(-90deg); transform-origin: top right; position: absolute; top: 100%; right: 0; }} .content {{ padding: 20px; box-sizing: border-box; }} .k-card {{ border:2px solid black; padding:15px; margin-bottom:15px; }} .k-title {{ font-size:24px; font-weight:bold; border-bottom:1px solid black; margin-bottom:10px; padding-bottom:5px; }} .k-item {{ font-size:20px; margin-bottom:8px; display:flex; justify-content:space-between; }} .k-meta {{ font-size:14px; color:#333; margin-bottom:20px; text-align:right; }} .k-status {{ font-size:18px; line-height:1.4; }} </style></head><body><div class="content"><div class="k-meta">{updated_at} (Landscape Mode)</div><div class="k-card"><div class="k-title">系統狀態</div><div class="k-status"><b>Status:</b> {status_data.get("system_status", "Online")}<br><b>Progress:</b> {status_data.get("in_progress", ["None"])[0] if status_data.get("in_progress") else "N/A"}</div></div><div class="k-card"><div class="k-title">熱門套利/異常</div>{"".join([f'<div class="k-item"><span>{m["title"][:25]}...</span><b>{m["edge"]}</b></div>' for m in hot_markets[:5]])}</div><div class="k-card"><div class="k-title">美股聯動</div>{"".join([f'<div class="k-item"><span>{s["s"]}</span><b>{s["c"]}</b></div>' for s in stocks[:5]])}</div><div style="font-size:10px; text-align:center; margin-top:30px;">JoeClowAI Lab Kindle Landscape</div></div></body></html>'''
+    kindle_auto_html = f'''<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta http-equiv="refresh" content="60"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Kindle Dash</title><style>
+        body {{ font-family:serif; background:white; color:black; margin:0; padding:0; overflow: hidden; }} 
+        .rotate {{ 
+            -webkit-transform: rotate(-90deg); 
+            -webkit-transform-origin: 50% 50%;
+            transform: rotate(-90deg); 
+            transform-origin: center; 
+            width: 1448px; 
+            height: 1072px; 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            margin-top: -536px; 
+            margin-left: -724px; 
+            display: -webkit-box;
+            display: flex; 
+            -webkit-box-orient: vertical;
+            flex-direction: column; 
+        }}
+        .header-section {{ height: 350px; border-bottom: 2px solid black; display: -webkit-box; display: flex; -webkit-box-orient: vertical; flex-direction: column; -webkit-box-pack: center; justify-content: center; -webkit-box-align: center; align-items: center; text-align: center; box-sizing: border-box; padding: 10px; }}
+        .data-section {{ height: 722px; display: -webkit-box; display: flex; -webkit-box-orient: horizontal; flex-direction: row; box-sizing: border-box; }}
+        .column {{ -webkit-box-flex: 1; flex: 1; border-right: 2px solid black; padding: 15px; overflow: hidden; display: -webkit-box; display: flex; -webkit-box-orient: vertical; flex-direction: column; }}
+        .column:last-child {{ border-right: none; }}
+        .k-time {{ font-size: 80px; font-weight: 900; margin: 0; }}
+        .k-date {{ font-size: 30px; margin-top: 10px; }}
+        .k-title {{ font-size: 28px; font-weight: bold; background: black; color: white; padding: 8px; margin-bottom: 15px; text-align: center; }}
+        .k-item {{ font-size: 22px; margin-bottom: 10px; display: -webkit-box; display: flex; -webkit-box-pack: justify; justify-content: space-between; border-bottom: 1px dotted black; }}
+        .k-status-box {{ font-size: 20px; line-height: 1.6; }}
+    </style></head><body><div class="rotate">
+        <div class="header-section">
+            <div class="k-time">{datetime.now().strftime('%H:%M')}</div>
+            <div class="k-date">{datetime.now().strftime('%Y-%m-%d')}</div>
+            <div style="font-size: 18px; margin-top: 15px;">系統狀態: {status_data.get("system_status", "Online")} | 重刷: 60s | v1.3</div>
+        </div>
+        <div class="data-section">
+            <div class="column">
+                <div class="k-title">💰 套利警報</div>
+                {"".join([f'<div class="k-item"><span>{m["title"][:15]}</span><b>{m["edge"]}</b></div>' for m in hot_markets[:6]])}
+            </div>
+            <div class="column">
+                <div class="k-title">📈 美股聯動</div>
+                {"".join([f'<div class="k-item"><span>{s["s"]}</span><b>{s["c"]}</b></div>' for s in stocks[:6]])}
+            </div>
+            <div class="column">
+                <div class="k-title">🛠️ 執行進度</div>
+                <div class="k-status-box">
+                    {"".join([f'• {x[:20]}<br>' for x in status_data.get("in_progress", [])])}
+                    {"".join([f'• {x[:20]}<br>' for x in status_data.get("todos", [])[:3]])}
+                </div>
+            </div>
+        </div>
+    </div></body></html>'''
     with open('daily_stock_summary/frontend/kindle_auto.html', 'w') as f: f.write(kindle_auto_html)
 
     full_html = f'''<!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"><title>JoeClowAI Lab</title><style>:root {{ --blue:#1a73e8; --bg:#f8f9fa; --up:#137333; --down:#d93025; --border:#e0e0e0; }} * {{ box-sizing:border-box; }} body {{ font-family:-apple-system,sans-serif; margin:0; background:var(--bg); color:#202124; }} .header {{ background:white; border-bottom:1px solid var(--border); position:sticky; top:0; z-index:1000; }} .brand {{ padding:12px 16px; display:flex; justify-content:space-between; align-items:center; }} .brand b {{ color:var(--blue); font-size:18px; }} .tabs {{ display:flex; }} .tab {{ flex:1; text-align:center; padding:12px; font-size:14px; font-weight:600; color:#5f6368; border-bottom:3px solid transparent; position:relative; }} .tab.active {{ color:var(--blue); border-bottom-color:var(--blue); }} .container {{ padding:10px; max-width:600px; margin:0 auto; }} .card {{ background:white; border-radius:12px; border:1px solid var(--border); margin-bottom:12px; overflow:hidden; }} .title {{ padding:10px 16px; font-size:12px; font-weight:700; background:#f1f3f4; color:#5f6368; }} .row {{ padding:12px 16px; border-bottom:1px solid #f0f0f0; display:flex; flex-direction:column; }} .item-header {{ display:flex; justify-content:space-between; align-items:flex-start; }} .item-name {{ font-size:15px; font-weight:700; }} .price-now {{ font-size:16px; font-weight:800; }} .price-prev {{ font-size:11px; color:#5f6368; text-align:right; }} .item-detail {{ display:flex; align-items:center; margin-top:6px; gap:8px; }} .badge {{ padding:3px 8px; border-radius:6px; font-size:12px; font-weight:700; background:#f1f3f4; }} .badge-bull {{ background:#e6f4ea; color:#137333; }} .badge-bear {{ background:#fce8e6; color:#d93025; }} .acc-card {{ background:var(--blue); color:white; padding:20px; text-align:center; border:none; }} .tab-content {{ display:none; }} .tab-content.active {{ display:block; }} .text-green {{ color:var(--up); }} .text-red {{ color:var(--down); }} .status-badge {{ display:inline-block; padding:5px 12px; border-radius:20px; font-weight:bold; font-size:14px; }} .status-online {{ background:#e6f4ea; color:#137333; }} ul {{ list-style:none; padding:0; }} li {{ padding:8px 0; border-bottom:1px solid #f9f9f9; display:flex; align-items:center; font-size:14px; }} li::before {{ content:"•"; color:#1a73e8; font-weight:bold; margin-right:10px; }}</style></head><body onload="ch()"><div class="header"><div class="brand"><b>JoeClowAI Lab</b> <span style="font-size:10px; color:#999;">{updated_at}</span></div><div class="tabs"><div class="tab active" onclick="sw(0)">🔮 監控</div><div class="tab" onclick="sw(1)">📈 美股</div><div class="tab" onclick="sw(2)">🇹🇼 預測</div><div class="tab" onclick="sw(3)">📝 筆記</div><div class="tab" onclick="sw(4)">🛠️ 狀態</div></div></div><div class="container"><div id="t0" class="tab-content active"><div class="card"><div class="title">套利與異常監測</div>{poly_html}</div></div><div id="t1" class="tab-content"><div class="card"><div class="title">美股聯動分析</div>{us_html}</div></div><div id="t2" class="tab-content"><div class="card acc-card"><div style="font-size:12px; opacity:0.8; font-weight:600;">今日準確率</div><div style="display:{'block' if total_f>0 else 'none'}"><div style="font-size:36px; font-weight:900;">{(correct_f/total_f*100) if total_f>0 else 0:.1f}%</div><div style="font-size:13px; opacity:0.9;">({correct_f}/{total_f} 命中)</div></div><div style="display:{'block' if total_f<=0 else 'none'}; font-size:16px; margin-top:5px;">{'⏳ 等待開盤驗證...' if is_market_open_day else '☕ 今日休市'}</div></div><div class="card"><div class="title">台股預測清單</div>{tw_html}</div><div class="card"><div class="title">歷史結算與累積對決 (PK)</div><table style="width:100%; padding:10px 16px; border-spacing:0 8px; font-size:13px;">{hist_rows}</table></div></div><div id="t3" class="tab-content"><div class="card"><div class="title">AI 實驗筆記歷史</div>{blog_list_html}</div></div><div id="t4" class="tab-content">{status_html}</div>{blog_details_html}</div><script>function sw(i){{document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i==j));document.querySelectorAll('.tab-content').forEach((c,j)=>c.classList.toggle('active',i==j));if(i>=5)document.querySelectorAll('.tab')[3].classList.add('active');if(i<5)localStorage.setItem('t',i);}}function ch(){{const t=localStorage.getItem('t');if(t)sw(t);setInterval(()=>location.reload(),60000);}}</script></body></html>'''
