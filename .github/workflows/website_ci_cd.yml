@@ -1,0 +1,78 @@
+# Enhanced CI/CD Pipeline for Website Deployment and Validation
+name: CI/CD Website Pipeline
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: target_site_tests/package-lock.json
+
+      - name: Install dependencies
+        working-directory: target_site_tests
+        run: npm ci
+
+      - name: Run Website Structure Check
+        working-directory: target_site_tests
+        run: node site_structure_check.js "https://example.com"
+
+      - name: Run Data Source Tests
+        working-directory: target_site_tests
+        run: node data_source_test.js
+
+  deploy:
+    needs: build_and_test
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  validate:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        working-directory: target_site_tests
+        run: npm ci
+      - name: Validate Live Deployment
+        working-directory: target_site_tests
+        run: node validate_deployment.js "${{ needs.deploy.outputs.page_url || 'https://joe-openclaw.github.io/workspace/' }}"

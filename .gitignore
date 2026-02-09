@@ -4,3 +4,9 @@
 !daily_stock_summary/
 !daily_stock_summary/frontend/
 !daily_stock_summary/frontend/combined.html
+!.github/
+!.github/workflows/
+!target_site_tests/
+!target_site_tests/*.js
+!target_site_tests/package.json
+!target_site_tests/package-lock.json
