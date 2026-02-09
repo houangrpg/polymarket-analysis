@@ -1,0 +1,12 @@
+{
+  "name": "my-website",
+  "version": "1.0.0",
+  "description": "Fix for missing website files",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'No build script implemented'; exit 1",
+    "deploy": "echo 'No deploy script implemented'; exit 1"
+  },
+  "author": "Joe Huang",
+  "license": "ISC"
+}
