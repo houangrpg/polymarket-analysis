@@ -1,10 +1,36 @@
 <!doctype html><html lang="zh-TW"><head><meta charset="utf-8"><meta http-equiv="refresh" content="60"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Kindle Dash</title><style>
-        body { font-family:serif; background:white; color:black; margin:0; padding:0; overflow: hidden; } 
-        .rotate { transform: rotate(-90deg); transform-origin: center; width: 100vh; height: 100vw; position: absolute; top: 50%; left: 50%; margin-top: -50vw; margin-left: -50vh; }
-        .content { padding: 20px; box-sizing: border-box; } 
-        .k-card { border:2px solid black; padding:15px; margin-bottom:15px; } 
-        .k-title { font-size:24px; font-weight:bold; border-bottom:1px solid black; margin-bottom:10px; padding-bottom:5px; } 
-        .k-item { font-size:20px; margin-bottom:8px; display:flex; justify-content:space-between; } 
-        .k-meta { font-size:14px; color:#333; margin-bottom:20px; text-align:right; } 
-        .k-status { font-size:18px; line-height:1.4; } 
-    </style></head><body><div class="rotate"><div class="content"><div class="k-meta">2026-02-09 13:49:41 (v1.2)</div><div class="k-card"><div class="k-title">系統狀態</div><div class="k-status"><b>Status:</b> Online<br><b>Progress:</b> Nothing Watch 通話對話方案：研發虛擬藍牙通話閘道器 (P0)</div></div><div class="k-card"><div class="k-title">熱門套利/異常</div></div><div class="k-card"><div class="k-title">美股聯動</div><div class="k-item"><span>TSLA</span><b>+3.50%</b></div><div class="k-item"><span>NVDA</span><b>+7.92%</b></div><div class="k-item"><span>AAPL</span><b>+0.80%</b></div><div class="k-item"><span>MSFT</span><b>+1.90%</b></div><div class="k-item"><span>AMZN</span><b>-5.55%</b></div></div><div style="font-size:10px; text-align:center; margin-top:30px;">JoeClowAI Lab Kindle Landscape</div></div></div></body></html>
+        body { font-family:serif; background:white; color:black; margin:0; padding:0; overflow: hidden; width: 100vw; height: 100vh; position: relative; } 
+        .rotate { transform: rotate(-90deg); transform-origin: center; width: 100vh; height: 100vw; position: absolute; top: 50%; left: 50%; margin-top: -50vw; margin-left: -50vh; display: flex; flex-direction: column; }
+        .header-section { height: 33.3vh; border-bottom: 2px solid black; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; padding: 10px; }
+        .data-section { height: 66.7vh; display: flex; flex-direction: row; box-sizing: border-box; }
+        .column { flex: 1; border-right: 1px solid black; padding: 10px; overflow: hidden; display: flex; flex-direction: column; }
+        .column:last-child { border-right: none; }
+        .k-time { font-size: 48px; font-weight: 900; margin: 0; }
+        .k-date { font-size: 20px; margin-top: 5px; }
+        .k-title { font-size: 20px; font-weight: bold; background: black; color: white; padding: 4px 8px; margin-bottom: 8px; text-align: center; }
+        .k-item { font-size: 16px; margin-bottom: 5px; display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; }
+        .k-status-box { font-size: 16px; line-height: 1.4; }
+    </style></head><body><div class="rotate">
+        <div class="header-section">
+            <div class="k-time">13:57</div>
+            <div class="k-date">2026-02-09</div>
+            <div style="font-size: 12px; margin-top: 10px;">系統狀態: Online | 重刷: 60s</div>
+        </div>
+        <div class="data-section">
+            <div class="column">
+                <div class="k-title">💰 套利警報</div>
+                
+            </div>
+            <div class="column">
+                <div class="k-title">📈 美股聯動</div>
+                <div class="k-item"><span>TSLA</span><b>+3.50%</b></div><div class="k-item"><span>NVDA</span><b>+7.92%</b></div><div class="k-item"><span>AAPL</span><b>+0.80%</b></div><div class="k-item"><span>MSFT</span><b>+1.90%</b></div><div class="k-item"><span>AMZN</span><b>-5.55%</b></div><div class="k-item"><span>GOOGL</span><b>-2.53%</b></div>
+            </div>
+            <div class="column">
+                <div class="k-title">🛠️ 執行進度</div>
+                <div class="k-status-box">
+                    • Nothing Watch 通...<br>• Kindle 專用高對比度顯示...<br>• 每日自動進化作業：自我代碼優化...<br>
+                    • Kindle 串接：明日有線連...<br>• 研究 Nothing Watc...<br>
+                </div>
+            </div>
+        </div>
+    </div></body></html>
