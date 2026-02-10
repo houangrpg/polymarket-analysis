@@ -143,6 +143,10 @@
             color: #444;
             font-weight: bold;
         }
+        /* Haptic / feedback animation */
+        .haptic-pulse { animation: hapticPulse 120ms ease-out; }
+        @keyframes hapticPulse { 0% { transform: scale(1); } 50% { transform: scale(0.985) translateY(-2px); } 100% { transform: scale(1); } }
+
     </style>
 </head>
 <body>
@@ -220,6 +224,42 @@
             return Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
         }
 
+        // Haptic feedback helper: use Vibration API when available; otherwise fall back to a short click sound and a visual pulse
+        function hapticTick() {
+            try {
+                if (navigator.vibrate) {
+                    // pattern: short tick
+                    navigator.vibrate(20);
+                } else {
+                    // WebAudio short click
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        const ctx = new AudioCtx();
+                        const o = ctx.createOscillator();
+                        const g = ctx.createGain();
+                        o.type = 'square';
+                        o.frequency.value = 1000;
+                        g.gain.value = 0.002;
+                        o.connect(g);
+                        g.connect(ctx.destination);
+                        o.start();
+                        setTimeout(()=>{ try{ o.stop(); ctx.close(); }catch(e){}}, 40);
+                    }
+                }
+            } catch (e) {
+                // silence failures
+            }
+            // visual pulse
+            wheel.classList.add('haptic-pulse');
+            setTimeout(()=> wheel.classList.remove('haptic-pulse'), 120);
+            // also pulse active cover item if present
+            const active = document.querySelector('.cover-item.active');
+            if (active) {
+                active.classList.add('haptic-pulse');
+                setTimeout(()=> active.classList.remove('haptic-pulse'), 120);
+            }
+        }
+
         function handleMove(e) {
             const touch = e.touches ? e.touches[0] : e;
             const currentAngle = getAngle(touch.clientX, touch.clientY);
@@ -229,11 +269,11 @@
                 if (delta > 180) delta -= 360;
                 if (delta < -180) delta += 360;
 
-                if (Math.abs(delta) > 15) { // Sensitivity
+                if (Math.abs(delta) > 12) { // Sensitivity (slightly more responsive)
                     if (delta > 0) currentIndex = (currentIndex + 1) % apps.length;
                     else currentIndex = (currentIndex - 1 + apps.length) % apps.length;
                     lastAngle = currentAngle;
-                    if (window.navigator.vibrate) window.navigator.vibrate(10);
+                    hapticTick();
                     render();
                 }
             } else {
