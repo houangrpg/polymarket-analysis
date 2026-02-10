@@ -176,25 +176,23 @@ def generate_dashboard():
             if win: correct_f += 1; accuracy_icon = "✅"
             else: accuracy_icon = "❌"
         tw_html += f'''
-            <div class="row">
-                <div class="item-header" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                    <div class="item-name" style="font-size: 14px; color: #1a73e8;">{ts}{symbol_text}</div>
-                    <div class="item-price" style="text-align:right;">
-                        <div class="price-prev" style="font-size:11px; color:#888;">昨收: {p_prev}</div>
+            <div class="row" style="display: flex; flex-direction: column; align-items: stretch; padding: 16px;">
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 4px;">
+                    <div style="font-weight: 700; color: #1a73e8;">{ts}{symbol_text}</div>
+                    <div>昨收: {p_prev}</div>
+                </div>
+                <div style="text-align: center; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; margin: 10px 0;">
+                    <div class="price-now {'text-green' if p_now_v > p_prev_v else 'text-red' if p_now_v < p_prev_v else ''}" style="line-height: 1;">
+                        <div style="font-size: 32px; font-weight: 900;">{p_now}</div>
+                        <div style="font-size: 14px; font-weight: bold; margin-top: 4px;">{diff_text}</div>
                     </div>
                 </div>
-                <div class="price-now-container" style="text-align: center; margin: 4px 0;">
-                    <div class="price-now {'text-green' if p_now_v > p_prev_v else 'text-red' if p_now_v < p_prev_v else ''}" style="display: inline-block;">
-                        <div style="font-size:26px; font-weight:900; line-height: 1;">{p_now}</div>
-                        <div style="font-size:12px; font-weight:bold; margin-top: 2px;">({diff_text})</div>
-                    </div>
-                </div>
-                <div class="item-detail" style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
-                    <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
                         <span class="badge {'badge-bull' if sentiment=='偏多' else 'badge-bear' if sentiment=='偏空' else ''}">{sentiment}</span>
-                        <span style="margin-left:5px; font-size:16px;">{accuracy_icon}</span>
+                        <span style="font-size: 20px;">{accuracy_icon}</span>
                     </div>
-                    <div style="font-size:12px; color:#5f6368;">↗️ <b>{counts["bull"]}</b> | ↘️ <b>{counts["bear"]}</b></div>
+                    <div style="font-size: 12px; color: #5f6368; font-weight: 600;">↗️ {counts["bull"]} | ↘️ {counts["bear"]}</div>
                 </div>
             </div>'''
 
