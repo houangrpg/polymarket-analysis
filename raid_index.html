@@ -37,7 +37,9 @@
         const spec = document.getElementById('testSpec').value || '登入測試功能及內頁相關功能點擊、查詢、錯誤記錄、效能檢測';
         if(!name || !url) return alert('請填寫系統名稱與網址');
         document.querySelector('.mission-control button').innerText = '⌛ 指令已發送...';
-        window.open(`https://t.me/JoeClowAI_bot?text=Raid 測試 ${encodeURIComponent(name)} ${encodeURIComponent(url)} 規範：${encodeURIComponent(spec)}`);
+        // 改用直接連結，不使用 t.me 轉跳以避免 User doesn't exist 錯誤
+        const message = `Raid 測試 ${name} ${url} 規範：${spec}`;
+        window.open(`tg://msg?text=${encodeURIComponent(message)}`);
     }
     </script>
 </body>
