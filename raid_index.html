@@ -18,6 +18,9 @@
         <h3>🚀 New Quest (新任務)</h3>
         <input type="text" id="projName" placeholder="系統名稱 (如: Apple)">
         <input type="text" id="targetUrl" placeholder="目標網址 (https://...)">
+        <br>
+        <textarea id="testSpec" placeholder="測試規範" style="background:#000; border:1px solid #00d2ff; color:#fff; padding:10px; width:85%; border-radius:5px; margin: 10px; height: 60px; font-family: sans-serif;">登入測試功能及內頁相關功能點擊、查詢、錯誤記錄、效能檢測</textarea>
+        <br>
         <button onclick="startRaid()">開始測試</button>
         <p style="font-size:12px; color:#aaa; margin-top:10px;">點擊後系統將在列表中新增「檢測中」狀態並啟動 AI</p>
     </div>
@@ -31,9 +34,10 @@
     function startRaid() {
         const name = document.getElementById('projName').value;
         const url = document.getElementById('targetUrl').value;
+        const spec = document.getElementById('testSpec').value || '登入測試功能及內頁相關功能點擊、查詢、錯誤記錄、效能檢測';
         if(!name || !url) return alert('請填寫系統名稱與網址');
         document.querySelector('.mission-control button').innerText = '⌛ 指令已發送...';
-        window.open(`https://t.me/JoeClowAI_bot?text=Raid 測試 ${encodeURIComponent(name)} ${encodeURIComponent(url)}`);
+        window.open(`https://t.me/JoeClowAI_bot?text=Raid 測試 ${encodeURIComponent(name)} ${encodeURIComponent(url)} 規範：${encodeURIComponent(spec)}`);
     }
     </script>
 </body>
