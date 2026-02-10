@@ -171,10 +171,14 @@ def generate_dashboard():
         accuracy_icon = ""
         diff_v = p_now_v - p_prev_v if p_now_v > 0 and p_prev_v > 0 else 0
         diff_text = f"{'+' if diff_v >= 0 else ''}{diff_v:.2f}"
-        if is_validation_time and p_now_v > 0 and p_prev_v > 0 and sentiment != '中性' and abs(p_now_v - p_prev_v) > 0.001:
-            total_f += 1; win = (sentiment == '偏多' and p_now_v > p_prev_v) or (sentiment == '偏空' and p_now_v < p_prev_v)
-            if win: correct_f += 1; accuracy_icon = "✅"
-            else: accuracy_icon = "❌"
+        if is_validation_time and p_now_v > 0 and p_prev_v > 0 and sentiment != '中性':
+            total_f += 1
+            # 嚴格判定：偏多必須漲，偏空必須跌
+            win = (sentiment == '偏多' and p_now_v > p_prev_v) or (sentiment == '偏空' and p_now_v < p_prev_v)
+            if win: 
+                correct_f += 1; accuracy_icon = "✅"
+            else: 
+                accuracy_icon = "❌"
         tw_html += f'''
             <div class="row" style="display: flex; flex-direction: column; align-items: stretch; padding: 16px;">
                 <div style="display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 4px;">
