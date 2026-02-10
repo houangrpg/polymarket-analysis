@@ -173,7 +173,20 @@ def generate_dashboard():
             total_f += 1; win = (sentiment == '偏多' and p_now_v > p_prev_v) or (sentiment == '偏空' and p_now_v < p_prev_v)
             if win: correct_f += 1; accuracy_icon = "✅"
             else: accuracy_icon = "❌"
-        tw_html += f'<div class="row"><div class="item-header"><div class="item-name">{ts}{symbol_text} {accuracy_icon}</div><div class="item-price"><div class="price-now">{p_now}</div><div class="price-prev">昨收: {p_prev}</div></div></div><div class="item-detail"><span class="badge {"badge-bull" if sentiment=="偏多" else "badge-bear" if sentiment=="偏空" else ""}">{sentiment}</span><div style="margin-left:auto; font-size:12px; color:#5f6368;">↗️ <b>{counts["bull"]}</b> | ↘️ <b>{counts["bear"]}</b></div></div></div>'
+        tw_html += f'''
+            <div class="row">
+                <div class="item-header">
+                    <div class="item-name">{ts}{symbol_text} {accuracy_icon}</div>
+                    <div class="item-price" style="text-align:right;">
+                        <div class="price-now {'text-green' if p_now_v > p_prev_v else 'text-red' if p_now_v < p_prev_v else ''}" style="font-size:24px; font-weight:900;">{p_now}</div>
+                        <div class="price-prev" style="font-size:12px; color:#666;">昨收: {p_prev}</div>
+                    </div>
+                </div>
+                <div class="item-detail">
+                    <span class="badge {'badge-bull' if sentiment=='偏多' else 'badge-bear' if sentiment=='偏空' else ''}">{sentiment}</span>
+                    <div style="margin-left:auto; font-size:12px; color:#5f6368;">↗️ <b>{counts["bull"]}</b> | ↘️ <b>{counts["bear"]}</b></div>
+                </div>
+            </div>'''
 
     us_html = "".join([f'<div class="row"><div class="item-header"><div class="item-name">{s["s"]} <small style="color:#666;">{s["n"]}</small></div><div class="item-price"><div class="price-now">${s["p"]:.2f}</div><div class="{"text-green" if s["cv"]>=0 else "text-red"}" style="font-size:12px; font-weight:700;">{s["c"]}</div></div></div><div class="item-detail"><span class="badge {"badge-bull" if s["pred"]=="看漲" else "badge-bear" if s["pred"]=="看跌" else ""}">{s["pred"]}</span><div style="margin-left:auto; font-size:11px; text-align:right; color:#1a73e8; font-weight:600;">{s["imp"]}</div></div><div style="font-size:11px; color:#555; margin-top:4px;">聯動: {s["tw"]}</div></div>' for s in stocks])
 
