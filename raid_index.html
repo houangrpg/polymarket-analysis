@@ -36,10 +36,34 @@
         const url = document.getElementById('targetUrl').value;
         const spec = document.getElementById('testSpec').value || '登入測試功能及內頁相關功能點擊、查詢、錯誤記錄、效能檢測';
         if(!name || !url) return alert('請填寫系統名稱與網址');
-        document.querySelector('.mission-control button').innerText = '⌛ 指令已發送...';
-        // 改用直接連結，不使用 t.me 轉跳以避免 User doesn't exist 錯誤
+        
+        const btn = document.querySelector('.mission-control button');
+        const originalText = btn.innerText;
+        btn.innerText = '⌛ 指令發送中...';
+        
         const message = `Raid 測試 ${name} ${url} 規範：${spec}`;
-        window.open(`tg://msg?text=${encodeURIComponent(message)}`);
+        const encodedMsg = encodeURIComponent(message);
+        
+        // 嘗試三種跳轉方式以確保相容性
+        const tgLink = `tg://msg?text=${encodedMsg}`;
+        const webLink = `https://t.me/JoeClowAI_bot?text=${encodedMsg}`;
+        
+        // 優先嘗試喚起 App，失敗後導向網頁版
+        setTimeout(() => {
+            btn.innerText = originalText;
+        }, 3000);
+
+        try {
+            window.location.href = tgLink;
+            // 如果 500ms 後沒離開頁面，可能是沒安裝或不支援 tg:// 協定，改用網頁版
+            setTimeout(() => {
+                if (document.hasFocus()) {
+                    window.open(webLink, '_blank');
+                }
+            }, 500);
+        } catch (e) {
+            window.open(webLink, '_blank');
+        }
     }
     </script>
 </body>
