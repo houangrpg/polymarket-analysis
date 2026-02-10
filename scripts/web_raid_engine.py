@@ -50,6 +50,19 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
     # 評分顏色
     score_color = "#39ff14" if score >= 80 else "#ffbd39" if score >= 60 else "#ff3131"
     
+    # 處理列表轉 HTML 的邏輯，避免 f-string 轉義衝突
+    loot_html = ""
+    for x in security_stats.get('loot', []):
+        loot_html += f'<span class="loot-item loot-success">{x}</span> '
+        
+    items_html = ""
+    for x in completeness_stats.get('items', []):
+        items_html += f'<div class="stat-item"><span class="stat-val" style="color: var(--success);">PASS</span><span class="stat-label">{x}</span></div>'
+        
+    suggestions_html = ""
+    for x in suggestions:
+        suggestions_html += f'<p>• {x}</p>'
+    
     html_content = f'''<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -138,7 +151,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             </div>
             <div class="loot">
                 <p>💡 <b>掉落戰利品 (資安發現)：</b></p>
-                {" ".join([f'<span class="loot-item loot-success">{{x}}</span>' for x in security_stats.get('loot', [])])}
+                {loot_html}
             </div>
         </div>
 
@@ -168,7 +181,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
                 <span class="difficulty">等級：{completeness_stats.get('level', 'S')}</span>
             </div>
             <div class="stats">
-                {"".join([f'<div class="stat-item"><span class="stat-val" style="color: var(--success);">PASS</span><span class="stat-label">{x}</span></div>' for x in completeness_stats.get('items', [])])}
+                {items_html}
             </div>
             <div class="loot">
                 <p>🧪 <b>技能檢測：</b></p>
@@ -182,7 +195,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
                 <span class="quest-title" style="color: var(--warning);">📜 冒險家建議 (System Optimization)</span>
             </div>
             <div style="font-size: 0.9em; line-height: 1.6;">
-                {"".join([f'<p>• {{x}}</p>' for x in suggestions])}
+                {suggestions_html}
             </div>
         </div>
 
