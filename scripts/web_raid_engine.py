@@ -1,11 +1,12 @@
 import json
 import os
 from datetime import datetime
+import subprocess
 
 # 初始化測試索引檔案
 INDEX_FILE = 'raid_index.json'
 
-def update_raid_index(project_name, url, report_file):
+def update_raid_index(project_name, url, report_file, status="Pending"):
     history = []
     if os.path.exists(INDEX_FILE):
         try:
@@ -14,22 +15,41 @@ def update_raid_index(project_name, url, report_file):
         except:
             history = []
     
-    entry = {
-        "date": datetime.now().strftime('%Y-%m-%d %H:%M'),
-        "name": project_name,
-        "url": url,
-        "report": report_file
-    }
-    history.insert(0, entry) # 最新放前面
+    # 檢查是否已有該項目的 Pending 紀錄，有的話更新，沒有的話新增
+    found = False
+    for item in history:
+        if item['name'] == project_name and item['status'] == "Testing...":
+            item['date'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+            item['report'] = report_file
+            item['status'] = status
+            found = True
+            break
+            
+    if not found:
+        entry = {
+            "date": datetime.now().strftime('%Y-%m-%d %H:%M'),
+            "name": project_name,
+            "url": url,
+            "report": report_file,
+            "status": status
+        }
+        history.insert(0, entry)
     
     with open(INDEX_FILE, 'w', encoding='utf-8') as f:
-        json.dump(history[:50], f, indent=2, ensure_ascii=False) # 保留最近 50 次
+        json.dump(history[:50], f, indent=2, ensure_ascii=False)
+    
+    generate_index_page()
+    # 自動推送索引更新
+    subprocess.run(["git", "add", INDEX_FILE, "raid_index.html"], capture_output=True)
+    subprocess.run(["git", "commit", "-m", f"System: Update index for {project_name} ({status})"], capture_output=True)
+    subprocess.run(["git", "push", "origin", "main"], capture_output=True)
 
-def generate_raid_html(project_name, url, status, security_stats, performance_stats, loot_items, suggestions):
+def generate_raid_html(project_name, url, status, security_stats, performance_stats, loot_items, suggestions, extra_cards=None):
     updated_at = datetime.now().strftime('%Y-%m-%d %H:%M')
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     report_filename = f"raid_{project_name.lower()}_{timestamp}.html"
     
+    # 使用與 his_raid_report.html 完全一致的 CSS 與結構
     html_content = f'''<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -52,30 +72,16 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             color: var(--text);
             margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            display: flex; flex-direction: column; align-items: center;
         }}
         .container {{ max-width: 800px; width: 100%; }}
         header {{ text-align: center; margin-bottom: 40px; }}
         h1 {{ font-size: 3em; text-shadow: 0 0 10px var(--primary); margin: 10px 0; }}
         .status-badge {{
-            background: var(--success);
-            color: black;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            box-shadow: 0 0 15px var(--success);
+            background: var(--success); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; box-shadow: 0 0 15px var(--success);
         }}
         .quest-card {{
-            background: var(--card);
-            border: 2px solid var(--primary);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.3s;
+            background: var(--card); border: 2px solid var(--primary); border-radius: 15px; padding: 20px; margin-bottom: 20px; position: relative; overflow: hidden; transition: transform 0.3s;
         }}
         .quest-card:hover {{ transform: scale(1.02); }}
         .quest-header {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 15px; }}
@@ -123,7 +129,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             </div>
             <div class="loot">
                 <p>💡 <b>掉落戰利品 (資安發現)：</b></p>
-                {" ".join([f'<span class="loot-item loot-success">{{x}}</span>' for x in loot_items])}
+                {" ".join([f'<span class="loot-item loot-success">{x}</span>' for x in loot_items])}
             </div>
         </div>
 
@@ -134,7 +140,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             </div>
             <div class="stats">
                 <div class="stat-item">
-                    <span class="stat-val">{{performance_stats.get('speed', '1.2s')}}</span>
+                    <span class="stat-val">{performance_stats.get('speed', '1.2s')}</span>
                     <span class="stat-label">頁面載入速度</span>
                 </div>
                 <div class="stat-item">
@@ -145,16 +151,18 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             <div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div>
             <div class="loot">
                 <p>🚀 <b>冒險心得：</b></p>
-                <p style="font-size: 0.9em; color: #ccc;">系統架構偵查完成。AJAX 術式流暢，但在多層 iframe 迷宮中容易產生性能損耗。建議優化前端結構以提升 FPS。</p>
+                <p style="font-size: 0.9em; color: #ccc;">系統架構偵查完成。AJAX 術式流暢。建議優化前端結構以提升 FPS。</p>
             </div>
         </div>
+
+        {extra_cards if extra_cards else ''}
 
         <div class="quest-card" style="border-color: var(--warning);">
             <div class="quest-header">
                 <span class="quest-title" style="color: var(--warning);">📜 冒險家建議 (System Optimization)</span>
             </div>
             <div style="font-size: 0.9em; line-height: 1.6;">
-                {"".join([f'<p>• {{x}}</p>' for x in suggestions])}
+                {"".join([f'<p>• {x}</p>' for x in suggestions])}
             </div>
         </div>
 
@@ -173,8 +181,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
     with open(report_filename, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
-    update_raid_index(project_name, url, report_filename)
-    generate_index_page()
+    update_raid_index(project_name, url, report_filename, status="Success")
     return report_filename
 
 def generate_index_page():
@@ -187,11 +194,14 @@ def generate_index_page():
     
     table_rows = ""
     for h in history:
+        status_style = 'color:#39ff14;' if h.get('status') == 'Success' else 'color:#ffbd39;'
+        report_link = f'<a href="{h["report"]}" style="{status_style}">[{h.get("status", "查看報告")}]</a>' if h.get('report') else f'<span style="{status_style}">檢測中...</span>'
+        
         row = f'<tr>'
         row += f'<td>{h["date"]}</td>'
         row += f'<td><b>{h["name"]}</b></td>'
         row += f'<td><a href="{h["url"]}" target="_blank">連結</a></td>'
-        row += f'<td><a href="{h["report"]}" style="color:#39ff14;">[查看報告]</a></td>'
+        row += f'<td>{report_link}</td>'
         row += f'</tr>'
         table_rows += row
     
@@ -201,8 +211,8 @@ def generate_index_page():
 <style>
     body {{ background:#0f0c29; color:white; font-family:sans-serif; padding:20px; text-align:center; }}
     .mission-control {{ background:#1b1b2f; border:2px solid #00d2ff; border-radius:15px; padding:20px; max-width:900px; margin:0 auto 30px; }}
-    input {{ background:#000; border:1px solid #00d2ff; color:#fff; padding:10px; width:60%; border-radius:5px; }}
-    button {{ background:#00d2ff; border:none; color:#000; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer; }}
+    input {{ background:#000; border:1px solid #00d2ff; color:#fff; padding:10px; width:40%; border-radius:5px; margin: 5px; }}
+    button {{ background:#00d2ff; border:none; color:#000; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer; margin: 5px; }}
     table {{ width:100%; max-width:900px; margin:20px auto; border-collapse:collapse; background:#1b1b2f; }}
     th, td {{ padding:15px; border-bottom:1px solid #333; text-align:left; }}
     th {{ background: #00d2ff; color: black; }}
@@ -213,9 +223,10 @@ def generate_index_page():
     
     <div class="mission-control">
         <h3>🚀 New Quest (新任務)</h3>
-        <input type="text" id="targetUrl" placeholder="輸入目標網站網址 (例如: https://example.com)">
+        <input type="text" id="projName" placeholder="系統名稱 (如: Apple)">
+        <input type="text" id="targetUrl" placeholder="目標網址 (https://...)">
         <button onclick="startRaid()">開始測試</button>
-        <p style="font-size:12px; color:#aaa; margin-top:10px;">點擊後將透過 Telegram AI 執行自動化 Raid 測試</p>
+        <p style="font-size:12px; color:#aaa; margin-top:10px;">點擊後系統將在列表中新增「檢測中」狀態並啟動 AI</p>
     </div>
 
     <table>
@@ -225,10 +236,11 @@ def generate_index_page():
     
     <script>
     function startRaid() {{
+        const name = document.getElementById('projName').value;
         const url = document.getElementById('targetUrl').value;
-        if(!url) return alert('請輸入網址');
+        if(!name || !url) return alert('請填寫系統名稱與網址');
         document.querySelector('.mission-control button').innerText = '⌛ 指令已發送...';
-        window.open(`https://t.me/JoeClowAI_bot?text=Raid 測試 ${{encodeURIComponent(url)}}`);
+        window.open(`https://t.me/JoeClowAI_bot?text=Raid 測試 ${{encodeURIComponent(name)}} ${{encodeURIComponent(url)}}`);
     }}
     </script>
 </body>
@@ -237,12 +249,5 @@ def generate_index_page():
         f.write(index_html)
 
 if __name__ == "__main__":
-    generate_raid_html(
-        "HIS", 
-        "https://his.tedpc.com.tw/hccm", 
-        "MISSION ACCOMPLISHED", 
-        {"level": "SS"}, 
-        {"speed": "1.2s"}, 
-        ["SSL已加密", "驗證碼OCR成功", "個案資料渲染正常"],
-        ["強制 HTTPS 重定向", "Session 自動超時", "RWD 響應式佈局優化"]
-    )
+    # 此處僅供手動測試腳本使用
+    pass
