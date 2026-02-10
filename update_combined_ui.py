@@ -169,6 +169,8 @@ def generate_dashboard():
             except: pass
         sentiment = '偏多' if counts['bull'] > counts['bear'] else ('偏空' if counts['bear'] > counts['bull'] else '中性')
         accuracy_icon = ""
+        diff_v = p_now_v - p_prev_v if p_now_v > 0 and p_prev_v > 0 else 0
+        diff_text = f"{'+' if diff_v >= 0 else ''}{diff_v:.2f}"
         if is_validation_time and p_now_v > 0 and p_prev_v > 0 and sentiment != '中性' and abs(p_now_v - p_prev_v) > 0.001:
             total_f += 1; win = (sentiment == '偏多' and p_now_v > p_prev_v) or (sentiment == '偏空' and p_now_v < p_prev_v)
             if win: correct_f += 1; accuracy_icon = "✅"
@@ -177,7 +179,10 @@ def generate_dashboard():
             <div class="row">
                 <div class="item-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; position: relative;">
                     <div class="item-name" style="z-index: 1;">{ts}{symbol_text} {accuracy_icon}</div>
-                    <div class="price-now {'text-green' if p_now_v > p_prev_v else 'text-red' if p_now_v < p_prev_v else ''}" style="position: absolute; left: 50%; transform: translateX(-50%); font-size:32px; font-weight:900;">{p_now}</div>
+                    <div class="price-now {'text-green' if p_now_v > p_prev_v else 'text-red' if p_now_v < p_prev_v else ''}" style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center;">
+                        <div style="font-size:32px; font-weight:900;">{p_now}</div>
+                        <div style="font-size:14px; font-weight:bold; margin-top:-5px;">({diff_text})</div>
+                    </div>
                     <div class="item-price" style="text-align:right; z-index: 1;">
                         <div class="price-prev" style="font-size:12px; color:#666;">昨收: {p_prev}</div>
                     </div>
