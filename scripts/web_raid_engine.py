@@ -249,5 +249,4 @@ def generate_index_page():
         f.write(index_html)
 
 if __name__ == "__main__":
-    # 此處僅供手動測試腳本使用
-    pass
+    generate_index_page()

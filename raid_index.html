@@ -4,8 +4,8 @@
 <style>
     body { background:#0f0c29; color:white; font-family:sans-serif; padding:20px; text-align:center; }
     .mission-control { background:#1b1b2f; border:2px solid #00d2ff; border-radius:15px; padding:20px; max-width:900px; margin:0 auto 30px; }
-    input { background:#000; border:1px solid #00d2ff; color:#fff; padding:10px; width:60%; border-radius:5px; }
-    button { background:#00d2ff; border:none; color:#000; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer; }
+    input { background:#000; border:1px solid #00d2ff; color:#fff; padding:10px; width:40%; border-radius:5px; margin: 5px; }
+    button { background:#00d2ff; border:none; color:#000; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer; margin: 5px; }
     table { width:100%; max-width:900px; margin:20px auto; border-collapse:collapse; background:#1b1b2f; }
     th, td { padding:15px; border-bottom:1px solid #333; text-align:left; }
     th { background: #00d2ff; color: black; }
@@ -16,22 +16,24 @@
     
     <div class="mission-control">
         <h3>🚀 New Quest (新任務)</h3>
-        <input type="text" id="targetUrl" placeholder="輸入目標網站網址 (例如: https://example.com)">
+        <input type="text" id="projName" placeholder="系統名稱 (如: Apple)">
+        <input type="text" id="targetUrl" placeholder="目標網址 (https://...)">
         <button onclick="startRaid()">開始測試</button>
-        <p style="font-size:12px; color:#aaa; margin-top:10px;">點擊後將透過 Telegram AI 執行自動化 Raid 測試</p>
+        <p style="font-size:12px; color:#aaa; margin-top:10px;">點擊後系統將在列表中新增「檢測中」狀態並啟動 AI</p>
     </div>
 
     <table>
         <thead><tr><th>時間</th><th>系統名稱</th><th>目標網址</th><th>冒險報告</th></tr></thead>
-        <tbody><tr><td>2026-02-10 15:33</td><td><b>HIS</b></td><td><a href="https://his.tedpc.com.tw/hccm" target="_blank">連結</a></td><td><a href="raid_his_20260210_153347.html" style="color:#39ff14;">[查看報告]</a></td></tr><tr><td>2026-02-10 15:22</td><td><b>HIS</b></td><td><a href="https://his.tedpc.com.tw/hccm" target="_blank">連結</a></td><td><a href="raid_his_20260210_152213.html" style="color:#39ff14;">[查看報告]</a></td></tr><tr><td>2026-02-10 15:19</td><td><b>HIS</b></td><td><a href="https://his.tedpc.com.tw/hccm" target="_blank">連結</a></td><td><a href="raid_his_20260210_151944.html" style="color:#39ff14;">[查看報告]</a></td></tr></tbody>
+        <tbody><tr><td>2026-02-10 15:33</td><td><b>HIS</b></td><td><a href="https://his.tedpc.com.tw/hccm" target="_blank">連結</a></td><td><a href="raid_his_20260210_153347.html" style="color:#ffbd39;">[查看報告]</a></td></tr><tr><td>2026-02-10 15:22</td><td><b>HIS</b></td><td><a href="https://his.tedpc.com.tw/hccm" target="_blank">連結</a></td><td><a href="raid_his_20260210_152213.html" style="color:#ffbd39;">[查看報告]</a></td></tr><tr><td>2026-02-10 15:19</td><td><b>HIS</b></td><td><a href="https://his.tedpc.com.tw/hccm" target="_blank">連結</a></td><td><a href="raid_his_20260210_151944.html" style="color:#ffbd39;">[查看報告]</a></td></tr></tbody>
     </table>
     
     <script>
     function startRaid() {
+        const name = document.getElementById('projName').value;
         const url = document.getElementById('targetUrl').value;
-        if(!url) return alert('請輸入網址');
+        if(!name || !url) return alert('請填寫系統名稱與網址');
         document.querySelector('.mission-control button').innerText = '⌛ 指令已發送...';
-        window.open(`https://t.me/JoeClowAI_bot?text=Raid 測試 ${encodeURIComponent(url)}`);
+        window.open(`https://t.me/JoeClowAI_bot?text=Raid 測試 ${encodeURIComponent(name)} ${encodeURIComponent(url)}`);
     }
     </script>
 </body>
