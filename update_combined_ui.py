@@ -209,14 +209,57 @@ def generate_dashboard():
         blog_details_html += f'<div id="t{i+5}" class="tab-content"><div class="card" style="padding:20px;"><h2 style="margin-top:0;">{b["title"]}</h2><div style="font-size:12px; color:#666; margin-bottom:15px;">發佈日期：{b["date"]} | 分類：{b["category"]}</div><div style="line-height:1.8; color:#333;">{safe_body}</div><button onclick="sw(3)" style="margin-top:20px; padding:10px; width:100%; background:#f1f3f4; border:none; border-radius:8px; font-weight:700; cursor:pointer;">返回列表</button></div></div>'
 
     history = []
+    db_path = os.path.join('data', 'data.db')
     try:
-        with open('prediction_history.json', 'r') as f: history = json.load(f)
-    except: pass
+        # Prefer reading history from SQLite database if present
+        if os.path.exists(db_path):
+            import sqlite3
+            conn = sqlite3.connect(db_path)
+            cur = conn.cursor()
+            try:
+                cur.execute('SELECT date, accuracy, correct, total FROM pk_history ORDER BY date DESC LIMIT 60')
+                rows = cur.fetchall()
+                # rows are newest first; reverse to chronological
+                history = [{'date': r[0], 'accuracy': r[1], 'correct': r[2], 'total': r[3]} for r in reversed(rows)]
+            except Exception:
+                history = []
+            finally:
+                conn.close()
+        else:
+            with open('prediction_history.json', 'r') as f: history = json.load(f)
+    except Exception:
+        try:
+            with open('prediction_history.json', 'r') as f: history = json.load(f)
+        except:
+            history = []
+
     if is_market_open_day and 14 <= datetime.now().hour < 23:
         d = time.strftime('%Y-%m-%d', time.localtime())
-        if not history or history[-1]['date'] != d: history.append({'date':d, 'accuracy':round((correct_f/total_f*100) if total_f>0 else 0,1), 'correct':correct_f, 'total':total_f})
-        else: history[-1].update({'accuracy':round((correct_f/total_f*100) if total_f>0 else 0,1), 'correct':correct_f, 'total':total_f})
-        with open('prediction_history.json', 'w') as f: json.dump(history[-60:], f, indent=2)
+        if not history or history[-1]['date'] != d:
+            history.append({'date':d, 'accuracy':round((correct_f/total_f*100) if total_f>0 else 0,1), 'correct':correct_f, 'total':total_f})
+        else:
+            history[-1].update({'accuracy':round((correct_f/total_f*100) if total_f>0 else 0,1), 'correct':correct_f, 'total':total_f})
+        # persist back to db if available, else json
+        try:
+            if os.path.exists(db_path):
+                import sqlite3
+                conn = sqlite3.connect(db_path)
+                cur = conn.cursor()
+                cur.execute('CREATE TABLE IF NOT EXISTS pk_history(date TEXT PRIMARY KEY, accuracy REAL, correct INTEGER, total INTEGER)')
+                # replace content
+                cur.execute('DELETE FROM pk_history')
+                for h in history[-60:]:
+                    cur.execute('INSERT OR REPLACE INTO pk_history(date, accuracy, correct, total) VALUES (?,?,?,?)', (h['date'], h['accuracy'], h['correct'], h['total']))
+                conn.commit()
+                conn.close()
+            else:
+                with open('prediction_history.json', 'w') as f: json.dump(history[-60:], f, indent=2)
+        except Exception:
+            try:
+                with open('prediction_history.json', 'w') as f: json.dump(history[-60:], f, indent=2)
+            except:
+                pass
+
     hist_rows = "".join([f"<tr><td>{h['date']}</td><td>{h['accuracy']}%</td><td style='text-align:right;'>{h['correct']}/{h['total']}</td></tr>" for h in reversed(history)])
 
     status_data = {}
