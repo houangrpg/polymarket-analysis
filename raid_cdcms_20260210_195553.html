@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Cdcms 系統測試報告 - 20260210_195553</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .status { padding: 10px; border-radius: 4px; margin-bottom: 20px; }
+        .status.pass { background-color: #d4edda; color: #155724; }
+        .status.fail { background-color: #f8d7da; color: #721c24; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .meta { color: #666; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>Cdcms 系統測試報告</h1>
+    <div class="meta">測試時間：2026/02/10 19:55:53</div>
+    <div class="meta">目標網址：https://His.tedpc.com.tw/cdcms</div>
+
+    <h2>測試結果摘要</h2>
+    <div class="status pass">
+        <strong>測試結論：通過</strong><br>
+        系統基本連通性良好，功能點擊與查詢回應正確，效能表現穩定。
+    </div>
+
+    <h2>詳細測試項目</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>測試項目</th>
+                <th>執行步驟</th>
+                <th>預期結果</th>
+                <th>實際結果</th>
+                <th>狀態</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>連通性檢查</td>
+                <td>啟動瀏覽器訪問目標網址</td>
+                <td>成功載入頁面</td>
+                <td>頁面載入成功，直接進入系統主頁（已登入狀態）</td>
+                <td>PASS</td>
+            </tr>
+            <tr>
+                <td>功能點擊 - 個案作業</td>
+                <td>點擊左側選單「個案作業」</td>
+                <td>展開子選單</td>
+                <td>子選單成功展開，顯示「整合清單」、「個案查詢」等項目</td>
+                <td>PASS</td>
+            </tr>
+            <tr>
+                <td>查詢功能 - 個案查詢</td>
+                <td>點擊「個案查詢」並點擊「查詢」按鈕</td>
+                <td>成功列出查詢結果</td>
+                <td>查詢成功，下方列表顯示多筆測試個案資料</td>
+                <td>PASS</td>
+            </tr>
+            <tr>
+                <td>功能點擊 - 照護作業</td>
+                <td>點擊左側選單「照護作業」</td>
+                <td>展開子選單</td>
+                <td>子選單成功展開，顯示「訪視行程作業」等項目</td>
+                <td>PASS</td>
+            </tr>
+            <tr>
+                <td>效能簡評</td>
+                <td>觀察頁面切換與資料查詢速度</td>
+                <td>回應時間在合理範圍內 ( < 2秒 )</td>
+                <td>頁面切換與查詢回應迅速，效能表現優異</td>
+                <td>PASS</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>錯誤記錄</h2>
+    <p>本次測試未發現明顯錯誤訊息或異常報錯。</p>
+
+    <h2>測試建議</h2>
+    <ul>
+        <li>系統目前為自動登入或工作階段保持狀態，建議後續可增加登出後重新登入的測試流程。</li>
+        <li>在大筆資料量下的查詢效能值得持續關注。</li>
+    </ul>
+</body>
+</html>
