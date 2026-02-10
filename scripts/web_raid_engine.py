@@ -15,7 +15,6 @@ def update_raid_index(project_name, url, report_file, status="Pending"):
         except:
             history = []
     
-    # 檢查是否已有該項目的 Pending 紀錄，有的話更新，沒有的話新增
     found = False
     for item in history:
         if item['name'] == project_name and item['status'] == "Testing...":
@@ -39,17 +38,18 @@ def update_raid_index(project_name, url, report_file, status="Pending"):
         json.dump(history[:50], f, indent=2, ensure_ascii=False)
     
     generate_index_page()
-    # 自動推送索引更新
     subprocess.run(["git", "add", INDEX_FILE, "raid_index.html"], capture_output=True)
     subprocess.run(["git", "commit", "-m", f"System: Update index for {project_name} ({status})"], capture_output=True)
     subprocess.run(["git", "push", "origin", "main"], capture_output=True)
 
-def generate_raid_html(project_name, url, status, security_stats, performance_stats, loot_items, suggestions, extra_cards=None):
+def generate_raid_html(project_name, url, status, security_stats, performance_stats, completeness_stats, suggestions, score):
     updated_at = datetime.now().strftime('%Y-%m-%d %H:%M')
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     report_filename = f"raid_{project_name.lower()}_{timestamp}.html"
     
-    # 使用與 his_raid_report.html 完全一致的 CSS 與結構
+    # 評分顏色
+    score_color = "#39ff14" if score >= 80 else "#ffbd39" if score >= 60 else "#ff3131"
+    
     html_content = f'''<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -75,8 +75,15 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             display: flex; flex-direction: column; align-items: center;
         }}
         .container {{ max-width: 800px; width: 100%; }}
-        header {{ text-align: center; margin-bottom: 40px; }}
+        header {{ text-align: center; margin-bottom: 40px; position: relative; }}
         h1 {{ font-size: 3em; text-shadow: 0 0 10px var(--primary); margin: 10px 0; }}
+        .score-circle {{
+            width: 100px; height: 100px; border: 5px solid {score_color}; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2em; font-weight: bold; color: {score_color};
+            margin: 0 auto 20px; box-shadow: 0 0 20px {score_color};
+            background: rgba(0,0,0,0.3);
+        }}
         .status-badge {{
             background: var(--success); color: black; padding: 5px 15px; border-radius: 20px; font-weight: bold; box-shadow: 0 0 15px var(--success);
         }}
@@ -106,12 +113,14 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
     <div class="container">
         <header>
             <p style="color: var(--primary); letter-spacing: 5px; margin-bottom: 5px;">JOE CLOW AI LAB PRESENTS</p>
+            <div class="score-circle">{score}</div>
             <h1>{project_name} SYSTEM RAID</h1>
             <p><a href="{url}" target="_blank">🌐 傳送門：{url}</a></p>
             <span class="status-badge">{status}</span>
             <p>最後掃描時間：{updated_at}</p>
         </header>
 
+        <!-- 1. 安全性防禦等級 -->
         <div class="quest-card">
             <div class="quest-header">
                 <span class="quest-title">🛡️ 安全性防禦等級</span>
@@ -119,20 +128,21 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             </div>
             <div class="stats">
                 <div class="stat-item">
-                    <span class="stat-val" style="color: var(--success);">100%</span>
+                    <span class="stat-val" style="color: var(--success);">{security_stats.get('ssl', '100%')}</span>
                     <span class="stat-label">SSL 加密</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-val" style="color: var(--warning);">LV.2</span>
+                    <span class="stat-val" style="color: var(--warning);">{security_stats.get('bot_def', 'LV.2')}</span>
                     <span class="stat-label">防機器人驗證</span>
                 </div>
             </div>
             <div class="loot">
                 <p>💡 <b>掉落戰利品 (資安發現)：</b></p>
-                {" ".join([f'<span class="loot-item loot-success">{x}</span>' for x in loot_items])}
+                {" ".join([f'<span class="loot-item loot-success">{{x}}</span>' for x in security_stats.get('loot', [])])}
             </div>
         </div>
 
+        <!-- 2. 效能與敏捷度 -->
         <div class="quest-card">
             <div class="quest-header">
                 <span class="quest-title">⚡ 效能與敏捷度</span>
@@ -144,25 +154,35 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
                     <span class="stat-label">頁面載入速度</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-val">10s</span>
+                    <span class="stat-val">{performance_stats.get('refresh', '10s')}</span>
                     <span class="stat-label">數據刷新間隔</span>
                 </div>
             </div>
             <div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div>
+        </div>
+
+        <!-- 3. 功能完整度 -->
+        <div class="quest-card">
+            <div class="quest-header">
+                <span class="quest-title">🩺 功能完整度</span>
+                <span class="difficulty">等級：{completeness_stats.get('level', 'S')}</span>
+            </div>
+            <div class="stats">
+                {"".join([f'<div class="stat-item"><span class="stat-val" style="color: var(--success);">PASS</span><span class="stat-label">{x}</span></div>' for x in completeness_stats.get('items', [])])}
+            </div>
             <div class="loot">
-                <p>🚀 <b>冒險心得：</b></p>
-                <p style="font-size: 0.9em; color: #ccc;">系統架構偵查完成。AJAX 術式流暢。建議優化前端結構以提升 FPS。</p>
+                <p>🧪 <b>技能檢測：</b></p>
+                <p style="font-size: 0.9em; color: #ccc;">{completeness_stats.get('desc', '功能模塊校驗完成，數據渲染穩定。')}</p>
             </div>
         </div>
 
-        {extra_cards if extra_cards else ''}
-
+        <!-- 4. 冒險家建議 -->
         <div class="quest-card" style="border-color: var(--warning);">
             <div class="quest-header">
                 <span class="quest-title" style="color: var(--warning);">📜 冒險家建議 (System Optimization)</span>
             </div>
             <div style="font-size: 0.9em; line-height: 1.6;">
-                {"".join([f'<p>• {x}</p>' for x in suggestions])}
+                {"".join([f'<p>• {{x}}</p>' for x in suggestions])}
             </div>
         </div>
 
@@ -182,6 +202,10 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
         f.write(html_content)
     
     update_raid_index(project_name, url, report_filename, status="Success")
+    # 自動推送新產出的報告
+    subprocess.run(["git", "add", report_filename], capture_output=True)
+    subprocess.run(["git", "commit", "-m", f"Report: Add {project_name} raid report"], capture_output=True)
+    subprocess.run(["git", "push", "origin", "main"], capture_output=True)
     return report_filename
 
 def generate_index_page():
