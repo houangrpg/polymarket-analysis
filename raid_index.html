@@ -1,21 +1,38 @@
-
-    <!DOCTYPE html>
-    <html>
-    <head><meta charset="UTF-8"><title>Web-Raid 測試紀錄庫</title>
-    <style>
-        body { background:#0f0c29; color:white; font-family:sans-serif; padding:40px; text-align:center; }
-        table { width:100%; max-width:900px; margin:20px auto; border-collapse:collapse; background:#1b1b2f; }
-        th, td { padding:15px; border-bottom:1px solid #333; text-align:left; }
-        th { background: #00d2ff; color: black; }
-        a { color:#00d2ff; text-decoration:none; }
-    </style></head>
-    <body>
-        <h1>🗄️ Web-Raid 測試紀錄庫</h1>
-        <table>
-            <thead><tr><th>時間</th><th>系統名稱</th><th>目標網址</th><th>冒險報告</th></tr></thead>
-            <tbody><tr><td>2026-02-10 14:53</td><td><b>HIS</b></td><td><a href="https://his.tedpc.com.tw/hccm" target="_blank">連結</a></td><td><a href="raid_his_20260210_1453.html" style="color:#39ff14;">[查看報告]</a></td></tr></tbody>
-        </table>
-        <p><a href="combined.html">🏠 返回主儀表板</a></p>
-    </body>
-    </html>
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web-Raid 測試紀錄庫</title>
+<style>
+    body { background:#0f0c29; color:white; font-family:sans-serif; padding:20px; text-align:center; }
+    .mission-control { background:#1b1b2f; border:2px solid #00d2ff; border-radius:15px; padding:20px; max-width:900px; margin:0 auto 30px; }
+    input { background:#000; border:1px solid #00d2ff; color:#fff; padding:10px; width:60%; border-radius:5px; }
+    button { background:#00d2ff; border:none; color:#000; padding:10px 20px; border-radius:5px; font-weight:bold; cursor:pointer; }
+    table { width:100%; max-width:900px; margin:20px auto; border-collapse:collapse; background:#1b1b2f; }
+    th, td { padding:15px; border-bottom:1px solid #333; text-align:left; }
+    th { background: #00d2ff; color: black; }
+    a { color:#00d2ff; text-decoration:none; }
+</style></head>
+<body>
+    <h1>🗄️ Web-Raid 測試紀錄庫</h1>
     
+    <div class="mission-control">
+        <h3>🚀 New Quest (新任務)</h3>
+        <input type="text" id="targetUrl" placeholder="輸入目標網站網址 (例如: https://example.com)">
+        <button onclick="startRaid()">開始測試</button>
+        <p style="font-size:12px; color:#aaa; margin-top:10px;">點擊後將透過 Telegram AI 執行自動化 Raid 測試</p>
+    </div>
+
+    <table>
+        <thead><tr><th>時間</th><th>系統名稱</th><th>目標網址</th><th>冒險報告</th></tr></thead>
+        <tbody><tr><td>{h["date"]}</td><td><b>{h["name"]}</b></td><td><a href="{h["url"]}" target="_blank">連結</a></td><td><a href="{h["report"]}" style="color:#39ff14;">[查看報告]</a></td></tr><tr><td>{h["date"]}</td><td><b>{h["name"]}</b></td><td><a href="{h["url"]}" target="_blank">連結</a></td><td><a href="{h["report"]}" style="color:#39ff14;">[查看報告]</a></td></tr></tbody>
+    </table>
+    
+    <script>
+    function startRaid() {
+        const url = document.getElementById('targetUrl').value;
+        if(!url) return alert('請輸入網址');
+        // 跳轉到 Telegram 帶入指令
+        window.open(`https://t.me/JoeClowAI_bot?text=Raid 測試 ${encodeURIComponent(url)}`);
+    }
+    </script>
+</body>
+</html>
