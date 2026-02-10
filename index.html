@@ -1,417 +1,259 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Polymarket 套利監控面板</title>
-  <style>
-    :root {
-      --pm-blue: #0066ff;
-      --bg-gray: #f4f7f9;
-      --text-main: #1a1a1b;
-      --text-muted: #5f6368;
-      --opp-green: #e6f4ea;
-      --opp-text: #137333;
-      --border-color: #dadce0;
-    }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-      margin: 0; background-color: var(--bg-gray); color: var(--text-main); line-height: 1.5;
-    }
-    .header { background: white; border-bottom: 1px solid var(--border-color); padding: 16px 24px; position: sticky; top: 0; z-index: 100; }
-    .header-content { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
-    h1 { margin: 0; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
-    .card { background: white; border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .meta-bar { padding: 12px 20px; background: #fafafa; border-bottom: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted); display: flex; gap: 20px; }
-    
-    table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-    th { background: #f8f9fa; padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border-color); }
-    td { padding: 16px; border-bottom: 1px solid var(--border-color); vertical-align: middle; overflow: hidden; }
-    
-    .market-cell { display: flex; align-items: center; gap: 12px; }
-    .m-img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid #eee; flex-shrink: 0; }
-    .m-img-placeholder { width: 32px; height: 32px; border-radius: 50%; background: #eee; flex-shrink: 0; }
-    .q-wrap { overflow: hidden; }
-    .question-link { color: var(--text-main); text-decoration: none; font-weight: 500; font-size: 14px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .question-link:hover { color: var(--pm-blue); text-decoration: underline; }
-    .slug-text { font-size: 11px; color: var(--text-muted); margin-top: 4px; display: flex; align-items: center; gap: 6px; }
-    
-    .mono { font-family: "SFMono-Regular", Consolas, monospace; font-size: 13px; }
-    .val { text-align: right; width: 80px; }
-    .highlight { font-weight: 700; color: var(--pm-blue); }
-    .edge-val { color: var(--opp-text); font-weight: 600; }
-    
-    .row-opportunity { background-color: var(--opp-green) !important; }
-    .badge-opp { background: var(--opp-text); color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 800; }
-    
-    tr:hover { background-color: #fcfcfc; }
-    
-    /* Column widths */
-    th:nth-child(1), td:nth-child(1) { width: auto; }
-    th:nth-child(n+2), td:nth-child(n+2) { width: 100px; text-align: right; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JoeClow OS - iPod Portal</title>
+    <style>
+        :root {
+            --ipod-silver: #d1d1d1;
+            --ipod-screen: #000;
+            --wheel-bg: #f0f0f0;
+            --text-color: #fff;
+        }
+        body {
+            background-color: #1a1a1a;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            color: var(--text-color);
+        }
+        /* iPod Body */
+        .ipod {
+            width: 320px;
+            height: 560px;
+            background: linear-gradient(135deg, #e0e0e0 0%, #a0a0a0 100%);
+            border-radius: 40px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), inset 0 2px 5px rgba(255,255,255,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+        /* Screen */
+        .screen {
+            width: 280px;
+            height: 220px;
+            background-color: #000;
+            border-radius: 10px;
+            border: 4px solid #333;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .status-bar {
+            height: 20px;
+            background: linear-gradient(to bottom, #444, #111);
+            font-size: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px;
+        }
+        /* Cover Flow Container */
+        .cover-flow {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+            overflow: hidden;
+        }
+        .cover-item {
+            width: 140px;
+            height: 140px;
+            background: var(--card-bg, #333);
+            position: absolute;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            cursor: pointer;
+            text-align: center;
+            padding: 10px;
+        }
+        .cover-item.active {
+            transform: translateZ(50px);
+            z-index: 10;
+            border: 2px solid #00d2ff;
+        }
+        .cover-item.prev {
+            transform: translateX(-100px) rotateY(45deg) scale(0.8);
+            z-index: 5;
+            opacity: 0.6;
+        }
+        .cover-item.next {
+            transform: translateX(100px) rotateY(-45deg) scale(0.8);
+            z-index: 5;
+            opacity: 0.6;
+        }
+        .item-icon { font-size: 40px; margin-bottom: 10px; }
+        .item-label { font-size: 14px; font-weight: bold; }
+        .item-desc { font-size: 10px; color: #aaa; margin-top: 5px; }
 
-    @media (max-width: 768px) {
-      th:nth-child(2), td:nth-child(2), th:nth-child(3), td:nth-child(3) { display: none; }
-      .container { margin: 12px auto; }
-    }
-  </style>
+        /* Click Wheel */
+        .wheel {
+            width: 220px;
+            height: 220px;
+            background-color: #fff;
+            border-radius: 50%;
+            margin-top: 40px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            touch-action: none;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .wheel-center {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #eee 0%, #ccc 100%);
+            border-radius: 50%;
+            z-index: 2;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .wheel-label {
+            position: absolute;
+            font-weight: bold;
+            color: #555;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .label-top { top: 15px; }
+        .label-bottom { bottom: 15px; }
+        .label-left { left: 15px; }
+        .label-right { right: 15px; }
+
+        /* Navigation Hint */
+        .hint {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #444;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-content">
-      <h1>📊 Polymarket Top 20 監控</h1>
-      <div style="font-size: 12px; color: var(--text-muted);">自動化套利分析面板</div>
-    </div>
-  </div>
+    <div class="ipod">
+        <div class="screen">
+            <div class="status-bar">
+                <span>9:41 AM</span>
+                <span id="header-label">JoeClow OS</span>
+                <span>🔋 100%</span>
+            </div>
+            <div class="cover-flow" id="flow-container">
+                <!-- Items will be injected here -->
+            </div>
+        </div>
 
-  <div class="container">
-    <div class="card">
-      <div class="meta-bar">
-        <span>🕒 更新時間: 2026-02-06 12:03:37</span>
-        <span>🔄 頻率: 每小時更新</span>
-        <span>🎯 策略: Yes+No Bundle < 1.00</span>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>市場項目</th>
-            <th>Yes Ask</th>
-            <th>No Ask</th>
-            <th>Bundle</th>
-            <th>Edge</th>
-            <th>Vol(24h)</th>
-          </tr>
-        </thead>
-        <tbody>
-          
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/jerome+powell+glasses1.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-the-fed-decrease-interest-rates-by-50-bps-after-the-march-2026-meeting" target="_blank" class="question-link">Will the Fed decrease interest rates by 50+ bps after the March 2026 meeting?</a>
-              <div class="slug-text">will-the-fed-decrease-interest-rates-by-50-bps-after-the-march-2026-meeting </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.016</td>
-        <td class="mono val">0.985</td>
-        <td class="mono val highlight">1.001</td>
-        <td class="mono val edge-val">-0.10%</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/judy-shelton-15c5dd306b.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-trump-nominate-judy-shelton-as-the-next-fed-chair" target="_blank" class="question-link">Will Trump nominate Judy Shelton as the next Fed chair?</a>
-              <div class="slug-text">will-trump-nominate-judy-shelton-as-the-next-fed-chair </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.035</td>
-        <td class="mono val">0.966</td>
-        <td class="mono val highlight">1.001</td>
-        <td class="mono val edge-val">-0.10%</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/jerome+powell+glasses1.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-the-fed-increase-interest-rates-by-25-bps-after-the-march-2026-meeting" target="_blank" class="question-link">Will the Fed increase interest rates by 25+ bps after the March 2026 meeting?</a>
-              <div class="slug-text">will-the-fed-increase-interest-rates-by-25-bps-after-the-march-2026-meeting </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.012</td>
-        <td class="mono val">0.989</td>
-        <td class="mono val highlight">1.001</td>
-        <td class="mono val edge-val">-0.10%</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/who-will-trump-nominate-as-fed-chair-9p19ttRwsbKL.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-trump-nominate-no-one-before-2027" target="_blank" class="question-link">Will Trump nominate no one before 2027?</a>
-              <div class="slug-text">will-trump-nominate-no-one-before-2027 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.001</td>
-        <td class="mono val">-</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/jerome+powell+glasses1.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-there-be-no-change-in-fed-interest-rates-after-the-march-2026-meeting" target="_blank" class="question-link">Will there be no change in Fed interest rates after the March 2026 meeting?</a>
-              <div class="slug-text">will-there-be-no-change-in-fed-interest-rates-after-the-march-2026-meeting </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.800</td>
-        <td class="mono val">0.210</td>
-        <td class="mono val highlight">1.010</td>
-        <td class="mono val edge-val">-1.00%</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/us-strikes-iran-by-october-3-2sVnIHq3sjqF.jpg" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/us-strikes-iran-by-february-5-2026" target="_blank" class="question-link">US strikes Iran by February 5, 2026?</a>
-              <div class="slug-text">us-strikes-iran-by-february-5-2026 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.002</td>
-        <td class="mono val">0.999</td>
-        <td class="mono val highlight">1.001</td>
-        <td class="mono val edge-val">-0.10%</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/jerome+powell+glasses1.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-the-fed-decrease-interest-rates-by-25-bps-after-the-march-2026-meeting" target="_blank" class="question-link">Will the Fed decrease interest rates by 25 bps after the March 2026 meeting?</a>
-              <div class="slug-text">will-the-fed-decrease-interest-rates-by-25-bps-after-the-march-2026-meeting </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.170</td>
-        <td class="mono val">0.840</td>
-        <td class="mono val highlight">1.010</td>
-        <td class="mono val edge-val">-1.00%</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nba-cha-hou-2026-02-05" target="_blank" class="question-link">Hornets vs. Rockets</a>
-              <div class="slug-text">nba-cha-hou-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">-</td>
-        <td class="mono val">0.001</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nba-was-det-2026-02-05" target="_blank" class="question-link">Wizards vs. Pistons</a>
-              <div class="slug-text">nba-was-det-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">-</td>
-        <td class="mono val">0.001</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/nhl.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nhl-lak-las-2026-02-05" target="_blank" class="question-link">Kings vs. Golden Knights</a>
-              <div class="slug-text">nhl-lak-las-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.059</td>
-        <td class="mono val">0.956</td>
-        <td class="mono val highlight">1.015</td>
-        <td class="mono val edge-val">-1.50%</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/nhl.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nhl-fla-tb-2026-02-05" target="_blank" class="question-link">Panthers vs. Lightning</a>
-              <div class="slug-text">nhl-fla-tb-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.001</td>
-        <td class="mono val">-</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/will-trump-nominate-kevin-warsh-as-the-next-fed-chair-Bc-vVyyVjhsS.jpg" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-trump-nominate-kevin-warsh-as-the-next-fed-chair" target="_blank" class="question-link">Will Trump nominate Kevin Warsh as the next Fed chair?</a>
-              <div class="slug-text">will-trump-nominate-kevin-warsh-as-the-next-fed-chair </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.951</td>
-        <td class="mono val">0.051</td>
-        <td class="mono val highlight">1.002</td>
-        <td class="mono val edge-val">-0.20%</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/nhl.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nhl-nyi-nj-2026-02-05" target="_blank" class="question-link">Islanders vs. Devils</a>
-              <div class="slug-text">nhl-nyi-nj-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">-</td>
-        <td class="mono val">0.001</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/nhl.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nhl-nsh-wsh-2026-02-05" target="_blank" class="question-link">Predators vs. Capitals</a>
-              <div class="slug-text">nhl-nsh-wsh-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.001</td>
-        <td class="mono val">-</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/will-athletic-bilbao-win-the-202526-la-liga-64c1C-MxElrB.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-athletic-bilbao-win-the-202526-la-liga" target="_blank" class="question-link">Will Athletic Bilbao win the 2025–26 La Liga?</a>
-              <div class="slug-text">will-athletic-bilbao-win-the-202526-la-liga </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.002</td>
-        <td class="mono val">-</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/BTC+fullsize.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/will-bitcoin-dip-to-60k-in-february-2026" target="_blank" class="question-link">Will Bitcoin dip to $60,000 in February?</a>
-              <div class="slug-text">will-bitcoin-dip-to-60k-in-february-2026 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">-</td>
-        <td class="mono val">0.001</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nba-chi-tor-2026-02-05-total-225pt5" target="_blank" class="question-link">Bulls vs. Raptors: O/U 225.5</a>
-              <div class="slug-text">nba-chi-tor-2026-02-05-total-225pt5 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">-</td>
-        <td class="mono val">0.001</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">M</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nba-sas-dal-2026-02-05" target="_blank" class="question-link">Spurs vs. Mavericks</a>
-              <div class="slug-text">nba-sas-dal-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">-</td>
-        <td class="mono val">0.001</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">K</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nba-uta-atl-2026-02-05" target="_blank" class="question-link">Jazz vs. Hawks</a>
-              <div class="slug-text">nba-uta-atl-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.001</td>
-        <td class="mono val">-</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">K</td>
-      </tr>
-      <tr>
-        <td>
-          <div class="market-cell">
-            <img src="https://polymarket-upload.s3.us-east-2.amazonaws.com/super+cool+basketball+in+red+and+blue+wow.png" class="m-img">
-            <div class="q-wrap">
-              <a href="https://polymarket.com/market/nba-chi-tor-2026-02-05" target="_blank" class="question-link">Bulls vs. Raptors</a>
-              <div class="slug-text">nba-chi-tor-2026-02-05 </div>
-            </div>
-          </div>
-        </td>
-        <td class="mono val">0.001</td>
-        <td class="mono val">-</td>
-        <td class="mono val highlight">-</td>
-        <td class="mono val edge-val">-</td>
-        <td class="mono val">K</td>
-      </tr>
-        </tbody>
-      </table>
+        <div class="wheel" id="click-wheel">
+            <div class="wheel-label label-top">Menu</div>
+            <div class="wheel-label label-bottom">▶️||</div>
+            <div class="wheel-label label-left">⏮</div>
+            <div class="wheel-label label-right">⏭</div>
+            <div class="wheel-center" id="select-btn"></div>
+        </div>
+        <div class="hint">SWIPE AROUND THE WHEEL</div>
     </div>
-    
-    <div style="margin-top: 24px; font-size: 12px; color: var(--text-muted); text-align: center;">
-      本頁面由 OpenClaw 自動生成，數據僅供參考。
-    </div>
-  </div>
+
+    <script>
+        const apps = [
+            { id: 'fin', label: '財務經理', icon: '💰', desc: '美股 / 台股監控', url: 'combined.html' },
+            { id: 'tech', label: '技術經理', icon: '⚙️', desc: 'Kindle / Watch 串接', url: '#' },
+            { id: 'intel', label: '情報經理', icon: '📡', desc: '全球科技情報', url: '#' },
+            { id: 'raid', label: '專案經理', icon: '🧪', desc: '系統測試紀錄', url: 'raid_index.html' },
+            { id: 'health', label: '健康顧問', icon: '❤️', desc: '睡眠與生理數據', url: '#' },
+            { id: 'concierge', label: '生活管家', icon: '🎩', desc: '天氣與備忘錄', url: '#' }
+        ];
+
+        let currentIndex = 0;
+        const container = document.getElementById('flow-container');
+        const headerLabel = document.getElementById('header-label');
+
+        function render() {
+            container.innerHTML = '';
+            apps.forEach((app, index) => {
+                const el = document.createElement('div');
+                el.className = 'cover-item';
+                if (index === currentIndex) el.classList.add('active');
+                else if (index === (currentIndex - 1 + apps.length) % apps.length) el.classList.add('prev');
+                else if (index === (currentIndex + 1) % apps.length) el.classList.add('next');
+                else el.style.display = 'none';
+
+                el.innerHTML = `
+                    <div class="item-icon">${app.icon}</div>
+                    <div class="item-label">${app.label}</div>
+                    <div class="item-desc">${app.desc}</div>
+                `;
+                el.onclick = () => { if(index === currentIndex) openApp(); };
+                container.appendChild(el);
+            });
+            headerLabel.innerText = apps[currentIndex].label;
+        }
+
+        function openApp() {
+            const url = apps[currentIndex].url;
+            if (url !== '#') window.location.href = url;
+            else alert(apps[currentIndex].label + ' 正在彙整報告中...');
+        }
+
+        // Wheel Rotation Logic
+        let lastAngle = null;
+        const wheel = document.getElementById('click-wheel');
+
+        function getAngle(x, y) {
+            const rect = wheel.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            return Math.atan2(y - centerY, x - centerX) * (180 / Math.PI);
+        }
+
+        function handleMove(e) {
+            const touch = e.touches ? e.touches[0] : e;
+            const currentAngle = getAngle(touch.clientX, touch.clientY);
+            
+            if (lastAngle !== null) {
+                let delta = currentAngle - lastAngle;
+                if (delta > 180) delta -= 360;
+                if (delta < -180) delta += 360;
+
+                if (Math.abs(delta) > 15) { // Sensitivity
+                    if (delta > 0) currentIndex = (currentIndex + 1) % apps.length;
+                    else currentIndex = (currentIndex - 1 + apps.length) % apps.length;
+                    lastAngle = currentAngle;
+                    if (window.navigator.vibrate) window.navigator.vibrate(10);
+                    render();
+                }
+            } else {
+                lastAngle = currentAngle;
+            }
+        }
+
+        wheel.addEventListener('touchstart', (e) => { lastAngle = null; });
+        wheel.addEventListener('touchmove', handleMove);
+        wheel.addEventListener('mousedown', (e) => { 
+            lastAngle = null; 
+            window.addEventListener('mousemove', handleMove);
+        });
+        window.addEventListener('mouseup', () => { 
+            window.removeEventListener('mousemove', handleMove); 
+        });
+
+        document.getElementById('select-btn').onclick = openApp;
+
+        render();
+    </script>
 </body>
 </html>
