@@ -1,3 +1,11 @@
 *
 !polymarket_analysis.html
 !index.html
+!combined.html
+!his_raid_report.html
+!raid_*.html
+!raid_index.html
+!raid_index.json
+!scripts/
+!skills/
+!generate_raid_report.py
