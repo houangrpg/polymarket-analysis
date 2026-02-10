@@ -175,16 +175,16 @@ def generate_dashboard():
             else: accuracy_icon = "❌"
         tw_html += f'''
             <div class="row">
-                <div class="item-header" style="flex-direction: column; align-items: center; text-align: center;">
-                    <div class="item-name" style="margin-bottom: 8px;">{ts}{symbol_text} {accuracy_icon}</div>
-                    <div class="item-price">
-                        <div class="price-now {'text-green' if p_now_v > p_prev_v else 'text-red' if p_now_v < p_prev_v else ''}" style="font-size:32px; font-weight:900;">{p_now}</div>
-                        <div class="price-prev" style="font-size:14px; color:#666;">昨收: {p_prev}</div>
+                <div class="item-header" style="display: flex; justify-content: space-between; align-items: center; width: 100%; position: relative;">
+                    <div class="item-name" style="z-index: 1;">{ts}{symbol_text} {accuracy_icon}</div>
+                    <div class="price-now {'text-green' if p_now_v > p_prev_v else 'text-red' if p_now_v < p_prev_v else ''}" style="position: absolute; left: 50%; transform: translateX(-50%); font-size:32px; font-weight:900;">{p_now}</div>
+                    <div class="item-price" style="text-align:right; z-index: 1;">
+                        <div class="price-prev" style="font-size:12px; color:#666;">昨收: {p_prev}</div>
                     </div>
                 </div>
-                <div class="item-detail" style="justify-content: center; margin-top: 10px;">
+                <div class="item-detail" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                     <span class="badge {'badge-bull' if sentiment=='偏多' else 'badge-bear' if sentiment=='偏空' else ''}">{sentiment}</span>
-                    <div style="margin-left:15px; font-size:14px; color:#5f6368;">↗️ <b>{counts["bull"]}</b> | ↘️ <b>{counts["bear"]}</b></div>
+                    <div style="font-size:12px; color:#5f6368;">↗️ <b>{counts["bull"]}</b> | ↘️ <b>{counts["bear"]}</b></div>
                 </div>
             </div>'''
 
