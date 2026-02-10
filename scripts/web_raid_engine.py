@@ -8,8 +8,11 @@ INDEX_FILE = 'raid_index.json'
 def update_raid_index(project_name, url, report_file):
     history = []
     if os.path.exists(INDEX_FILE):
-        with open(INDEX_FILE, 'r') as f:
-            history = json.load(f)
+        try:
+            with open(INDEX_FILE, 'r') as f:
+                history = json.load(f)
+        except:
+            history = []
     
     entry = {
         "date": datetime.now().strftime('%Y-%m-%d %H:%M'),
@@ -19,12 +22,14 @@ def update_raid_index(project_name, url, report_file):
     }
     history.insert(0, entry) # 最新放前面
     
-    with open(INDEX_FILE, 'w') as f:
-        json.dump(history[:50], f, indent=2) # 保留最近 50 次
+    with open(INDEX_FILE, 'w', encoding='utf-8') as f:
+        json.dump(history[:50], f, indent=2, ensure_ascii=False) # 保留最近 50 次
 
 def generate_raid_html(project_name, url, status, security_stats, performance_stats, loot_items, suggestions):
     updated_at = datetime.now().strftime('%Y-%m-%d %H:%M')
-    report_filename = f"raid_{project_name.lower()}_{datetime.now().strftime('%Y%m%d_%H%M')}.html"
+    # 使用時間戳記生成唯一的報告檔名
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    report_filename = f"raid_{project_name.lower()}_{timestamp}.html"
     
     html_content = f'''<!DOCTYPE html>
 <html lang="zh-TW">
@@ -85,7 +90,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             </div>
             <div class="loot">
                 <p>💡 <b>掉落戰利品 (資安發現)：</b></p>
-                {" ".join([f'<span class="loot-item loot-success">{{x}}</span>' for x in loot_items])}
+                {" ".join([f'<span class="loot-item loot-success">{x}</span>' for x in loot_items])}
             </div>
         </div>
 
@@ -96,7 +101,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
             </div>
             <div class="stats">
                 <div class="stat-item">
-                    <span class="stat-val">{{performance_stats.get('speed', '1.2s')}}</span>
+                    <span class="stat-val">{performance_stats.get('speed', '1.2s')}</span>
                     <span class="stat-label">頁面載入速度</span>
                 </div>
                 <div class="stat-item">
@@ -112,7 +117,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
                 <span class="quest-title" style="color: var(--warning);">📜 冒險家建議 (System Optimization)</span>
             </div>
             <div style="font-size: 0.9em; line-height: 1.6;">
-                {"".join([f'<p>• {{x}}</p>' for x in suggestions])}
+                {"".join([f'<p>• {x}</p>' for x in suggestions])}
             </div>
         </div>
 
@@ -128,7 +133,7 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
 </body>
 </html>'''
     
-    with open(report_filename, 'w') as f:
+    with open(report_filename, 'w', encoding='utf-8') as f:
         f.write(html_content)
     
     update_raid_index(project_name, url, report_filename)
@@ -137,14 +142,26 @@ def generate_raid_html(project_name, url, status, security_stats, performance_st
 
 def generate_index_page():
     if not os.path.exists(INDEX_FILE): return
-    with open(INDEX_FILE, 'r') as f:
-        history = json.load(f)
+    try:
+        with open(INDEX_FILE, 'r', encoding='utf-8') as f:
+            history = json.load(f)
+    except:
+        history = []
     
-    rows = "".join([f'<tr><td>{{h["date"]}}</td><td><b>{{h["name"]}}</b></td><td><a href="{{h["url"]}}" target="_blank">連結</a></td><td><a href="{{h["report"]}}" style="color:#39ff14;">[查看報告]</a></td></tr>' for h in history])
+    # 這裡的關鍵是使用普通字串連接，避免 f-string 的大括號轉義錯誤
+    table_rows = ""
+    for h in history:
+        row = f'<tr>'
+        row += f'<td>{h["date"]}</td>'
+        row += f'<td><b>{h["name"]}</b></td>'
+        row += f'<td><a href="{h["url"]}" target="_blank">連結</a></td>'
+        row += f'<td><a href="{h["report"]}" style="color:#39ff14;">[查看報告]</a></td>'
+        row += f'</tr>'
+        table_rows += row
     
     index_html = f'''<!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Web-Raid 測試紀錄庫</title>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>SYSPWER 測試紀錄庫</title>
 <style>
     body {{ background:#0f0c29; color:white; font-family:sans-serif; padding:20px; text-align:center; }}
     .mission-control {{ background:#1b1b2f; border:2px solid #00d2ff; border-radius:15px; padding:20px; max-width:900px; margin:0 auto 30px; }}
@@ -156,7 +173,7 @@ def generate_index_page():
     a {{ color:#00d2ff; text-decoration:none; }}
 </style></head>
 <body>
-    <h1>🗄️ Web-Raid 測試紀錄庫</h1>
+    <h1>🗄️ SYSPWER 測試紀錄庫</h1>
     
     <div class="mission-control">
         <h3>🚀 New Quest (新任務)</h3>
@@ -167,7 +184,7 @@ def generate_index_page():
 
     <table>
         <thead><tr><th>時間</th><th>系統名稱</th><th>目標網址</th><th>冒險報告</th></tr></thead>
-        <tbody>{rows}</tbody>
+        <tbody>{table_rows}</tbody>
     </table>
     
     <script>
@@ -180,10 +197,11 @@ def generate_index_page():
     </script>
 </body>
 </html>'''
-    with open('raid_index.html', 'w') as f:
+    with open('raid_index.html', 'w', encoding='utf-8') as f:
         f.write(index_html)
 
 if __name__ == "__main__":
+    # 清除舊的錯誤索引（如果有的話）
     generate_raid_html(
         "HIS", 
         "https://his.tedpc.com.tw/hccm", 
