@@ -126,6 +126,7 @@ def load_blogs():
     return sorted_blogs
 
 def generate_dashboard():
+    import time
     os.environ['TZ'] = 'Asia/Taipei'; time.tzset()
     now = datetime.now(); updated_at = now.strftime('%Y-%m-%d %H:%M:%S')
     current_hour = now.hour; weekday = now.weekday()
