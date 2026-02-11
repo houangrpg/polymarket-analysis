@@ -341,6 +341,16 @@ def generate_dashboard():
     try:
         backup_name = f'combined_auto_{now.strftime("%Y%m%d_%H%M%S")}.html'
         with open(backup_name, 'w') as bf: bf.write(full_html)
+        # Prune backups older than 30 days
+        try:
+            import glob, time
+            cutoff = time.time() - (30 * 24 * 60 * 60)
+            for f in glob.glob('combined_auto_*.html'):
+                if os.path.getmtime(f) < cutoff:
+                    try: os.remove(f)
+                    except: pass
+        except Exception:
+            pass
     except Exception:
         pass
 
