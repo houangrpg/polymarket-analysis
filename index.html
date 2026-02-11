@@ -3,19 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JoeClawSite</title>
+    <title>JoeClawSite | Market Dashboard</title>
     <style>
         :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
-            --card: #ffffff;
-            --text: #1e293b;
+            /* Deep Blue & Cherry Blossom Theme */
+            --bg-deep-blue: #0f172a;
+            --card-blue: #1e293b;
+            --accent-pink: #fbcfe8; /* Cherry Blossom Light */
+            --cherry-blossom: #f472b6; /* Cherry Blossom Main */
+            --text-light: #f1f5f9;
+            --text-muted: #94a3b8;
+            --success: #4ade80;
+            --danger: #f87171;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg-deep-blue);
+            color: var(--text-light);
             margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -23,72 +29,199 @@
         }
         header {
             width: 100%;
-            padding: 2rem 0;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            color: white;
+            padding: 3rem 0;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 2px solid var(--cherry-blossom);
             text-align: center;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            letter-spacing: 0.1rem;
+            color: var(--accent-pink);
+            text-shadow: 0 0 10px rgba(244, 114, 182, 0.3);
+        }
+        header p {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
         }
         main {
             width: 90%;
-            max-width: 800px;
-            margin-top: 2rem;
+            max-width: 1000px;
+            margin: 3rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
         }
         .card {
-            background: var(--card);
+            background: var(--card-blue);
             padding: 1.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-            margin-bottom: 2rem;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(244, 114, 182, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-        .status-dot {
-            height: 10px;
-            width: 10px;
-            background-color: #22c55e;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            border-color: rgba(244, 114, 182, 0.3);
         }
-        #data-list {
+        .card h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+            color: var(--accent-pink);
+            border-bottom: 1px solid rgba(244, 114, 182, 0.2);
+            padding-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .market-list {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
-        #data-list li {
-            padding: 0.75rem;
-            border-bottom: 1px solid #e2e8f0;
+        .market-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .market-item:last-child {
+            border-bottom: none;
+        }
+        .asset-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .asset-name {
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        .asset-price {
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .asset-change {
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .change-up { color: var(--success); }
+        .change-down { color: var(--danger); }
+
+        footer {
+            margin-top: auto;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>JoeClawSite</h1>
-        <p><span class="status-dot"></span> 系統已就緒</p>
+        <h1>JOECLAW DASHBOARD</h1>
+        <p>市場追蹤與決策支援系統</p>
     </header>
     <main>
+        <!-- US Stocks Card -->
         <section class="card">
-            <h2>歡迎來到 JoeClaw 門戶</h2>
-            <p>這是你的新網站基礎架構。已整合 HTML5, CSS3, 與後端 SQLite 資料庫支持。</p>
+            <h2>US Stocks <span>🇺🇸</span></h2>
+            <div class="market-list" id="us-stocks">
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">5,123.45</span>
+                    </div>
+                    <span class="asset-change change-up">+1.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">16,234.56</span>
+                    </div>
+                    <span class="asset-change change-up">+1.5%</span>
+                </div>
+            </div>
         </section>
+
+        <!-- Taiwan Stocks Card -->
         <section class="card">
-            <h2>動態數據櫃</h2>
-            <ul id="data-list">
-                <li>正在從 SQLite 加載初始化數據...</li>
-            </ul>
+            <h2>Taiwan Stocks <span>🇹🇼</span></h2>
+            <div class="market-list" id="tw-stocks">
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">台積電 (2330)</span>
+                        <span class="asset-price">780</span>
+                    </div>
+                    <span class="asset-change change-up">+2.3%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">加權指數</span>
+                        <span class="asset-price">20,123</span>
+                    </div>
+                    <span class="asset-change change-up">+0.8%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stocks Card -->
+        <section class="card">
+            <h2>Tech Stocks <span>💻</span></h2>
+            <div class="market-list" id="tech-stocks">
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVDA</span>
+                        <span class="asset-price">920.12</span>
+                    </div>
+                    <span class="asset-change change-up">+3.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">AAPL</span>
+                        <span class="asset-price">185.67</span>
+                    </div>
+                    <span class="asset-change change-down">-0.5%</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Polymarket Card -->
+        <section class="card">
+            <h2>Polymarket <span>🎲</span></h2>
+            <div class="market-list" id="polymarket">
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Fed Cut in March?</span>
+                        <span class="asset-price">12% Odds</span>
+                    </div>
+                    <span class="asset-change change-down">-5%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">BTC 100k 2026?</span>
+                        <span class="asset-price">65% Odds</span>
+                    </div>
+                    <span class="asset-change change-up">+10%</span>
+                </div>
+            </div>
         </section>
     </main>
+    <footer>
+        <p>系統時間: <span id="clock"></span> | 數據源: joeclaw.db</p>
+    </footer>
     <script>
-        // 初始化動畫或數據交互
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('JoeClawSite 已啟動');
-            // 這裡未來可以連結後端 API
-            setTimeout(() => {
-                document.getElementById('data-list').innerHTML = `
-                    <li>✅ SQLite 資料庫已連接</li>
-                    <li>✅ HTML/CSS/JS 渲染正常</li>
-                    <li>✅ 系統時間: ${new Date().toLocaleString()}</li>
-                `;
-            }, 1000);
-        });
+        function updateClock() {
+            document.getElementById('clock').innerText = new Date().toLocaleString('zh-TW');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+        
+        console.log('JoeClaw Dashboard initialized with deep blue & cherry blossom theme.');
     </script>
 </body>
 </html>
