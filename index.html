@@ -269,28 +269,32 @@
         const POLY_QUERIES = ['Fed rate cut', 'Bitcoin price'];
 
         async function fetchStockData() {
-            // Using AllOrigins CORS proxy with JSONP or directly. 
-            // allorigins.win/get?url=... returns a wrapper object.
-            const corsProxy = 'https://api.allorigins.win/get?url=';
+            // Using a simple fetch with a public CORS proxy.
+            const corsProxy = 'https://cors-anywhere.herokuapp.com/'; // Note: User might need to enable it for their IP if directly accessed, but AllOrigins is better if it works.
+            // Let's try AllOrigins again but correctly handling the result or using a different one.
+            const proxyUrl = 'https://api.allorigins.win/get?url=';
             
             for (const symbol of STOCKS) {
                 try {
-                    const url = `${corsProxy}${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`)}`;
-                    const resp = await fetch(url);
+                    const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`;
+                    const resp = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
                     const wrapper = await resp.json();
-                    const data = JSON.parse(wrapper.contents);
-                    const result = data.chart.result[0];
-                    const price = result.meta.regularMarketPrice;
-                    const prevClose = result.meta.previousClose;
-                    const change = ((price - prevClose) / prevClose * 100).toFixed(2);
                     
-                    const priceEl = document.querySelector(`[data-symbol="${symbol}"]`);
-                    const changeEl = document.querySelector(`[data-symbol-change="${symbol}"]`);
-                    
-                    if (priceEl) priceEl.innerText = symbol.includes('TW') || symbol.startsWith('^') ? price.toLocaleString() : `$${price.toLocaleString()}`;
-                    if (changeEl) {
-                        changeEl.innerText = `${change > 0 ? '+' : ''}${change}%`;
-                        changeEl.className = `asset-change ${change >= 0 ? 'change-up' : 'change-down'}`;
+                    if (wrapper.contents) {
+                        const data = JSON.parse(wrapper.contents);
+                        const result = data.chart.result[0];
+                        const price = result.meta.regularMarketPrice;
+                        const prevClose = result.meta.previousClose;
+                        const change = ((price - prevClose) / prevClose * 100).toFixed(2);
+                        
+                        const priceEl = document.querySelector(`[data-symbol="${symbol}"]`);
+                        const changeEl = document.querySelector(`[data-symbol-change="${symbol}"]`);
+                        
+                        if (priceEl) priceEl.innerText = symbol.includes('TW') || symbol.startsWith('^') ? price.toLocaleString() : `$${price.toLocaleString()}`;
+                        if (changeEl) {
+                            changeEl.innerText = `${change > 0 ? '+' : ''}${change}%`;
+                            changeEl.className = `asset-change ${change >= 0 ? 'change-up' : 'change-down'}`;
+                        }
                     }
                 } catch (e) {
                     console.error(`Failed to fetch ${symbol}:`, e);
@@ -299,29 +303,32 @@
         }
 
         async function fetchPolymarketData() {
-            const corsProxy = 'https://api.allorigins.win/get?url=';
+            const proxyUrl = 'https://api.allorigins.win/get?url=';
             for (const query of POLY_QUERIES) {
                 try {
-                    const url = `${corsProxy}${encodeURIComponent(`https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`)}`;
-                    const resp = await fetch(url);
+                    const targetUrl = `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`;
+                    const resp = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
                     const wrapper = await resp.json();
-                    const markets = JSON.parse(wrapper.contents);
-                    if (markets.length > 0) {
-                        const m = markets[0];
-                        const outcomes = JSON.parse(m.outcomes);
-                        const prices = JSON.parse(m.outcomePrices);
-                        const yesIdx = outcomes.indexOf('Yes');
-                        if (yesIdx !== -1) {
-                            const prob = (parseFloat(prices[yesIdx]) * 100).toFixed(1);
-                            const change = (m.oneDayPriceChange * 100).toFixed(1);
-                            
-                            const priceEl = document.querySelector(`[data-poly="${query}"]`);
-                            const changeEl = document.querySelector(`[data-poly-change="${query}"]`);
-                            
-                            if (priceEl) priceEl.innerText = `${prob}%`;
-                            if (changeEl) {
-                                changeEl.innerText = `${change > 0 ? '+' : ''}${change}%`;
-                                changeEl.className = `asset-change ${change >= 0 ? 'change-up' : 'change-down'}`;
+                    
+                    if (wrapper.contents) {
+                        const markets = JSON.parse(wrapper.contents);
+                        if (markets.length > 0) {
+                            const m = markets[0];
+                            const outcomes = JSON.parse(m.outcomes);
+                            const prices = JSON.parse(m.outcomePrices);
+                            const yesIdx = outcomes.indexOf('Yes');
+                            if (yesIdx !== -1) {
+                                const prob = (parseFloat(prices[yesIdx]) * 100).toFixed(1);
+                                const change = (m.oneDayPriceChange * 100).toFixed(1);
+                                
+                                const priceEl = document.querySelector(`[data-poly="${query}"]`);
+                                const changeEl = document.querySelector(`[data-poly-change="${query}"]`);
+                                
+                                if (priceEl) priceEl.innerText = `${prob}%`;
+                                if (changeEl) {
+                                    changeEl.innerText = `${change > 0 ? '+' : ''}${change}%`;
+                                    changeEl.className = `asset-change ${change >= 0 ? 'change-up' : 'change-down'}`;
+                                }
                             }
                         }
                     }
