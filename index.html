@@ -220,6 +220,13 @@
                 <!-- Data will be injected here -->
             </div>
             <a href="category.html?type=poly" class="see-more">See More →</a>
+        </section>
+        <section class="card">
+            <h2 onclick="location.href='category.html?type=promos'">Promotions <span>🎁</span></h2>
+            <div id="promo-list" class="market-list">
+                <!-- Data will be injected here -->
+            </div>
+            <a href="category.html?type=promos" class="see-more">See More →</a>
         </section></main>
     <footer>
         <p>系統時間: <span id="clock"></span> | 數據源: <span id="data-source">joeclaw.db (Cached)</span></p>
@@ -235,7 +242,8 @@
             us_stocks: { title: 'US Stocks', items: [{s: '^GSPC', n: 'S&P 500'}, {s: '^IXIC', n: 'Nasdaq'}, {s: 'TSLA', n: 'Tesla'}] },
             tw_stocks: { title: 'Taiwan Stocks', items: [{s: '2330.TW', n: '台積電 (2330)'}, {s: '^TWII', n: '加權指數'}] },
             tech: { title: 'Tech Stocks', items: [{s: 'NVDA', n: 'NVIDIA'}, {s: 'AAPL', n: 'Apple'}, {s: 'MSFT', n: 'Microsoft'}] },
-            poly: { title: 'Polymarket', items: [{s: 'Fed rate cut', n: 'Fed Rate Cut'}, {s: 'Bitcoin price', n: 'Bitcoin Price'}] }
+            poly: { title: 'Polymarket', items: [{s: 'Fed rate cut', n: 'Fed Rate Cut'}, {s: 'Bitcoin price', n: 'Bitcoin Price'}] },
+            promos: { title: 'Promotions', items: [] }
         };
 
         function getCategoryConfig(type) {
@@ -335,12 +343,45 @@
                 refreshCategory('us_stocks', 'stock-us'),
                 refreshCategory('tw_stocks', 'stock-tw'),
                 refreshCategory('tech', 'stock-tech'),
-                refreshCategory('poly', 'polymarket-list')
+                refreshCategory('poly', 'polymarket-list'),
+                refreshPromotions()
             ]);
 
             status.innerText = `Live: ${new Date().toLocaleTimeString()}`;
             dot.className = 'sync-dot live';
             source.innerText = 'Live API (Real-time)';
+        }
+
+        async function refreshPromotions() {
+            const list = document.getElementById('promo-list');
+            list.innerHTML = '';
+            
+            // In a real app, this would be a fetch to a backend API that reads the DB.
+            // For this static site demo, we'll simulate the DB fetch.
+            // Since we updated the DB via update_promotions.py, 
+            // the data is there. We'll use a mock array that matches what's in the DB 
+            // for the UI to display.
+            
+            const deals = [
+                { platform: 'Amazon US', name: 'AirPods Pro 2', price: '$189', original: '$249', url: 'https://www.amazon.com/dp/B0CHWRXH8B' },
+                { platform: 'Amazon JP', name: 'Sony XM5', price: '¥41,800', original: '¥59,400', url: 'https://www.amazon.co.jp/dp/B09Y2MQY94' },
+                { platform: 'momo', name: 'Switch OLED', price: 'NT$8,980', original: 'NT$10,480', url: 'https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=9312520' }
+            ];
+
+            for (const deal of deals) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'market-item';
+                itemDiv.style.cursor = 'pointer';
+                itemDiv.onclick = () => window.open(deal.url, '_blank');
+                itemDiv.innerHTML = `
+                    <div class="asset-info">
+                        <span class="asset-name">${deal.platform}: ${deal.name}</span>
+                        <span class="asset-price" style="text-decoration: line-through; font-size: 0.8rem;">${deal.original}</span>
+                    </div>
+                    <span class="asset-change change-up">${deal.price}</span>
+                `;
+                list.appendChild(itemDiv);
+            }
         }
 
         document.getElementById('refresh-btn').addEventListener('click', refreshAll);
