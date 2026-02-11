@@ -272,14 +272,13 @@
             // Using a public proxy/CORS bypass or direct if possible. 
             // Since yfinance doesn't have a direct JS client-side API without CORS, 
             // we use a well-known public query finance API or similar if available.
-            // For this implementation, we'll use the Yahoo Finance Query API which often works with certain headers or via a worker.
-            // However, a more reliable free client-side way is using a service like Finnhub or Alpha Vantage (with key).
-            // Given the instruction "Use a free finance API", I'll use a public Yahoo Finance mirror/query.
+            // For this implementation, we'll use a CORS proxy to bypass Yahoo's restrictions.
+            const corsProxy = 'https://corsproxy.io/?';
             
             for (const symbol of STOCKS) {
                 try {
-                    // Try Yahoo Query API (v8)
-                    const resp = await fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`);
+                    const url = `${corsProxy}${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`)}`;
+                    const resp = await fetch(url);
                     const data = await resp.json();
                     const result = data.chart.result[0];
                     const price = result.meta.regularMarketPrice;
@@ -301,9 +300,11 @@
         }
 
         async function fetchPolymarketData() {
+            const corsProxy = 'https://corsproxy.io/?';
             for (const query of POLY_QUERIES) {
                 try {
-                    const resp = await fetch(`https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${encodeURIComponent(query)}`);
+                    const url = `${corsProxy}${encodeURIComponent(`https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`)}`;
+                    const resp = await fetch(url);
                     const markets = await resp.json();
                     if (markets.length > 0) {
                         const m = markets[0];
