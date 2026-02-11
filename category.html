@@ -162,22 +162,100 @@
             us_stocks: { title: 'US Stocks', items: [{s: '^GSPC', n: 'S&P 500'}, {s: '^IXIC', n: 'Nasdaq'}, {s: 'TSLA', n: 'Tesla'}] },
             tw_stocks: { title: 'Taiwan Stocks', items: [{s: '2330.TW', n: '台積電 (2330)'}, {s: '^TWII', n: '加權指數'}] },
             tech: { title: 'Tech Stocks', items: [{s: 'NVDA', n: 'NVIDIA'}, {s: 'AAPL', n: 'Apple'}, {s: 'MSFT', n: 'Microsoft'}] },
-            poly: { title: 'Polymarket', items: [{s: 'Fed rate cut', n: 'Fed Rate Cut'}, {s: 'Bitcoin price', n: 'Bitcoin Price'}] }
+            poly: { title: 'Polymarket', items: [{s: 'Fed rate cut', n: 'Fed Rate Cut'}, {s: 'Bitcoin price', n: 'Bitcoin Price'}] },
+            promos: { title: 'Promotions', items: [] }
         };
 
         let config = JSON.parse(localStorage.getItem(`config_${type}`)) || DEFAULT_CONFIGS[type];
         document.getElementById('category-title').innerText = config.title;
 
-        function render() {
+        if (type === 'promos') {
+            document.querySelector('.controls').style.display = 'none';
+            document.querySelector('.add-form').style.display = 'none';
+        }
+
+        async function fetchStockData(symbol) {
+            try {
+                const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`;
+                const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                const wrapper = await resp.json();
+                if (wrapper.contents) {
+                    const data = JSON.parse(wrapper.contents);
+                    const result = data.chart.result[0];
+                    const price = result.meta.regularMarketPrice;
+                    const prevClose = result.meta.previousClose;
+                    const change = ((price - prevClose) / prevClose * 100).toFixed(2);
+                    const name = result.meta.shortName || symbol;
+                    return { price, change, name };
+                }
+            } catch (e) { console.error(e); }
+            return null;
+        }
+
+        async function fetchPolymarketData(query) {
+            try {
+                const targetUrl = `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`;
+                const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                const wrapper = await resp.json();
+                if (wrapper.contents) {
+                    const markets = JSON.parse(wrapper.contents);
+                    if (markets.length > 0) {
+                        const m = markets[0];
+                        const outcomes = JSON.parse(m.outcomes);
+                        const prices = JSON.parse(m.outcomePrices);
+                        const yesIdx = outcomes.indexOf('Yes');
+                        if (yesIdx !== -1) {
+                            const prob = (parseFloat(prices[yesIdx]) * 100).toFixed(1);
+                            const change = (m.oneDayPriceChange * 100).toFixed(1);
+                            return { price: prob + '%', change, name: m.question };
+                        }
+                    }
+                }
+            } catch (e) { console.error(e); }
+            return null;
+        }
+
+        async function fetchPromos() {
+            // Simulated search trigger
+            return [
+                { platform: 'Amazon US', name: 'AirPods Pro 2', price: '$189', original: '$249', url: 'https://www.amazon.com/dp/B0CHWRXH8B' },
+                { platform: 'Amazon JP', name: 'Sony XM5', price: '¥41,800', original: '¥59,400', url: 'https://www.amazon.co.jp/dp/B09Y2MQY94' },
+                { platform: 'momo', name: 'Switch OLED', price: 'NT$8,980', original: 'NT$10,480', url: 'https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=9312520' },
+                { platform: 'PChome', name: 'iPhone 16 Pro', price: 'NT$34,900', original: 'NT$36,900', url: 'https://24h.pchome.com.tw/' }
+            ];
+        }
+
+        async function render() {
             const list = document.getElementById('item-list');
             list.innerHTML = '';
+
+            if (type === 'promos') {
+                const deals = await fetchPromos();
+                deals.forEach(deal => {
+                    const div = document.createElement('div');
+                    div.className = 'market-item';
+                    div.style.cursor = 'pointer';
+                    div.onclick = () => window.open(deal.url, '_blank');
+                    div.innerHTML = `
+                        <div class="asset-info">
+                            <span class="asset-name">${deal.platform}: ${deal.name}</span>
+                            <span class="asset-price" style="text-decoration: line-through; font-size: 0.8rem;">${deal.original}</span>
+                        </div>
+                        <span class="asset-change change-up">${deal.price}</span>
+                    `;
+                    list.appendChild(div);
+                });
+                return;
+            }
+
             config.items.forEach((item, index) => {
                 const div = document.createElement('div');
                 div.className = 'market-item';
+                const safeId = item.s.replace(/[^a-zA-Z0-9]/g, '');
                 div.innerHTML = `
                     <div class="asset-info">
                         <span class="asset-name">${item.n}</span>
-                        <span class="asset-symbol">${item.s}</span>
+                        <span class="asset-symbol">${item.s} | <span id="price-${safeId}">Loading...</span></span>
                     </div>
                     <div class="item-actions">
                         <button class="btn" onclick="move(${index}, -1)">↑</button>
@@ -186,6 +264,13 @@
                     </div>
                 `;
                 list.appendChild(div);
+
+                (type === 'poly' ? fetchPolymarketData(item.s) : fetchStockData(item.s)).then(data => {
+                    if (data) {
+                        const pEl = document.getElementById(`price-${safeId}`);
+                        if (pEl) pEl.innerText = (type === 'poly' ? data.price : `$${data.price.toLocaleString()}`) + ` (${data.change > 0 ? '+' : ''}${data.change}%)`;
+                    }
+                });
             });
             localStorage.setItem(`config_${type}`, JSON.stringify(config));
         }
@@ -211,15 +296,23 @@
             btn.innerText = document.body.classList.contains('edit-mode') ? 'Save Mode' : 'Edit Mode';
         });
 
-        document.getElementById('add-btn').addEventListener('click', () => {
-            const s = document.getElementById('new-symbol').value;
-            const n = document.getElementById('new-name').value;
-            if (s && n) {
-                config.items.push({ s, n });
+        document.getElementById('add-btn').addEventListener('click', async () => {
+            const s = document.getElementById('new-symbol').value.toUpperCase();
+            if (!s) return;
+            
+            const btn = document.getElementById('add-btn');
+            btn.innerText = 'Verifying...';
+            
+            const data = await (type === 'poly' ? fetchPolymarketData(s) : fetchStockData(s));
+            if (data) {
+                config.items.push({ s, n: data.name || s });
                 document.getElementById('new-symbol').value = '';
                 document.getElementById('new-name').value = '';
                 render();
+            } else {
+                alert('Symbol not found or API error.');
             }
+            btn.innerText = 'Add';
         });
 
         render();

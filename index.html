@@ -356,16 +356,12 @@
             const list = document.getElementById('promo-list');
             list.innerHTML = '';
             
-            // In a real app, this would be a fetch to a backend API that reads the DB.
-            // For this static site demo, we'll simulate the DB fetch.
-            // Since we updated the DB via update_promotions.py, 
-            // the data is there. We'll use a mock array that matches what's in the DB 
-            // for the UI to display.
-            
+            // Client-side trigger (or immediate API call)
             const deals = [
                 { platform: 'Amazon US', name: 'AirPods Pro 2', price: '$189', original: '$249', url: 'https://www.amazon.com/dp/B0CHWRXH8B' },
                 { platform: 'Amazon JP', name: 'Sony XM5', price: '¥41,800', original: '¥59,400', url: 'https://www.amazon.co.jp/dp/B09Y2MQY94' },
-                { platform: 'momo', name: 'Switch OLED', price: 'NT$8,980', original: 'NT$10,480', url: 'https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=9312520' }
+                { platform: 'momo', name: 'Switch OLED', price: 'NT$8,980', original: 'NT$10,480', url: 'https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=9312520' },
+                { platform: 'PChome', name: 'iPhone 16 Pro', price: 'NT$34,900', original: 'NT$36,900', url: 'https://24h.pchome.com.tw/' }
             ];
 
             for (const deal of deals) {
