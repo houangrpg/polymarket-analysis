@@ -269,15 +269,11 @@
         const POLY_QUERIES = ['Fed rate cut', 'Bitcoin price'];
 
         async function fetchStockData() {
-            // Using a simple fetch with a public CORS proxy.
-            const corsProxy = 'https://cors-anywhere.herokuapp.com/'; // Note: User might need to enable it for their IP if directly accessed, but AllOrigins is better if it works.
-            // Let's try AllOrigins again but correctly handling the result or using a different one.
-            const proxyUrl = 'https://api.allorigins.win/get?url=';
-            
             for (const symbol of STOCKS) {
                 try {
+                    // Try AllOrigins first
                     const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`;
-                    const resp = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
+                    const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
                     const wrapper = await resp.json();
                     
                     if (wrapper.contents) {
@@ -303,11 +299,10 @@
         }
 
         async function fetchPolymarketData() {
-            const proxyUrl = 'https://api.allorigins.win/get?url=';
             for (const query of POLY_QUERIES) {
                 try {
                     const targetUrl = `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`;
-                    const resp = await fetch(`${proxyUrl}${encodeURIComponent(targetUrl)}`);
+                    const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
                     const wrapper = await resp.json();
                     
                     if (wrapper.contents) {
