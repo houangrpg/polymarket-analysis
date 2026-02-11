@@ -269,18 +269,16 @@
         const POLY_QUERIES = ['Fed rate cut', 'Bitcoin price'];
 
         async function fetchStockData() {
-            // Using a public proxy/CORS bypass or direct if possible. 
-            // Since yfinance doesn't have a direct JS client-side API without CORS, 
-            // we use a well-known public query finance API or similar if available.
-            // For this implementation, we'll use a CORS proxy to bypass Yahoo's restrictions.
-            // Note: Use a more stable proxy or specific headers if needed.
-            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            // Using AllOrigins CORS proxy with JSONP or directly. 
+            // allorigins.win/get?url=... returns a wrapper object.
+            const corsProxy = 'https://api.allorigins.win/get?url=';
             
             for (const symbol of STOCKS) {
                 try {
                     const url = `${corsProxy}${encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`)}`;
                     const resp = await fetch(url);
-                    const data = await resp.json();
+                    const wrapper = await resp.json();
+                    const data = JSON.parse(wrapper.contents);
                     const result = data.chart.result[0];
                     const price = result.meta.regularMarketPrice;
                     const prevClose = result.meta.previousClose;
@@ -301,12 +299,13 @@
         }
 
         async function fetchPolymarketData() {
-            const corsProxy = 'https://api.allorigins.win/raw?url=';
+            const corsProxy = 'https://api.allorigins.win/get?url=';
             for (const query of POLY_QUERIES) {
                 try {
                     const url = `${corsProxy}${encodeURIComponent(`https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`)}`;
                     const resp = await fetch(url);
-                    const markets = await resp.json();
+                    const wrapper = await resp.json();
+                    const markets = JSON.parse(wrapper.contents);
                     if (markets.length > 0) {
                         const m = markets[0];
                         const outcomes = JSON.parse(m.outcomes);
