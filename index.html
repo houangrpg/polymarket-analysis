@@ -273,7 +273,8 @@
             // Since yfinance doesn't have a direct JS client-side API without CORS, 
             // we use a well-known public query finance API or similar if available.
             // For this implementation, we'll use a CORS proxy to bypass Yahoo's restrictions.
-            const corsProxy = 'https://corsproxy.io/?';
+            // Note: Use a more stable proxy or specific headers if needed.
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
             
             for (const symbol of STOCKS) {
                 try {
@@ -300,7 +301,7 @@
         }
 
         async function fetchPolymarketData() {
-            const corsProxy = 'https://corsproxy.io/?';
+            const corsProxy = 'https://api.allorigins.win/raw?url=';
             for (const query of POLY_QUERIES) {
                 try {
                     const url = `${corsProxy}${encodeURIComponent(`https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`)}`;
