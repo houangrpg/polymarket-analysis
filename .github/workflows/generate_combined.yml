@@ -24,11 +24,22 @@ jobs:
       - name: Run generator
         run: |
           python3 update_combined_ui.py
-      - name: Commit generated files
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add combined_auto.html || true
-          git add combined_auto_*.html || true
-          git commit -m "Auto-generate combined_auto (GH Actions)" || echo "no changes to commit"
-          git push || echo "push failed"
+      - name: Create branch and commit generated files
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Auto-generate combined_auto (GH Actions)
+          file_pattern: |
+            combined_auto.html
+            combined_auto_*.html
+          branch: auto/generated/dashboard-${{ github.run_id }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Auto-generate combined_auto (GH Actions)"
+          branch: auto/generated/dashboard-${{ github.run_id }}
+          title: "Auto-generated dashboard: ${{ github.run_number }}"
+          body: |
+            This PR contains auto-generated dashboard files (combined_auto.html) created by GitHub Actions.
+            Review and merge to publish to combined.html.
+          base: main
