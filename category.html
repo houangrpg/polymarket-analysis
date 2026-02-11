@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoeClawSite | Category View</title>
+    <style>
+        :root {
+            --bg-deep-blue: #0f172a;
+            --card-blue: #1e293b;
+            --accent-pink: #fbcfe8;
+            --cherry-blossom: #f472b6;
+            --text-light: #f1f5f9;
+            --text-muted: #94a3b8;
+            --success: #4ade80;
+            --danger: #f87171;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-deep-blue);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        header {
+            width: 100%;
+            padding: 2rem 0;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border-bottom: 2px solid var(--cherry-blossom);
+            text-align: center;
+            position: relative;
+        }
+        .back-link {
+            position: absolute;
+            left: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--cherry-blossom);
+            text-decoration: none;
+            font-size: 1rem;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: var(--accent-pink);
+        }
+        main {
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem 0;
+        }
+        .card {
+            background: var(--card-blue);
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            border: 1px solid rgba(244, 114, 182, 0.1);
+        }
+        .market-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .market-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .asset-info {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .asset-name {
+            font-weight: 500;
+        }
+        .asset-symbol {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .item-actions {
+            display: none; /* Hidden by default, shown in Edit Mode */
+            gap: 0.5rem;
+        }
+        .edit-mode .item-actions {
+            display: flex;
+        }
+        .btn {
+            background: transparent;
+            border: 1px solid var(--cherry-blossom);
+            color: var(--cherry-blossom);
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.4rem;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn:hover {
+            background: var(--cherry-blossom);
+            color: var(--text-light);
+        }
+        .btn-danger {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        .btn-danger:hover {
+            background: var(--danger);
+        }
+        .add-form {
+            margin-top: 1.5rem;
+            display: none;
+            gap: 1rem;
+        }
+        .edit-mode .add-form {
+            display: flex;
+        }
+        input {
+            background: var(--bg-deep-blue);
+            border: 1px solid var(--text-muted);
+            color: var(--text-light);
+            padding: 0.5rem;
+            border-radius: 0.4rem;
+            flex-grow: 1;
+        }
+        .controls {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-link">← Back</a>
+        <h1 id="category-title">Category Name</h1>
+    </header>
+    <main>
+        <div class="controls">
+            <button id="edit-btn" class="btn">Edit Mode</button>
+        </div>
+        <div class="card">
+            <div id="item-list" class="market-list">
+                <!-- Items will be injected here -->
+            </div>
+            <div class="add-form">
+                <input type="text" id="new-symbol" placeholder="Ticker (e.g. TSLA)">
+                <input type="text" id="new-name" placeholder="Name (e.g. Tesla)">
+                <button id="add-btn" class="btn">Add</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type') || 'us_stocks';
+        
+        const DEFAULT_CONFIGS = {
+            us_stocks: { title: 'US Stocks', items: [{s: '^GSPC', n: 'S&P 500'}, {s: '^IXIC', n: 'Nasdaq'}, {s: 'TSLA', n: 'Tesla'}] },
+            tw_stocks: { title: 'Taiwan Stocks', items: [{s: '2330.TW', n: '台積電 (2330)'}, {s: '^TWII', n: '加權指數'}] },
+            tech: { title: 'Tech Stocks', items: [{s: 'NVDA', n: 'NVIDIA'}, {s: 'AAPL', n: 'Apple'}, {s: 'MSFT', n: 'Microsoft'}] },
+            poly: { title: 'Polymarket', items: [{s: 'Fed rate cut', n: 'Fed Rate Cut'}, {s: 'Bitcoin price', n: 'Bitcoin Price'}] }
+        };
+
+        let config = JSON.parse(localStorage.getItem(`config_${type}`)) || DEFAULT_CONFIGS[type];
+        document.getElementById('category-title').innerText = config.title;
+
+        function render() {
+            const list = document.getElementById('item-list');
+            list.innerHTML = '';
+            config.items.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'market-item';
+                div.innerHTML = `
+                    <div class="asset-info">
+                        <span class="asset-name">${item.n}</span>
+                        <span class="asset-symbol">${item.s}</span>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn" onclick="move(${index}, -1)">↑</button>
+                        <button class="btn" onclick="move(${index}, 1)">↓</button>
+                        <button class="btn btn-danger" onclick="remove(${index})">Delete</button>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            localStorage.setItem(`config_${type}`, JSON.stringify(config));
+        }
+
+        function move(index, dir) {
+            const newIndex = index + dir;
+            if (newIndex >= 0 && newIndex < config.items.length) {
+                const temp = config.items[index];
+                config.items[index] = config.items[newIndex];
+                config.items[newIndex] = temp;
+                render();
+            }
+        }
+
+        function remove(index) {
+            config.items.splice(index, 1);
+            render();
+        }
+
+        document.getElementById('edit-btn').addEventListener('click', () => {
+            document.body.classList.toggle('edit-mode');
+            const btn = document.getElementById('edit-btn');
+            btn.innerText = document.body.classList.contains('edit-mode') ? 'Save Mode' : 'Edit Mode';
+        });
+
+        document.getElementById('add-btn').addEventListener('click', () => {
+            const s = document.getElementById('new-symbol').value;
+            const n = document.getElementById('new-name').value;
+            if (s && n) {
+                config.items.push({ s, n });
+                document.getElementById('new-symbol').value = '';
+                document.getElementById('new-name').value = '';
+                render();
+            }
+        });
+
+        render();
+    </script>
+</body>
+</html>

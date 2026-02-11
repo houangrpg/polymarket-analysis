@@ -119,6 +119,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            cursor: pointer;
+        }
+        .card h2:hover {
+            color: var(--cherry-blossom);
+        }
+        .see-more {
+            display: block;
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--cherry-blossom);
+            text-decoration: none;
+            margin-top: 1rem;
+        }
+        .see-more:hover {
+            text-decoration: underline;
         }
         .market-list {
             list-style: none;
@@ -179,81 +194,32 @@
     </header>
     <main>
         <section class="card">
-            <h2>US Stocks <span>🇺🇸</span></h2>
+            <h2 onclick="location.href='category.html?type=us_stocks'">US Stocks <span>🇺🇸</span></h2>
             <div id="stock-us" class="market-list">
                 <!-- Data will be injected here -->
-                <div class="market-item">
-                    <div class="asset-info">
-                        <span class="asset-name">S&P 500</span>
-                        <span class="asset-price" data-symbol="^GSPC">Loading...</span>
-                    </div>
-                    <span class="asset-change" data-symbol-change="^GSPC">--</span>
-                </div>
-                <div class="market-item">
-                    <div class="asset-info">
-                        <span class="asset-name">Nasdaq</span>
-                        <span class="asset-price" data-symbol="^IXIC">Loading...</span>
-                    </div>
-                    <span class="asset-change" data-symbol-change="^IXIC">--</span>
-                </div>
             </div>
+            <a href="category.html?type=us_stocks" class="see-more">See More →</a>
         </section>
         <section class="card">
-            <h2>Taiwan Stocks <span>🇹🇼</span></h2>
+            <h2 onclick="location.href='category.html?type=tw_stocks'">Taiwan Stocks <span>🇹🇼</span></h2>
             <div id="stock-tw" class="market-list">
-                <div class="market-item">
-                    <div class="asset-info">
-                        <span class="asset-name">台積電 (2330)</span>
-                        <span class="asset-price" data-symbol="2330.TW">Loading...</span>
-                    </div>
-                    <span class="asset-change" data-symbol-change="2330.TW">--</span>
-                </div>
-                <div class="market-item">
-                    <div class="asset-info">
-                        <span class="asset-name">加權指數</span>
-                        <span class="asset-price" data-symbol="^TWII">Loading...</span>
-                    </div>
-                    <span class="asset-change" data-symbol-change="^TWII">--</span>
-                </div>
+                <!-- Data will be injected here -->
             </div>
+            <a href="category.html?type=tw_stocks" class="see-more">See More →</a>
         </section>
         <section class="card">
-            <h2>Tech Stocks <span>💻</span></h2>
+            <h2 onclick="location.href='category.html?type=tech'">Tech Stocks <span>💻</span></h2>
             <div id="stock-tech" class="market-list">
-                <div class="market-item">
-                    <div class="asset-info">
-                        <span class="asset-name">NVDA</span>
-                        <span class="asset-price" data-symbol="NVDA">Loading...</span>
-                    </div>
-                    <span class="asset-change" data-symbol-change="NVDA">--</span>
-                </div>
-                <div class="market-item">
-                    <div class="asset-info">
-                        <span class="asset-name">AAPL</span>
-                        <span class="asset-price" data-symbol="AAPL">Loading...</span>
-                    </div>
-                    <span class="asset-change" data-symbol-change="AAPL">--</span>
-                </div>
+                <!-- Data will be injected here -->
             </div>
+            <a href="category.html?type=tech" class="see-more">See More →</a>
         </section>
         <section class="card">
-            <h2>Polymarket <span>🎲</span></h2>
+            <h2 onclick="location.href='category.html?type=poly'">Polymarket <span>🎲</span></h2>
             <div id="polymarket-list" class="market-list">
-                <div class="market-item">
-                    <div class="asset-info">
-                        <span class="asset-name">Fed Rate Cut in March?</span>
-                        <span class="asset-price" data-poly="Fed rate cut">Loading...</span>
-                    </div>
-                    <span class="asset-change" data-poly-change="Fed rate cut">--</span>
-                </div>
-                <div class="market-item">
-                    <div class="asset-info">
-                        <span class="asset-name">Bitcoin to 100k in 2026?</span>
-                        <span class="asset-price" data-poly="Bitcoin price">Loading...</span>
-                    </div>
-                    <span class="asset-change" data-poly-change="Bitcoin price">--</span>
-                </div>
+                <!-- Data will be injected here -->
             </div>
+            <a href="category.html?type=poly" class="see-more">See More →</a>
         </section></main>
     <footer>
         <p>系統時間: <span id="clock"></span> | 數據源: <span id="data-source">joeclaw.db (Cached)</span></p>
@@ -265,71 +231,95 @@
         setInterval(updateClock, 1000);
         updateClock();
 
-        const STOCKS = ['^GSPC', '^IXIC', '2330.TW', '^TWII', 'NVDA', 'AAPL'];
-        const POLY_QUERIES = ['Fed rate cut', 'Bitcoin price'];
+        const DEFAULT_CONFIGS = {
+            us_stocks: { title: 'US Stocks', items: [{s: '^GSPC', n: 'S&P 500'}, {s: '^IXIC', n: 'Nasdaq'}, {s: 'TSLA', n: 'Tesla'}] },
+            tw_stocks: { title: 'Taiwan Stocks', items: [{s: '2330.TW', n: '台積電 (2330)'}, {s: '^TWII', n: '加權指數'}] },
+            tech: { title: 'Tech Stocks', items: [{s: 'NVDA', n: 'NVIDIA'}, {s: 'AAPL', n: 'Apple'}, {s: 'MSFT', n: 'Microsoft'}] },
+            poly: { title: 'Polymarket', items: [{s: 'Fed rate cut', n: 'Fed Rate Cut'}, {s: 'Bitcoin price', n: 'Bitcoin Price'}] }
+        };
 
-        async function fetchStockData() {
-            for (const symbol of STOCKS) {
-                try {
-                    // Try AllOrigins first
-                    const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`;
-                    const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-                    const wrapper = await resp.json();
-                    
-                    if (wrapper.contents) {
-                        const data = JSON.parse(wrapper.contents);
-                        const result = data.chart.result[0];
-                        const price = result.meta.regularMarketPrice;
-                        const prevClose = result.meta.previousClose;
-                        const change = ((price - prevClose) / prevClose * 100).toFixed(2);
-                        
-                        const priceEl = document.querySelector(`[data-symbol="${symbol}"]`);
-                        const changeEl = document.querySelector(`[data-symbol-change="${symbol}"]`);
-                        
-                        if (priceEl) priceEl.innerText = symbol.includes('TW') || symbol.startsWith('^') ? price.toLocaleString() : `$${price.toLocaleString()}`;
-                        if (changeEl) {
-                            changeEl.innerText = `${change > 0 ? '+' : ''}${change}%`;
-                            changeEl.className = `asset-change ${change >= 0 ? 'change-up' : 'change-down'}`;
-                        }
-                    }
-                } catch (e) {
-                    console.error(`Failed to fetch ${symbol}:`, e);
-                }
-            }
+        function getCategoryConfig(type) {
+            return JSON.parse(localStorage.getItem(`config_${type}`)) || DEFAULT_CONFIGS[type];
         }
 
-        async function fetchPolymarketData() {
-            for (const query of POLY_QUERIES) {
-                try {
-                    const targetUrl = `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`;
-                    const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-                    const wrapper = await resp.json();
-                    
-                    if (wrapper.contents) {
-                        const markets = JSON.parse(wrapper.contents);
-                        if (markets.length > 0) {
-                            const m = markets[0];
-                            const outcomes = JSON.parse(m.outcomes);
-                            const prices = JSON.parse(m.outcomePrices);
-                            const yesIdx = outcomes.indexOf('Yes');
-                            if (yesIdx !== -1) {
-                                const prob = (parseFloat(prices[yesIdx]) * 100).toFixed(1);
-                                const change = (m.oneDayPriceChange * 100).toFixed(1);
-                                
-                                const priceEl = document.querySelector(`[data-poly="${query}"]`);
-                                const changeEl = document.querySelector(`[data-poly-change="${query}"]`);
-                                
-                                if (priceEl) priceEl.innerText = `${prob}%`;
-                                if (changeEl) {
-                                    changeEl.innerText = `${change > 0 ? '+' : ''}${change}%`;
-                                    changeEl.className = `asset-change ${change >= 0 ? 'change-up' : 'change-down'}`;
-                                }
-                            }
+        async function fetchStockData(symbol) {
+            try {
+                const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`;
+                const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                const wrapper = await resp.json();
+                
+                if (wrapper.contents) {
+                    const data = JSON.parse(wrapper.contents);
+                    const result = data.chart.result[0];
+                    const price = result.meta.regularMarketPrice;
+                    const prevClose = result.meta.previousClose;
+                    const change = ((price - prevClose) / prevClose * 100).toFixed(2);
+                    return { price, change };
+                }
+            } catch (e) {
+                console.error(`Failed to fetch ${symbol}:`, e);
+            }
+            return null;
+        }
+
+        async function fetchPolymarketData(query) {
+            try {
+                const targetUrl = `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`;
+                const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                const wrapper = await resp.json();
+                
+                if (wrapper.contents) {
+                    const markets = JSON.parse(wrapper.contents);
+                    if (markets.length > 0) {
+                        const m = markets[0];
+                        const outcomes = JSON.parse(m.outcomes);
+                        const prices = JSON.parse(m.outcomePrices);
+                        const yesIdx = outcomes.indexOf('Yes');
+                        if (yesIdx !== -1) {
+                            const prob = (parseFloat(prices[yesIdx]) * 100).toFixed(1);
+                            const change = (m.oneDayPriceChange * 100).toFixed(1);
+                            return { price: prob + '%', change };
                         }
                     }
-                } catch (e) {
-                    console.error(`Failed to fetch Poly ${query}:`, e);
                 }
+            } catch (e) {
+                console.error(`Failed to fetch Poly ${query}:`, e);
+            }
+            return null;
+        }
+
+        async function refreshCategory(type, elementId) {
+            const config = getCategoryConfig(type);
+            const list = document.getElementById(elementId);
+            list.innerHTML = '';
+            
+            // Limit to top 3
+            const displayItems = config.items.slice(0, 3);
+            
+            for (const item of displayItems) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'market-item';
+                itemDiv.innerHTML = `
+                    <div class="asset-info">
+                        <span class="asset-name">${item.n}</span>
+                        <span class="asset-price" id="price-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}">Loading...</span>
+                    </div>
+                    <span class="asset-change" id="change-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}">--</span>
+                `;
+                list.appendChild(itemDiv);
+
+                // Fetch data async
+                (type === 'poly' ? fetchPolymarketData(item.s) : fetchStockData(item.s)).then(data => {
+                    if (data) {
+                        const pEl = document.getElementById(`price-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}`);
+                        const cEl = document.getElementById(`change-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}`);
+                        if (pEl) pEl.innerText = (type === 'poly' ? data.price : (item.s.includes('TW') || item.s.startsWith('^') ? data.price.toLocaleString() : `$${data.price.toLocaleString()}`));
+                        if (cEl) {
+                            cEl.innerText = `${data.change > 0 ? '+' : ''}${data.change}%`;
+                            cEl.className = `asset-change ${data.change >= 0 ? 'change-up' : 'change-down'}`;
+                        }
+                    }
+                });
             }
         }
 
@@ -341,7 +331,12 @@
             status.innerText = 'Syncing...';
             dot.className = 'sync-dot';
 
-            await Promise.all([fetchStockData(), fetchPolymarketData()]);
+            await Promise.all([
+                refreshCategory('us_stocks', 'stock-us'),
+                refreshCategory('tw_stocks', 'stock-tw'),
+                refreshCategory('tech', 'stock-tech'),
+                refreshCategory('poly', 'polymarket-list')
+            ]);
 
             status.innerText = `Live: ${new Date().toLocaleTimeString()}`;
             dot.className = 'sync-dot live';
@@ -355,10 +350,7 @@
         // Auto-refresh every 60s
         setInterval(refreshAll, 60000);
         
-        console.log('JoeClaw Dashboard Real-time sync initialized.');
+        console.log('JoeClaw Dashboard Multi-page initialized.');
     </script>
-</body>
-</html>
-
 </body>
 </html>
