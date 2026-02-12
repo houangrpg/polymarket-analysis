@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JoeClawSite | Market Dashboard</title>
+    <style>
+        :root {
+            /* Deep Blue & Cherry Blossom Theme - Refined */
+            --bg-deep-blue: #020617;
+            --card-blue: #0f172a;
+            --accent-pink: #fbcfe8;
+            --cherry-blossom: #f472b6;
+            --text-light: #f8fafc;
+            --text-muted: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --glow: rgba(244, 114, 182, 0.2);
+        }
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background-color: var(--bg-deep-blue);
+            color: var(--text-light);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+        .status-bar {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(244, 114, 182, 0.2);
+            padding: 0.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        header {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+        }
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--accent-pink), var(--cherry-blossom));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.05em;
+        }
+        main {
+            max-width: 1200px;
+            margin: -2rem auto 4rem;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: var(--card-blue);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            border-color: var(--cherry-blossom);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px var(--glow);
+            transform: translateY(-4px);
+        }
+        .card h2 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .market-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .asset-name { font-weight: 600; font-size: 1.1rem; }
+        .asset-price { font-family: 'JetBrains Mono', monospace; font-size: 1rem; color: var(--accent-pink); }
+        .asset-change {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 2rem;
+            font-weight: 700;
+        }
+        .change-up { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+        .change-down { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        /* Animations */
+        @keyframes flash-up {
+            0% { background: rgba(34, 197, 94, 0.5); }
+            100% { background: transparent; }
+        }
+        @keyframes flash-down {
+            0% { background: rgba(239, 68, 68, 0.5); }
+            100% { background: transparent; }
+        }
+        .updated-up { animation: flash-up 1s ease-out; }
+        .updated-down { animation: flash-down 1s ease-out; }
+
+        .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: #475569; display: inline-block; margin-right: 0.5rem; }
+        .sync-dot.live { background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
+    </style>
+</head>
+<body>
+    <div class="status-bar">
+        <div>
+            <span class="sync-dot live" id="sync-dot"></span>
+            <span id="sync-status">SYSTEM LIVE</span>
+        </div>
+        <div id="clock"></div>
+    </div>
+    <header>
+        <h1>JOECLAW</h1>
+        <p style="color: var(--text-muted); font-weight: 300;">Advanced Intelligence & Market Portal</p>
+    </header>
+    <main>
+        <section class="card">
+            <h2>US Stocks <span>🇺🇸</span></h2>
+            <div class="market-list">
+                
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,858.47</span>
+                    </div>
+                    <span class="asset-change change-up">+0.19%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">21,123.45</span>
+                    </div>
+                    <span class="asset-change change-up">+0.5%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">-0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">-0.16%</span>
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <h2>Taiwan Stocks <span>🇹🇼</span></h2>
+            <div class="market-list">
+                
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">台積電 (2330)</span>
+                        <span class="asset-price">1,860.00</span>
+                    </div>
+                    <span class="asset-change change-up">+2.48%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">加權指數</span>
+                        <span class="asset-price">32,404.62</span>
+                    </div>
+                    <span class="asset-change change-up">+1.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">TSMC</span>
+                        <span class="asset-price">$1,915.00</span>
+                    </div>
+                    <span class="asset-change change-up">+1.86%</span>
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <h2>Tech Stocks <span>💻</span></h2>
+            <div class="market-list">
+                
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVDA</span>
+                        <span class="asset-price">188.54</span>
+                    </div>
+                    <span class="asset-change change-down">-0.79%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">AAPL</span>
+                        <span class="asset-price">274.07</span>
+                    </div>
+                    <span class="asset-change change-up">+1.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-up">+0.80%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-up">+0.67%</span>
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <h2>Polymarket <span>🎲</span></h2>
+            <div class="market-list">
+                
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Fed Rate Cut in March?</span>
+                        <span class="asset-price">90%</span>
+                    </div>
+                    <span class="asset-change change-up">+5%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Bitcoin to 100k in 2026?</span>
+                        <span class="asset-price">78%</span>
+                    </div>
+                    <span class="asset-change change-up">+13%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-6.6%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">3.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+2.3%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-6.6%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">3.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+2.3%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-6.6%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">3.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+2.3%</span>
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <h2>Stock <span>📊</span></h2>
+            <div class="market-list">
+                
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.81</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,102.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">TSMC</span>
+                        <span class="asset-price">$1,915.00</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$188.54</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$273.68</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,983.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,102.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$192.48</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$274.70</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,962.97</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,131.87</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.29</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$276.41</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,916.79</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">22,920.97</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$188.93</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$277.07</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,944.81</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,073.17</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.68</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$279.83</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,936.89</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,018.77</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.16</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$278.16</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,946.97</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,026.26</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.02</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$278.81</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,956.59</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,097.43</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.97</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$279.95</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,947.95</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,064.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.82</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$279.39</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,949.51</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,077.73</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.49</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$278.98</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,947.61</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,103.09</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.76</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$278.89</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,958.36</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,146.96</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$192.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$279.55</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,949.21</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,096.82</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$191.49</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$276.54</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,942.70</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,065.03</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.99</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.90</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">S&P 500</span>
+                        <span class="asset-price">6,941.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Nasdaq</span>
+                        <span class="asset-price">23,066.47</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">NVIDIA</span>
+                        <span class="asset-price">$190.05</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Apple</span>
+                        <span class="asset-price">$275.50</span>
+                    </div>
+                    <span class="asset-change change-down">0.00%</span>
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <h2>Prediction <span>📊</span></h2>
+            <div class="market-list">
+                
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.5%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">89.8%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.3%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.5%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.2%</span>
+                    </div>
+                    <span class="asset-change change-down">-2.0%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">92.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.4%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.2%</span>
+                    </div>
+                    <span class="asset-change change-down">-2.0%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">92.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.4%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">92.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">92.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">90.4%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">1.5%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">90.4%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">1.5%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">90.8%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">1.6%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">90.8%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">1.6%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.8%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">91.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+4.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">1.6%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.8%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">91.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+4.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">1.6%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.8%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">91.0%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">1.6%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.8%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">91.0%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">1.6%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">91.5%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.6%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">91.5%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.6%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.4%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.4%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+2.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">88.9%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+2.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">88.9%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">88.9%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">88.9%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.0%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">89.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">6.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+3.0%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">89.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.1%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.9%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">84.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.9%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">84.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.6%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">86.8%</span>
+                    </div>
+                    <span class="asset-change change-down">-3.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.6%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">86.8%</span>
+                    </div>
+                    <span class="asset-change change-down">-3.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">86.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.9%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">86.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.9%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">88.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.3%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.9%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">5.3%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">88.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.3%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.9%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.3%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.5%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">3.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.3%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.5%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">84.8%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">84.8%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.7%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.7%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-5.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.7%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-5.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">86.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-8.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">86.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-8.2%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.4%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.2%</span>
+                    </div>
+                    <span class="asset-change change-down">-10.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.5%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">85.2%</span>
+                    </div>
+                    <span class="asset-change change-down">-10.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.2%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.5%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">91.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-7.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-0.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">91.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-7.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">88.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.9%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport less than 250,000?</span>
+                        <span class="asset-price">2.0%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.1%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 250,000-500,000 people?</span>
+                        <span class="asset-price">88.5%</span>
+                    </div>
+                    <span class="asset-change change-down">-1.8%</span>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Will Trump deport 500,000-750,000- people?</span>
+                        <span class="asset-price">2.6%</span>
+                    </div>
+                    <span class="asset-change change-up">+1.9%</span>
+                </div>
+            </div>
+        </section>
+        <section class="card">
+            <h2>Crypto <span>📊</span></h2>
+            <div class="market-list">
+                
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Bitcoin</span>
+                        <span class="asset-price">$67,221.33</span>
+                    </div>
+                    <span class="asset-change change-up">+0.34%</span>
+                </div>
+            </div>
+        </section>
+            <section class="card">
+                <h2>AI 最新 <span>📰</span></h2>
+                <div class="market-list">
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">HP ZBook Ultra G1a review: a business-class workstation that’s got game</span>
+                        <span class="asset-price">The Verge</span>
+                    </div>
+                    <div style="width:100%;margin-top:0.5rem;">Business laptops are typically dull computers foisted on employees en masse. But higher-end enterprise workstation notebooks sometimes get an interesting enough blend of power and features to appeal to enthusiasts. <a href="https://www.theverge.com/tech/877688/hp-zbook-ultra-g1a-laptop-amd-strix-halo-review" target="_blank">（原文）</a></div>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">ICE is pushing Minneapolis underground</span>
+                        <span class="asset-price">The Verge</span>
+                    </div>
+                    <div style="width:100%;margin-top:0.5rem;">Minneapolis was not the war zone I expected to find. Depending on who you are and where you live, things can seem, for a few fleeting moments, almost normal, like a few blocks or neighborhoods over people aren't being tear gassed or rounded up by ICE or, in two tragic cases, being gunned down by […] <a href="https://www.theverge.com/policy/877106/minneapolis-ice-cbp-occupation-immigration-raid-mutual-aid" target="_blank">（原文）</a></div>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Highguard’s developer reportedly lays off ‘most’ of its staff just over two weeks after launch</span>
+                        <span class="asset-price">The Verge</span>
+                    </div>
+                    <div style="width:100%;margin-top:0.5rem;">Highguard, a new multiplayer shooter from developers who worked on games like Apex Legends and Call of Duty, launched just over two weeks ago, but developer Wildlight Entertainment is already cutting jobs at the company, according to posts from affected staffers on LinkedIn. Former Wildlight level designer Alex Graner says that "most of the team […] <a href="https://www.theverge.com/games/877674/highguard-wildlight-entertainment-layoffs" target="_blank">（原文）</a></div>
+                </div></div>
+                <div style="text-align:right;margin-top:0.5rem;"><a href="news_ai.html">更多AI 最新</a></div>
+            </section>
+            <section class="card">
+                <h2>智慧醫療 最新 <span>📰</span></h2>
+                <div class="market-list">
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">AI is already making online swindles easier. It could get much worse.</span>
+                        <span class="asset-price">MIT Tech Review Health</span>
+                    </div>
+                    <div style="width:100%;margin-top:0.5rem;">Anton Cherepanov is always on the lookout for something interesting. And in late August last year, he spotted just that. <a href="https://www.technologyreview.com/2026/02/12/1132386/ai-already-making-online-swindles-easier/" target="_blank">（原文）</a></div>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">Why EVs are gaining ground in Africa</span>
+                        <span class="asset-price">MIT Tech Review Health</span>
+                    </div>
+                    <div style="width:100%;margin-top:0.5rem;">EVs are getting cheaper and more common all over the world. But the technology still faces major challenges in some markets, including many countries in Africa. <a href="https://www.technologyreview.com/2026/02/12/1132790/evs-progress-africa/" target="_blank">（原文）</a></div>
+                </div>
+                <div class="market-item">
+                    <div class="asset-info">
+                        <span class="asset-name">What’s next for Chinese open-source AI</span>
+                        <span class="asset-price">MIT Tech Review Health</span>
+                    </div>
+                    <div style="width:100%;margin-top:0.5rem;">MIT Technology Review’s What’s Next series looks across industries, trends, and technologies to give you a first look at the future. You can read the rest of them here. <a href="https://www.technologyreview.com/2026/02/12/1132811/whats-next-for-chinese-open-source-ai/" target="_blank">（原文）</a></div>
+                </div></div>
+                <div style="text-align:right;margin-top:0.5rem;"><a href="news_health.html">更多智慧醫療 最新</a></div>
+            </section></main>
+    <footer>
+        <p>系統時間: <span id="clock"></span> | 數據源: <span id="data-source">joeclaw.db (Cached)</span></p>
+    </footer>
+    <script>
+        function updateClock() {
+            document.getElementById('clock').innerText = new Date().toLocaleString('zh-TW');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        const DEFAULT_CONFIGS = {
+            us_stocks: { title: 'US Stocks', items: [{s: '^GSPC', n: 'S&P 500'}, {s: '^IXIC', n: 'Nasdaq'}, {s: 'TSLA', n: 'Tesla'}] },
+            tw_stocks: { title: 'Taiwan Stocks', items: [{s: '2330.TW', n: '台積電 (2330)'}, {s: '^TWII', n: '加權指數'}] },
+            tech: { title: 'Tech Stocks', items: [{s: 'NVDA', n: 'NVIDIA'}, {s: 'AAPL', n: 'Apple'}, {s: 'MSFT', n: 'Microsoft'}] },
+            poly: { title: 'Polymarket', items: [{s: 'Fed rate cut', n: 'Fed Rate Cut'}, {s: 'Bitcoin price', n: 'Bitcoin Price'}] },
+            promos: { title: 'Promotions', items: [] }
+        };
+
+        function getCategoryConfig(type) {
+            return JSON.parse(localStorage.getItem(`config_${type}`)) || DEFAULT_CONFIGS[type];
+        }
+
+        async function fetchStockData(symbol) {
+            try {
+                const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`;
+                const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                const wrapper = await resp.json();
+                
+                if (wrapper.contents) {
+                    const data = JSON.parse(wrapper.contents);
+                    const result = data.chart.result[0];
+                    const price = result.meta.regularMarketPrice;
+                    const prevClose = result.meta.previousClose;
+                    const change = ((price - prevClose) / prevClose * 100).toFixed(2);
+                    return { price, change };
+                }
+            } catch (e) {
+                console.error(`Failed to fetch ${symbol}:`, e);
+            }
+            return null;
+        }
+
+        async function fetchPolymarketData(query) {
+            try {
+                const targetUrl = `https://gamma-api.polymarket.com/markets?active=true&closed=false&limit=1&query=${query}`;
+                const resp = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
+                const wrapper = await resp.json();
+                
+                if (wrapper.contents) {
+                    const markets = JSON.parse(wrapper.contents);
+                    if (markets.length > 0) {
+                        const m = markets[0];
+                        const outcomes = JSON.parse(m.outcomes);
+                        const prices = JSON.parse(m.outcomePrices);
+                        const yesIdx = outcomes.indexOf('Yes');
+                        if (yesIdx !== -1) {
+                            const prob = (parseFloat(prices[yesIdx]) * 100).toFixed(1);
+                            const change = (m.oneDayPriceChange * 100).toFixed(1);
+                            return { price: prob + '%', change };
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error(`Failed to fetch Poly ${query}:`, e);
+            }
+            return null;
+        }
+
+        async function refreshCategory(type, elementId) {
+            const config = getCategoryConfig(type);
+            const list = document.getElementById(elementId);
+            list.innerHTML = '';
+            
+            // Limit to top 3
+            const displayItems = config.items.slice(0, 3);
+            
+            for (const item of displayItems) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'market-item';
+                itemDiv.innerHTML = `
+                    <div class="asset-info">
+                        <span class="asset-name">${item.n}</span>
+                        <span class="asset-price" id="price-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}">Loading...</span>
+                    </div>
+                    <span class="asset-change" id="change-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}">--</span>
+                `;
+                list.appendChild(itemDiv);
+
+                // Fetch data async
+                (type === 'poly' ? fetchPolymarketData(item.s) : fetchStockData(item.s)).then(data => {
+                    if (data) {
+                        const pEl = document.getElementById(`price-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}`);
+                        const cEl = document.getElementById(`change-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}`);
+                        if (pEl) pEl.innerText = (type === 'poly' ? data.price : (item.s.includes('TW') || item.s.startsWith('^') ? data.price.toLocaleString() : `$${data.price.toLocaleString()}`));
+                        if (cEl) {
+                            cEl.innerText = `${data.change > 0 ? '+' : ''}${data.change}%`;
+                            cEl.className = `asset-change ${data.change >= 0 ? 'change-up' : 'change-down'}`;
+                        }
+                    }
+                });
+            }
+        }
+
+        async function refreshAll() {
+            const dot = document.getElementById('sync-dot');
+            const status = document.getElementById('sync-status');
+            const source = document.getElementById('data-source');
+            
+            status.innerText = 'Syncing...';
+            dot.className = 'sync-dot';
+
+            await Promise.all([
+                refreshCategory('us_stocks', 'stock-us'),
+                refreshCategory('tw_stocks', 'stock-tw'),
+                refreshCategory('tech', 'stock-tech'),
+                refreshCategory('poly', 'polymarket-list'),
+                refreshPromotions()
+            ]);
+
+            status.innerText = `Live: ${new Date().toLocaleTimeString()}`;
+            dot.className = 'sync-dot live';
+            source.innerText = 'Live API (Real-time)';
+        }
+
+        async function refreshPromotions() {
+            const list = document.getElementById('promo-list');
+            list.innerHTML = '';
+            
+            // Client-side trigger (or immediate API call)
+            const deals = [
+{ platform: 'Amazon US', name: 'Apple AirPods Pro (2nd Generation) with USB-C', price: '$189.00', original: '$249.00', url: 'https://www.amazon.com/dp/B0CHWRXH8B' },
+{ platform: 'Amazon JP', name: 'Sony WH-1000XM5 Wireless Noise Canceling Headphones', price: '¥41,800', original: '¥59,400', url: 'https://www.amazon.co.jp/dp/B09Y2MQY94' },
+{ platform: 'momo', name: 'Nintendo Switch OLED Model (Neon)', price: 'NT$8,980', original: 'NT$10,480', url: 'https://www.momoshop.com.tw/goods/GoodsDetail.jsp?i_code=9312520' }
+];
+
+            for (const deal of deals) {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'market-item';
+                itemDiv.style.cursor = 'pointer';
+                itemDiv.onclick = () => window.open(deal.url, '_blank');
+                itemDiv.innerHTML = `
+                    <div class="asset-info">
+                        <span class="asset-name">${deal.platform}: ${deal.name}</span>
+                        <span class="asset-price" style="text-decoration: line-through; font-size: 0.8rem;">${deal.original}</span>
+                    </div>
+                    <span class="asset-change change-up">${deal.price}</span>
+                `;
+                list.appendChild(itemDiv);
+            }
+        }
+
+        document.getElementById('refresh-btn').addEventListener('click', refreshAll);
+
+        // Initial fetch
+        refreshAll();
+        // Auto-refresh every 60s
+        setInterval(refreshAll, 60000);
+        
+        console.log('JoeClaw Dashboard Multi-page initialized.');
+    </script>
+</body>
+</html>
