@@ -4693,7 +4693,17 @@
         };
 
         function getCategoryConfig(type) {
-            return JSON.parse(localStorage.getItem(`config_${type}`)) || DEFAULT_CONFIGS[type];
+            let config;
+            try {
+                const stored = localStorage.getItem(`config_${type}`);
+                config = stored ? JSON.parse(stored) : null;
+            } catch (e) {
+                console.warn('Invalid localStorage config for', type, e);
+                localStorage.removeItem(`config_${type}`);
+                config = null;
+            }
+            config = config || DEFAULT_CONFIGS[type];
+            return config;
         }
 
         async function fetchStockData(symbol) {
