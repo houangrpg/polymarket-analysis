@@ -6,7 +6,6 @@ from zoneinfo import ZoneInfo
 db_path = 'joeclaw.db'
 html_path = 'index.html'
 
-
 def is_us_market_open(now_utc=None):
     # US market hours (NYSE/Nasdaq): Mon-Fri 09:30-16:00 America/New_York (ET)
     if now_utc is None:
@@ -21,7 +20,6 @@ def is_us_market_open(now_utc=None):
     open_time = ny.replace(hour=9, minute=30, second=0, microsecond=0)
     close_time = ny.replace(hour=16, minute=0, second=0, microsecond=0)
     return open_time <= ny <= close_time
-
 
 def generate_html():
     conn = sqlite3.connect(db_path)
@@ -40,7 +38,7 @@ def generate_html():
     categories = {}
     for cat, name, price, change in rows:
         if cat not in categories:
-            categories[cat] = []
+            categories[cat] = []  # Critical re-indentation fixed
         categories[cat].append({
             'name': name,
             'price': price,
@@ -81,10 +79,21 @@ def generate_html():
             change_class = "change-up" if "+" in change_text else "change-down"
             # Use final price as stored in DB; if market closed, we assume DB contains last close
             items_html += f"""
-                <div class=\"market-item\">\n                    <div class=\"asset-info\">\n                        <span class=\"asset-name\">{item['name']}</span>\n                        <span class=\"asset-price\">{item['price']}</span>\n                    </div>\n                    <span class=\"asset-change {change_class}\">{change_text}</span>\n                </div>"""
+                <div class=\"market-item\">
+                    <div class=\"asset-info\">
+                        <span class=\"asset-name\">{item['name']}</span>
+                        <span class=\"asset-price\">{item['price']}</span>
+                    </div>
+                    <span class=\"asset-change {change_class}\">{change_text}</span>
+                </div>"""
 
         cards_html += f"""
-        <section class=\"card\">\n            <h2>{cat} {header_extra} <span>{icon}</span></h2>\n            <div class=\"market-list\">\n                {items_html}\n            </div>\n        </section>"""
+        <section class=\"card\">
+            <h2>{cat} {header_extra} <span>{icon}</span></h2>
+            <div class=\"market-list\">
+                {items_html}
+            </div>
+        </section>"""
 
     # Build promotions JS array (client-side)
     deals_js_items = []
@@ -130,15 +139,30 @@ def generate_html():
         preview_html = ''
         for item in filtered_items[:3]:
             preview_html += f"""
-                <div class=\"market-item\">\n                    <div class=\"asset-info\">\n                        <span class=\"asset-name\">{item.get('title')}</span>\n                        <span class=\"asset-price\">{item.get('source')}</span>\n                    </div>\n                    <div style=\"width:100%;margin-top:0.5rem;\">{item.get('summary')} <a href=\"{item.get('link')}\" target=\"_blank\">（原文）</a></div>\n                </div>"""
+                <div class=\"market-item\">
+                    <div class=\"asset-info\">
+                        <span class=\"asset-name\">{item.get('title')}</span>
+                        <span class=\"asset-price\">{item.get('source')}</span>
+                    </div>
+                    <div style=\"width:100%;margin-top:0.5rem;\">{item.get('summary')} <a href=\"{item.get('link')}\" target=\"_blank\">（原文）</a></div>
+                </div>"""
         if preview_html:
             news_sections_html += f"""
-            <section class=\"card\">\n                <h2>{title} <span>📰</span></h2>\n                <div class=\"market-list\">{preview_html}</div>\n                <div style=\"text-align:right;margin-top:0.5rem;\"><a href=\"news_{cat}.html\">更多{title}</a></div>\n            </section>"""
+            <section class=\"card\">
+                <h2>{title} <span>📰</span></h2>
+                <div class=\"market-list\">{preview_html}</div>
+                <div style=\"margin-top:0.5rem;\">直接顯示分類內容</div>
+            </section>"""
         # build full page for this category
         full_items_html = ''
         for item in filtered_items:
             full_items_html += f"""
-            <div class=\"market-item\" style=\"flex-direction:column;align-items:flex-start;\">\n                <div style=\"font-weight:700;\">{item.get('title')}</div>\n                <div style=\"color:#94a3b8;font-size:0.9rem;\">{item.get('source')} • {item.get('fetched_at')}</div>\n                <div style=\"margin-top:0.25rem;\">{item.get('summary')} <a href=\"{item.get('link')}\" target=\"_blank\">（原文）</a></div>\n            </div>\n            <hr/>"""
+            <div class=\"market-item\" style=\"flex-direction:column;align-items:flex-start;\">
+                <div style=\"font-weight:700;\">{item.get('title')}</div>
+                <div style=\"color:#94a3b8;font-size:0.9rem;\">{item.get('source')} • {item.get('fetched_at')}</div>
+                <div style=\"margin-top:0.25rem;\">{item.get('summary')} <a href=\"{item.get('link')}\" target=\"_blank\">（原文）</a></div>
+            </div>
+            <hr/>"""
         page_html = f"""
         <!doctype html>
         <html lang=\"zh-TW\"> 
@@ -158,7 +182,7 @@ def generate_html():
         </html>
         """
         try:
-            with open(os.path.join(os.path.dirname(__file__), f'news_{cat}.html'), 'w', encoding='utf-8') as pf:
+            with open(os.path.join(os.path.dirname(__file__), f"news_{cat}.html"), 'w', encoding='utf-8') as pf:
                 pf.write(page_html)
         except Exception:
             pass
