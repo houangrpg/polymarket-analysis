@@ -166,7 +166,16 @@
             promos: { title: 'Promotions', items: [] }
         };
 
-        let config = JSON.parse(localStorage.getItem(`config_${type}`)) || DEFAULT_CONFIGS[type];
+        let config;
+        try {
+            const stored = localStorage.getItem(`config_${type}`);
+            config = stored ? JSON.parse(stored) : null;
+        } catch (e) {
+            console.warn('Invalid localStorage config for', type, e);
+            localStorage.removeItem(`config_${type}`);
+            config = null;
+        }
+        config = config || DEFAULT_CONFIGS[type];
         document.getElementById('category-title').innerText = config.title;
 
         if (type === 'promos') {
