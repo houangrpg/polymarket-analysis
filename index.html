@@ -4752,7 +4752,8 @@
         async function refreshCategory(type, elementId) {
             const config = getCategoryConfig(type);
             const list = document.getElementById(elementId);
-            list.innerHTML = '';
+            const previousHTML = list.innerHTML;
+            const tempContainer = document.createElement('div');
             
             // Limit to top 3
             const displayItems = config.items.slice(0, 3);
@@ -4767,7 +4768,7 @@
                     </div>
                     <span class="asset-change" id="change-${type}-${item.s.replace(/[^a-zA-Z0-9]/g, '')}">--</span>
                 `;
-                list.appendChild(itemDiv);
+                tempContainer.appendChild(itemDiv);
 
                 // Fetch data async
                 (type === 'poly' ? fetchPolymarketData(item.s) : fetchStockData(item.s)).then(data => {
@@ -4782,6 +4783,24 @@
                     }
                 });
             }
+            // commit tempContainer into list if we got items, otherwise restore previous HTML and show error
+            if (tempContainer.children.length > 0) {
+                list.innerHTML = tempContainer.innerHTML;
+            } else {
+                list.innerHTML = previousHTML;
+                // show brief inline error
+                const errEl = document.createElement('div');
+                errEl.style.color = 'var(--danger)';
+                errEl.style.fontSize = '0.9rem';
+                errEl.style.marginTop = '0.5rem';
+                errEl.innerText = '（暫時無法取得即時資料，已還原快取資料）';
+                // remove previous error elements to avoid duplicates
+                const existing = list.parentElement.querySelector('.fetch-error');
+                if (existing) existing.remove();
+                errEl.className = 'fetch-error';
+                list.parentElement.appendChild(errEl);
+            }
+    
         }
 
         async function refreshAll() {
