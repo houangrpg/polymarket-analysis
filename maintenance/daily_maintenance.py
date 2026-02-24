@@ -51,6 +51,19 @@ with open(log_path, 'a', encoding='utf-8') as L:
     else:
         L.write('update_html.py not found\n')
 
+
+    # Commit generated site files (index.html, news_*.html, public/) if any
+    L.write('\n-- commit generated site files (if present) --\n')
+    rc,out,err = run('git status --porcelain')
+    if out.strip():
+        # add common generated files
+        run('git add index.html || true')
+        run('git add news_*.html || true')
+        run('git add public || true')
+        rc2,o2,e2 = run('git commit -m "Regenerate site (maintenance)" || true')
+        L.write(o2 + e2 + f'rc={rc2}\n')
+    else:
+        L.write('No generated site changes to commit.\n')
     # 4) Syntax-check all python files (py_compile)
     L.write('\n-- py_compile check --\n')
     rc,out,err = run("python3 -m py_compile $(find . -name '*.py' -not -path './venv/*')")
