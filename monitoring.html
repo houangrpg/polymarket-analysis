@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>JoeClawSite — Monitoring Dashboard (Prototype)</title>
+  <link rel="icon" href="/favicon.ico">
+  <style>
+    :root{--bg:#0b1020;--card:#0f1724;--muted:#9aa4b2;--accent:#4dd0e1;--glass: rgba(255,255,255,0.02)}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071026 0%,#071522 100%);color:#e6eef6;margin:0;padding:24px}
+    h1{margin:0 0 8px;font-size:20px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.4);min-height:100px}
+    .muted{color:var(--muted);font-size:13px}
+    .kpi{font-size:18px;font-weight:600}
+    .row{display:flex;gap:12px;align-items:center}
+    canvas{max-width:100%;height:70px}
+    pre{white-space:pre-wrap;color:var(--muted);font-size:13px}
+    footer{margin-top:18px;color:var(--muted);font-size:13px}
+    .service-up{color:#7ef085}
+    .service-down{color:#ff7b7b}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>JoeClawSite — Monitoring Dashboard (Prototype)</h1>
+    <div class="muted">Live snapshot from <code>/status.json</code></div>
+  </header>
+
+  <main style="margin-top:16px">
+    <div class="grid">
+      <div class="card">
+        <div class="muted">System</div>
+        <div id="sys_uptime" class="kpi">--</div>
+        <div id="sys_kernel" class="muted">--</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">CPU / Memory</div>
+        <div class="row">
+          <div style="flex:1">
+            <div class="muted">CPU %</div>
+            <canvas id="cpuChart" width="300" height="70"></canvas>
+          </div>
+          <div style="flex:1">
+            <div class="muted">Memory %</div>
+            <canvas id="memChart" width="300" height="70"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Disk</div>
+        <div id="disk_info" class="kpi">--</div>
+        <canvas id="diskChart" width="300" height="70"></canvas>
+      </div>
+
+      <div class="card">
+        <div class="muted">Services</div>
+        <div id="services_list" style="margin-top:8px"></div>
+      </div>
+
+      <div class="card" style="grid-column: span 2;">
+        <div class="muted">Recent maintenance logs</div>
+        <pre id="maintenance_logs">loading…</pre>
+      </div>
+
+      <div class="card">
+        <div class="muted">Raw snapshot</div>
+        <pre id="raw_json">loading…</pre>
+      </div>
+
+    </div>
+
+    <footer>
+      Prototype — auto-generated. For production, wire secure endpoints and history storage.
+    </footer>
+  </main>
+
+<script>
+async function fetchStatus(){
+  try{
+    const r = await fetch('status.json', {cache: 'no-store'});
+    if(!r.ok) throw new Error('status.json fetch failed: '+r.status);
+    const j = await r.json();
+    return j;
+  }catch(e){
+    console.error(e);
+    return null;
+  }
+}
+
+function short(n){return (Math.round(n*10)/10).toString()}
+
+function render(k){
+  document.getElementById('raw_json').textContent = JSON.stringify(k,null,2);
+  const sys = k.system || {};
+  document.getElementById('sys_uptime').textContent = sys.uptime || sys.uptime_str || '--';
+  document.getElementById('sys_kernel').textContent = sys.kernel || '';
+
+  // CPU chart
+  const cpu = k.cpu || {usage:0};
+  const mem = k.memory || {used_pct:0};
+  const disk = k.disk || {used_pct:0, mounts:[]};
+
+  drawSpark('cpuChart', cpu.history || [cpu.usage||0]);
+  drawSpark('memChart', mem.history || [mem.used_pct||0]);
+  drawSpark('diskChart', disk.history || [disk.used_pct||0]);
+
+  // disk info
+  document.getElementById('disk_info').textContent = (disk.used_pct ? disk.used_pct+'% used' : '--') + (disk.mounts&&disk.mounts.length? '  '+(disk.mounts[0].mount || '') : '');
+
+  // services
+  const servicesEl = document.getElementById('services_list');
+  servicesEl.innerHTML = '';
+  const sv = k.services || {};
+  for(const name of Object.keys(sv)){
+    const s = sv[name];
+    const el = document.createElement('div');
+    el.innerHTML = `<strong>${name}</strong>: <span class="${s.ok? 'service-up':'service-down'}">${s.ok? 'up':'down'}</span> ${s.msg? '- '+s.msg : ''}`;
+    servicesEl.appendChild(el);
+  }
+
+  // maintenance logs
+  const m = k.maintenance || [];
+  document.getElementById('maintenance_logs').textContent = m.slice(-8).reverse().map(x=>`[${x.t || x.ts || 'n/a'}] ${x.msg || JSON.stringify(x)}`).join('\n') || 'no logs';
+}
+
+function drawSpark(id, values){
+  const ctx = document.getElementById(id).getContext('2d');
+  if(window[id+'_chart']){window[id+'_chart'].data.labels = values.map((_,i)=>i);window[id+'_chart'].data.datasets[0].data = values;window[id+'_chart'].update();return}
+  window[id+'_chart'] = new Chart(ctx, {
+    type:'line',
+    data:{labels:values.map((_,i)=>i),datasets:[{data:values,borderColor:'#4dd0e1',backgroundColor:'rgba(77,208,225,0.08)',fill:true,tension:0.3,pointRadius:0}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{x:{display:false},y:{display:false}},plugins:{legend:{display:false},tooltip:{enabled:false}}}
+  });
+}
+
+async function init(){
+  const s = await fetchStatus();
+  if(!s){ document.getElementById('raw_json').textContent='status.json unavailable'; return }
+  render(s);
+}
+
+init();
+</script>
+</body>
+</html>
