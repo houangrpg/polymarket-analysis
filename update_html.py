@@ -216,9 +216,47 @@ def generate_html():
             e_idx += 2  # include the closing ];
             new_html = new_html[:s_idx] + deals_js + new_html[e_idx:]
 
-    # Inject trading flag and last-updated into the page (inject script after <body>)
+    # Inject multi-market trading flags and last-updated into the page (inject script after <body>)
     generated_at = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    trading_flag_script = f"<script>const TRADING_LIVE = {'true' if trading_now else 'false'}; const PAGE_GENERATED_AT = '{generated_at}';</script>"
+    # determine multi-market flags
+    us_flag = is_us_market_open()
+    def is_tw_market_open(now_utc=None):
+        if now_utc is None:
+            now_utc = datetime.datetime.now(datetime.timezone.utc)
+        try:
+            tz = now_utc.astimezone(ZoneInfo('Asia/Taipei'))
+        except Exception:
+            return False
+        if tz.weekday() >= 5:
+            return False
+        open_t = tz.replace(hour=9, minute=0, second=0, microsecond=0)
+        close_t = tz.replace(hour=13, minute=30, second=0, microsecond=0)
+        return open_t <= tz <= close_t
+    tw_flag = is_tw_market_open()
+    def is_jp_market_open(now_utc=None):
+        if now_utc is None:
+            now_utc = datetime.datetime.now(datetime.timezone.utc)
+        try:
+            tz = now_utc.astimezone(ZoneInfo('Asia/Tokyo'))
+        except Exception:
+            return False
+        if tz.weekday() >= 5:
+            return False
+        morning_start = tz.replace(hour=9, minute=0, second=0, microsecond=0)
+        morning_end = tz.replace(hour=11, minute=30, second=0, microsecond=0)
+        aft_start = tz.replace(hour=12, minute=30, second=0, microsecond=0)
+        aft_end = tz.replace(hour=15, minute=0, second=0, microsecond=0)
+        return (morning_start <= tz <= morning_end) or (aft_start <= tz <= aft_end)
+    jp_flag = is_jp_market_open()
+    any_flag = us_flag or tw_flag or jp_flag
+    trading_flag_script = (
+        f"<script>const TRADING_LIVE_US = {str(us_flag).lower()}; "
+        f"const TRADING_LIVE_TW = {str(tw_flag).lower()}; "
+        f"const TRADING_LIVE_JP = {str(jp_flag).lower()}; "
+        f"const TRADING_LIVE = {str(any_flag).lower()}; const PAGE_GENERATED_AT = '{generated_at}';</script>"
+    )
+    import re
+    new_html = re.sub(r'<script>\s*const\s+TRADING_LIVE[\s\S]*?</script>\s*', '', new_html, flags=re.S)
     if '<body' in new_html:
         new_html = new_html.replace('<body>', '<body>\n' + trading_flag_script)
     else:
@@ -226,7 +264,6 @@ def generate_html():
 
     # Inject last-updated into the status bar (replace SYSTEM LIVE with timestamp)
     new_html = new_html.replace('SYSTEM LIVE', f'SYSTEM LIVE — 最後更新: {generated_at}')
-
     # Update deploy marker comment if present
     if 'DEPLOY_MARKER:' in new_html:
         # simple replace for marker line
