@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agent Activity Dashboard</title>
+<style>
+  body{font-family:Segoe UI,Helvetica,Arial;background:#0f172a;color:#e6eef8;margin:0;padding:1rem}
+  .wrap{max-width:980px;margin:0 auto}
+  header h1{margin:0 0 1rem 0;color:#fbcfe8}
+  .card{background:#0b1220;border:1px solid #2b4760;padding:1rem;border-radius:8px;margin-bottom:1rem}
+  .task{font-size:1.1rem;margin-bottom:.5rem}
+  .progress{height:12px;background:#233447;border-radius:6px;overflow:hidden}
+  .progress > i{display:block;height:100%;background:linear-gradient(90deg,#6ee7b7,#60a5fa);width:0%}
+  pre{background:#041024;color:#cfeefb;padding:.5rem;border-radius:6px;white-space:pre-wrap;max-height:240px;overflow:auto}
+  ul.log{list-style:none;padding:0;margin:0}
+  ul.log li{padding:.35rem 0;border-bottom:1px dashed rgba(255,255,255,0.03)}
+  .meta{color:#94a3b8;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Agent Activity Dashboard (local)</h1>
+    <p class="meta">Updates every 3 seconds • server: localhost:9000 • logs: /home/joe/.openclaw/workspace/logs/agent-activity.log</p>
+  </header>
+
+  <div id="status" class="card">
+    <div class="task">Loading status…</div>
+    <div class="meta" id="last-status"></div>
+    <div style="margin-top:.75rem">
+      <div class="progress" aria-hidden="true"><i id="progress-bar"></i></div>
+      <div class="meta" id="step-detail" style="margin-top:.5rem"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Recent Activity</h3>
+    <ul id="log" class="log"></ul>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0">Manual actions (local)</h3>
+    <p class="meta">You can run the helper script on the host to post updates:</p>
+    <pre>python3 /home/joe/.openclaw/workspace/bin/update_status.py --task "Example task" --step "started" --detail "doing work" --progress 10 --status running</pre>
+  </div>
+</div>
+
+<script>
+const STATUS_URL = '/status.json';
+async function refresh(){
+  try{
+    const r = await fetch(STATUS_URL + '?t=' + Date.now());
+    if(!r.ok) throw new Error('no status');
+    const s = await r.json();
+    document.querySelector('#status .task').innerText = s.current_task || 'idle';
+    document.getElementById('last-status').innerText = 'Last: ' + (s.last_status || '') + (s.updated ? ' • ' + new Date(s.updated).toLocaleString() : '');
+    const pct = Math.max(0, Math.min(100, parseFloat(s.progress||0)));
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('step-detail').innerText = (s.step_detail || '') + (s.step ? ' ('+s.step+')' : '');
+
+    const logEl = document.getElementById('log');
+    logEl.innerHTML='';
+    const logs = s.recent_logs || [];
+    logs.slice(0,50).forEach(l => {
+      const li = document.createElement('li');
+      li.innerHTML = `<div style="font-size:0.95rem">${escapeHtml(l.msg)}</div><div class="meta">${new Date(l.ts).toLocaleString()}</div>`;
+      logEl.appendChild(li);
+    });
+  }catch(e){
+    document.querySelector('#status .task').innerText = 'status unavailable';
+    console.debug(e);
+  }
+}
+function escapeHtml(s){return (s+'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+refresh();
+setInterval(refresh,3000);
+</script>
+</body>
+</html>
