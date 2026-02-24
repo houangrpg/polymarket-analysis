@@ -15,7 +15,7 @@
     .kpi{font-size:18px;font-weight:600}
     .row{display:flex;gap:12px;align-items:center}
     canvas{max-width:100%;height:70px}
-    pre{white-space:pre-wrap;color:var(--muted);font-size:13px}
+    pre{white-space:pre-wrap;color:var(--muted);font-size:13px;max-height:220px;overflow:auto;padding:8px;border-radius:6px;background:rgba(255,255,255,0.01)}
     footer{margin-top:18px;color:var(--muted);font-size:13px}
     .service-up{color:#7ef085}
     .service-down{color:#ff7b7b}
@@ -118,8 +118,8 @@
       </div>
 
       <div class="card">
-        <div class="muted">Raw snapshot</div>
-        <pre id="raw_json">loading…</pre>
+        <div style="display:flex;justify-content:space-between;align-items:center;"><div class="muted">Raw snapshot</div><button id="toggle_raw" style="background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:6px;border-radius:6px;cursor:pointer">Toggle raw</button></div>
+        <pre id="raw_json" style="display:none">loading…</pre>
       </div>
 
     </div>
@@ -228,7 +228,7 @@ function render(k){
 
   // maintenance logs
   const m = k.maintenance || [];
-  document.getElementById('maintenance_logs').textContent = m.slice(-8).reverse().map(x=>`[${x.t || x.ts || 'n/a'}] ${x.msg || JSON.stringify(x)}`).join('\n') || 'no logs';
+  const logs = m.slice(-8).reverse().map(x=>`[${x.t || x.ts || 'n/a'}] ${x.msg || JSON.stringify(x)}`); document.getElementById('maintenance_logs').textContent = logs.join('\n') || 'no logs';
 }
 
 function drawSpark(id, values){
@@ -249,6 +249,7 @@ async function init(){
 }
 
 init();
-</script>
+
+document.getElementById('toggle_raw').addEventListener('click',()=>{const r=document.getElementById('raw_json');r.style.display=(r.style.display==='none')?'block':'none'});</script>
 </body>
 </html>
