@@ -176,6 +176,25 @@ async function fetchStatus(){
   return j;
 }
 
+function normalizeStatus(j){
+  // Convert older status.json shapes into expected keys
+  if(!j) return j;
+  const out = {};
+  // system
+  out.system = {uptime: j.uptime || j.uptime_str || (j.updated? new Date(j.updated).toString() : 'n/a'), kernel: j.kernel || j.sys_kernel || ''};
+  // cpu/memory/disk defaults
+  out.cpu = j.cpu || {usage:0, history: (j.cpu&&j.cpu.history)? j.cpu.history : [0,0,0,0]};
+  out.memory = j.memory || {used_pct: (j.memory&&j.memory.used_pct)? j.memory.used_pct : 0, history: (j.memory&&j.memory.history)? j.memory.history : [0,0,0,0]};
+  out.disk = j.disk || {used_pct: (j.disk&&j.disk.used_pct)? j.disk.used_pct : 0, mounts: (j.disk&&j.disk.mounts)? j.disk.mounts : [], history: (j.disk&&j.disk.history)? j.disk.history : [0,0,0,0]};
+  // services
+  out.services = {};
+  if(j.services){ out.services = j.services }
+  else if(j.last_status || j.current_task){ out.services.openclaw = {ok: (j.last_status=='ok' || j.last_status==true), msg: j.current_task || ''} }
+  // maintenance logs
+  if(j.maintenance) out.maintenance = j.maintenance; else if(j.recent_logs) out.maintenance = j.recent_logs.map(x=>({ts:x.ts||x.t, msg:x.msg||x.message||JSON.stringify(x)})); else out.maintenance = [];
+  return out;
+}
+
 function short(n){return (Math.round(n*10)/10).toString()}
 
 function render(k){
@@ -225,7 +244,8 @@ function drawSpark(id, values){
 async function init(){
   const s = await fetchStatus();
   if(!s){ document.getElementById('raw_json').textContent='status.json unavailable'; return }
-  render(s);
+  const norm = normalizeStatus(s);
+  render(norm);
 }
 
 init();
