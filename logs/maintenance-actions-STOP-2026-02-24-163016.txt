@@ -1,0 +1,8 @@
+Resuming stop actions: 2026-02-24T16:30:16+08:00
+
+Crontab check:
+(no crontab)
+
+Killing matching processes safely (exclude this script's PID)...
+Pattern: update_promotions.py
+Killing pid 866550 (pattern update_promotions.py)

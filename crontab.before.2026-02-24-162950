@@ -1,0 +1,2 @@
+0 5 * * * /sbin/reboot
+0 3 * * * /home/joe/.openclaw/workspace/maintenance/run_daily.sh >/home/joe/.openclaw/workspace/logs/maintenance-cron.log 2>&1

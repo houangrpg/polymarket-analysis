@@ -1,0 +1,11 @@
+Maintenance Stop Report: 2026-02-24-162950
+Workspace: /home/joe/.openclaw/workspace
+
+1) Backing up current crontab and removing matching entries...
+0 5 * * * /sbin/reboot
+0 3 * * * /home/joe/.openclaw/workspace/maintenance/run_daily.sh >/home/joe/.openclaw/workspace/logs/maintenance-cron.log 2>&1
+crontab backup: /home/joe/.openclaw/workspace/crontab.before.2026-02-24-162950
+Crontab cleared (no remaining entries after removal).
+
+2) Terminating running maintenance-related processes (pkill patterns) and listing matches...
+Patterns: update_promotions.py update_html.py run_daily.sh maintenance/daily_maintenance.py python -m http.server status-server

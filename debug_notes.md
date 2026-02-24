@@ -1,0 +1,3 @@
+--- Debug Log ---
+- Generated issues like 'See More' redundancy often related to filtering and duplicate titles.
+- Plan: develop or refine logic to focus group vast datasets with interchangeable assets filtering/exclusive.
