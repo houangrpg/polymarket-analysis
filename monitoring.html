@@ -23,6 +23,57 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+<script id="embedded-status" type="application/json">{
+  "current_task": "Maintenance (2026-02-23)",
+  "step": "complete",
+  "step_detail": "All steps finished; monitor 24-48h",
+  "progress": 100.0,
+  "last_status": "ok",
+  "recent_logs": [
+    {
+      "ts": 1771809890640,
+      "msg": "Maintenance complete: OpenClaw update, fixes, driver reinstall, reboot, audit, website fix"
+    },
+    {
+      "ts": 1771809882666,
+      "msg": "Fixed category view; merged to main and pushed"
+    },
+    {
+      "ts": 1771809874568,
+      "msg": "Security audit completed; 1 warn"
+    },
+    {
+      "ts": 1771809866454,
+      "msg": "Rebooted; nvidia driver active"
+    },
+    {
+      "ts": 1771809750003,
+      "msg": "Reinstalled nvidia-driver-535"
+    },
+    {
+      "ts": 1771809741708,
+      "msg": "Blacklisted nouveau and updated initramfs"
+    },
+    {
+      "ts": 1771809732979,
+      "msg": "Upgraded npm to 11.10.1"
+    },
+    {
+      "ts": 1771809724787,
+      "msg": "Doctor: removed 4 stale session locks"
+    },
+    {
+      "ts": 1771809716841,
+      "msg": "Updated openclaw 2026.2.9 -> 2026.2.21-2"
+    },
+    {
+      "ts": 1771809406741,
+      "msg": "deployed status-ui"
+    }
+  ],
+  "updated": 1771812955780
+}</script>
+
   <header>
     <h1>JoeClawSite — Monitoring Dashboard (Prototype)</h1>
     <div class="muted">Live snapshot from <code>/status.json</code></div>
@@ -94,6 +145,14 @@ async function fetchStatus(){
   let j = await tryFetch('status.json');
   if(!j) j = await tryFetch('public/status.json');
   if(!j) j = await tryFetch('/public/status.json');
+  if(!j){
+    // try embedded JSON
+    const embed = document.getElementById('embedded-status');
+    if(embed){
+      try{ j = JSON.parse(embed.textContent); }
+      catch(e){ console.debug('embedded status parse failed',e); }
+    }
+  }
   if(!j){
     // fallback sample to avoid blank page
     j = {
