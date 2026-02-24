@@ -80,15 +80,41 @@
 
 <script>
 async function fetchStatus(){
-  try{
-    const r = await fetch('status.json', {cache: 'no-store'});
-    if(!r.ok) throw new Error('status.json fetch failed: '+r.status);
-    const j = await r.json();
-    return j;
-  }catch(e){
-    console.error(e);
-    return null;
+  // Try multiple locations and provide a graceful fallback
+  async function tryFetch(url){
+    try{
+      const r = await fetch(url, {cache: 'no-store'});
+      if(!r.ok) throw new Error(url+' fetch failed: '+r.status);
+      return await r.json();
+    }catch(e){
+      console.debug('tryFetch failed',url,e);
+      return null;
+    }
   }
+  let j = await tryFetch('status.json');
+  if(!j) j = await tryFetch('public/status.json');
+  if(!j) j = await tryFetch('/public/status.json');
+  if(!j){
+    // fallback sample to avoid blank page
+    j = {
+      system:{uptime:'n/a', kernel: 'n/a'},
+      cpu:{usage:0, history:[0,0,0,0]},
+      memory:{used_pct:0, history:[0,0,0,0]},
+      disk:{used_pct:0, mounts:[] , history:[0,0,0,0]},
+      services:{openclaw:{ok:true,msg:'using fallback'}},
+      maintenance:[]
+    };
+    // show small visible notice
+    const notice = document.createElement('div');
+    notice.style.background='rgba(255,120,80,0.08)';
+    notice.style.border='1px solid rgba(255,120,80,0.15)';
+    notice.style.padding='8px';
+    notice.style.borderRadius='6px';
+    notice.style.marginBottom='8px';
+    notice.innerText = 'Note: status.json not found on server. Displaying fallback data.';
+    document.querySelector('main').insertBefore(notice, document.querySelector('main').firstChild);
+  }
+  return j;
 }
 
 function short(n){return (Math.round(n*10)/10).toString()}
