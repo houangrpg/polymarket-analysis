@@ -108,17 +108,35 @@ with open(log_path, 'a', encoding='utf-8') as L:
     else:
         L.write('status-server.log not found\n')
 
-    # 7) Auto-push changes to origin main (user requested)
-    L.write('\n-- auto-push to origin main --\n')
+    # 7) Create branch and open PR for generated changes (safer workflow)
+    L.write('\n-- create branch + PR (if changes) --\n')
     rc_branch, out_branch, err_branch = run('git rev-parse --abbrev-ref HEAD')
-    branch = out_branch.strip() if rc_branch==0 and out_branch.strip() else 'main'
+    current_branch = out_branch.strip() if rc_branch==0 and out_branch.strip() else 'main'
     rc,out,err = run('git status --porcelain')
     if out.strip():
-        L.write('Local changes present, attempting to push to origin '+branch+'\n')
-        rc2,o2,e2 = run('git push origin '+branch)
-        L.write(o2 + e2 + f'rc={rc2}\n')
+        # create a timestamped branch
+        ts = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+        pr_branch = f'maintenance/auto-{ts}'
+        L.write(f'Local changes detected. Creating branch {pr_branch} and pushing...\n')
+        rc,o,e = run(f'git checkout -b {pr_branch}')
+        L.write(o + e + f'rc={rc}\n')
+        rc,o,e = run('git push origin ' + pr_branch)
+        L.write(o + e + f'rc={rc}\n')
+        # try to create a PR with gh if available
+        rc_gh, out_gh, err_gh = run('which gh || true')
+        if rc_gh == 0 and out_gh.strip():
+            title = f'Automated maintenance: regenerate site ({date_str})'
+            body = 'This PR was created automatically by the daily maintenance script. It regenerates site assets and applies auto-fixes where applicable.'
+            L.write('gh CLI found; attempting to create PR...\n')
+            rc,o,e = run(f'gh pr create --title "{title}" --body "{body}" --base {current_branch} --head {pr_branch} || true')
+            L.write(o + e + f'rc={rc}\n')
+        else:
+            L.write('gh CLI not found; branch pushed but PR not created. You can open a PR manually: branch=' + pr_branch + '\n')
+        # return to original branch
+        rc,o,e = run('git checkout ' + current_branch)
+        L.write(o + e + f'rc={rc}\n')
     else:
-        L.write('No local changes to push.\n')
+        L.write('No local changes to create PR for.\n')
 
     L.write('\n-- maintenance end --\n')
 
